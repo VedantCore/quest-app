@@ -1,32 +1,104 @@
-"use client";
-import { useState } from "react";
-import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
-import { auth, googleProvider } from "../../lib/firebase";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+'use client';
+import { useState } from 'react';
+import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import { auth, googleProvider } from '../../lib/firebase';
+import { supabase } from '../../lib/supabase';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const router = useRouter();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError("");
+    setError('');
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      router.push("/");
+      console.log('🔵 Starting email/password login...');
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+      console.log('✅ Firebase auth successful:', {
+        uid: user.uid,
+        email: user.email,
+      });
+
+      // Sync user to Supabase
+      const userData = {
+        user_id: user.uid,
+        email: user.email,
+        name: user.displayName || email.split('@')[0],
+        role: 'user',
+        avatar_url: user.photoURL || null,
+      };
+
+      console.log('🔵 Attempting Supabase sync with data:', userData);
+      const { data, error: supabaseError } = await supabase
+        .from('users')
+        .upsert(userData, { onConflict: 'user_id' })
+        .select();
+
+      if (supabaseError) {
+        console.error('❌ Supabase sync error:', {
+          message: supabaseError.message,
+          details: supabaseError.details,
+          hint: supabaseError.hint,
+          code: supabaseError.code,
+        });
+        setError(`Auth successful but sync failed: ${supabaseError.message}`);
+      } else {
+        console.log('✅ Supabase sync successful:', data);
+      }
+
+      router.push('/');
     } catch (err) {
       setError(err.message);
     }
   };
 
   const handleGoogleLogin = async () => {
-    setError("");
+    setError('');
     try {
-      await signInWithPopup(auth, googleProvider);
-      router.push("/");
+      console.log('🔵 Starting Google login...');
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      console.log('✅ Firebase auth successful:', {
+        uid: user.uid,
+        email: user.email,
+      });
+
+      const userData = {
+        user_id: user.uid,
+        email: user.email,
+        name: user.displayName || 'User',
+        role: 'user',
+        avatar_url: user.photoURL || null,
+      };
+
+      console.log('🔵 Attempting Supabase sync with data:', userData);
+      const { data, error: supabaseError } = await supabase
+        .from('users')
+        .upsert(userData, { onConflict: 'user_id' })
+        .select();
+
+      if (supabaseError) {
+        console.error('❌ Supabase sync error:', {
+          message: supabaseError.message,
+          details: supabaseError.details,
+          hint: supabaseError.hint,
+          code: supabaseError.code,
+        });
+        setError(`Auth successful but sync failed: ${supabaseError.message}`);
+      } else {
+        console.log('✅ Supabase sync successful:', data);
+      }
+
+      router.push('/');
     } catch (err) {
       setError(err.message);
     }
@@ -89,7 +161,9 @@ export default function Login() {
             <div className="w-full border-t border-gray-300" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">Or continue with</span>
+            <span className="px-2 bg-white text-gray-500">
+              Or continue with
+            </span>
           </div>
         </div>
 
@@ -120,8 +194,11 @@ export default function Login() {
         </button>
 
         <p className="text-sm text-center text-gray-600">
-          Don't have an account?{" "}
-          <Link href="/signup" className="font-medium text-blue-600 hover:text-blue-500">
+          Don't have an account?{' '}
+          <Link
+            href="/signup"
+            className="font-medium text-blue-600 hover:text-blue-500"
+          >
             Sign up
           </Link>
         </p>
