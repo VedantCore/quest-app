@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function Signup() {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -31,7 +32,7 @@ export default function Signup() {
       const userData = {
         user_id: user.uid,
         email: user.email,
-        name: email.split('@')[0],
+        name: name.trim() || email.split('@')[0],
         role: 'user',
         avatar_url: user.photoURL || null,
       };
@@ -111,6 +112,25 @@ export default function Signup() {
         </h2>
         {error && <p className="text-red-500 text-center">{error}</p>}
         <form onSubmit={handleSignup} className="space-y-6">
+          <div>
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Full Name
+            </label>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              autoComplete="name"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter your full name"
+            />
+          </div>
           <div>
             <label
               htmlFor="email"
