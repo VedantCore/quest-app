@@ -77,7 +77,7 @@ export default function UserManagement() {
       {/* Header with Stats */}
       <div className="mb-6">
         <h2 className="text-2xl font-semibold mb-4">User Management</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-white rounded-lg shadow p-4">
             <div className="text-sm font-semibold text-gray-700">
               Total Users
@@ -92,6 +92,12 @@ export default function UserManagement() {
             </div>
             <div className="text-2xl font-bold text-gray-900">
               {users.filter((u) => u.role === 'admin').length}
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="text-sm font-semibold text-gray-700">Managers</div>
+            <div className="text-2xl font-bold text-gray-900">
+              {users.filter((u) => u.role === 'manager').length}
             </div>
           </div>
           <div className="bg-white rounded-lg shadow p-4">
@@ -131,6 +137,7 @@ export default function UserManagement() {
             >
               <option value="all">All Roles</option>
               <option value="admin">Admin</option>
+              <option value="manager">Manager</option>
               <option value="user">User</option>
             </select>
           </div>
@@ -200,10 +207,13 @@ export default function UserManagement() {
                       className={`px-2 py-1 text-xs font-bold rounded-full border ${
                         user.role === 'admin'
                           ? 'bg-black text-white border-black'
+                          : user.role === 'manager'
+                          ? 'bg-gray-600 text-white border-gray-600'
                           : 'bg-gray-400 text-gray-900 border-gray-400'
                       }`}
                     >
                       <option value="user">User</option>
+                      <option value="manager">Manager</option>
                       <option value="admin">Admin</option>
                     </select>
                   </td>
