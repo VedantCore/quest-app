@@ -8,12 +8,12 @@ export default function TaskManagement() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [formData, setFormData] = useState({
-    title: '',
+    heading: '',
     description: '',
-    points: 0,
-    category: 'daily',
-    status: 'active',
+    category: '',
+    timeline: '',
   });
+  const [subtasks, setSubtasks] = useState([{ title: '', points: 0 }]);
 
   useEffect(() => {
     fetchTasks();
@@ -21,13 +21,25 @@ export default function TaskManagement() {
 
   const fetchTasks = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: tasksData, error: tasksError } = await supabase
         .from('tasks')
-        .select('*')
+        .select(
+          `
+          *,
+          subtasks (
+            subtask_id,
+            task_id,
+            title,
+            points,
+            is_completed,
+            created_at
+          )
+        `
+        )
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setTasks(data || []);
+      if (tasksError) throw tasksError;
+      setTasks(tasksData || []);
     } catch (error) {
       console.error('Error fetching tasks:', error);
     } finally {
@@ -35,32 +47,96 @@ export default function TaskManagement() {
     }
   };
 
+  const calculateTotalPoints = (taskSubtasks) => {
+    if (!taskSubtasks || taskSubtasks.length === 0) return 0;
+    return taskSubtasks.reduce(
+      (sum, subtask) => sum + (subtask.points || 0),
+      0
+    );
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       if (editingTask) {
         // Update existing task
-        const { error } = await supabase
+        const { error: taskError } = await supabase
           .from('tasks')
-          .update(formData)
-          .eq('id', editingTask.id);
+          .update({
+            heading: formData.heading,
+            description: formData.description,
+            category: formData.category,
+            timeline: formData.timeline,
+          })
+          .eq('task_id', editingTask.task_id);
 
-        if (error) throw error;
+        if (taskError) throw taskError;
+
+        // Delete old subtasks
+        await supabase
+          .from('subtasks')
+          .delete()
+          .eq('task_id', editingTask.task_id);
+
+        // Insert updated subtasks
+        const subtasksToInsert = subtasks
+          .filter((st) => st.title.trim())
+          .map((st) => ({
+            task_id: editingTask.task_id,
+            title: st.title,
+            points: parseInt(st.points) || 0,
+          }));
+
+        if (subtasksToInsert.length > 0) {
+          const { error: subtaskError } = await supabase
+            .from('subtasks')
+            .insert(subtasksToInsert);
+
+          if (subtaskError) throw subtaskError;
+        }
       } else {
         // Create new task
-        const { error } = await supabase.from('tasks').insert([formData]);
+        const { data: newTask, error: taskError } = await supabase
+          .from('tasks')
+          .insert([
+            {
+              heading: formData.heading,
+              description: formData.description,
+              category: formData.category,
+              timeline: formData.timeline,
+            },
+          ])
+          .select()
+          .single();
 
-        if (error) throw error;
+        if (taskError) throw taskError;
+
+        // Insert subtasks
+        const subtasksToInsert = subtasks
+          .filter((st) => st.title.trim())
+          .map((st) => ({
+            task_id: newTask.task_id,
+            title: st.title,
+            points: parseInt(st.points) || 0,
+          }));
+
+        if (subtasksToInsert.length > 0) {
+          const { error: subtaskError } = await supabase
+            .from('subtasks')
+            .insert(subtasksToInsert);
+
+          if (subtaskError) throw subtaskError;
+        }
       }
 
       // Reset form and close modal
       setFormData({
-        title: '',
+        heading: '',
         description: '',
-        points: 0,
-        category: 'daily',
-        status: 'active',
+        category: '',
+        timeline: '',
       });
+      setSubtasks([{ title: '', points: 0 }]);
       setShowCreateModal(false);
       setEditingTask(null);
       fetchTasks();
@@ -73,20 +149,41 @@ export default function TaskManagement() {
   const handleEdit = (task) => {
     setEditingTask(task);
     setFormData({
-      title: task.title,
+      heading: task.heading || '',
       description: task.description || '',
-      points: task.points,
-      category: task.category,
-      status: task.status,
+      category: task.category || '',
+      timeline: task.timeline || '',
     });
+
+    // Load existing subtasks
+    if (task.subtasks && task.subtasks.length > 0) {
+      setSubtasks(
+        task.subtasks.map((st) => ({
+          title: st.title,
+          points: st.points,
+        }))
+      );
+    } else {
+      setSubtasks([{ title: '', points: 0 }]);
+    }
+
     setShowCreateModal(true);
   };
 
   const handleDelete = async (taskId) => {
-    if (!confirm('Are you sure you want to delete this task?')) return;
+    if (
+      !confirm(
+        'Are you sure you want to delete this task? All subtasks will be deleted as well.'
+      )
+    )
+      return;
 
     try {
-      const { error } = await supabase.from('tasks').delete().eq('id', taskId);
+      // Subtasks will be deleted automatically due to cascade delete
+      const { error } = await supabase
+        .from('tasks')
+        .delete()
+        .eq('task_id', taskId);
 
       if (error) throw error;
       fetchTasks();
@@ -96,16 +193,33 @@ export default function TaskManagement() {
     }
   };
 
+  const addSubtask = () => {
+    setSubtasks([...subtasks, { title: '', points: 0 }]);
+  };
+
+  const removeSubtask = (index) => {
+    const newSubtasks = subtasks.filter((_, i) => i !== index);
+    setSubtasks(
+      newSubtasks.length > 0 ? newSubtasks : [{ title: '', points: 0 }]
+    );
+  };
+
+  const updateSubtask = (index, field, value) => {
+    const newSubtasks = [...subtasks];
+    newSubtasks[index][field] = value;
+    setSubtasks(newSubtasks);
+  };
+
   const closeModal = () => {
     setShowCreateModal(false);
     setEditingTask(null);
     setFormData({
-      title: '',
+      heading: '',
       description: '',
-      points: 0,
-      category: 'daily',
-      status: 'active',
+      category: '',
+      timeline: '',
     });
+    setSubtasks([{ title: '', points: 0 }]);
   };
 
   if (loading) {
@@ -131,16 +245,19 @@ export default function TaskManagement() {
           <thead className="bg-gray-100">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">
-                Title
+                Heading
               </th>
               <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">
                 Category
               </th>
               <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">
-                Points
+                Timeline
               </th>
               <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">
-                Status
+                Subtasks
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">
+                Total Points
               </th>
               <th className="px-6 py-3 text-right text-xs font-bold text-gray-900 uppercase tracking-wider">
                 Actions
@@ -150,18 +267,18 @@ export default function TaskManagement() {
           <tbody className="bg-white divide-y divide-gray-200">
             {tasks.length === 0 ? (
               <tr>
-                <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
+                <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
                   No tasks found. Create your first task!
                 </td>
               </tr>
             ) : (
               tasks.map((task) => (
-                <tr key={task.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
+                <tr key={task.task_id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4">
                     <div className="text-sm font-semibold text-gray-900">
-                      {task.title}
+                      {task.heading}
                     </div>
-                    <div className="text-sm text-gray-700">
+                    <div className="text-sm text-gray-700 max-w-xs truncate">
                       {task.description}
                     </div>
                   </td>
@@ -170,19 +287,16 @@ export default function TaskManagement() {
                       {task.category}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                    {task.points} pts
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {task.timeline
+                      ? new Date(task.timeline).toLocaleDateString()
+                      : 'N/A'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-2 inline-flex text-xs leading-5 font-bold rounded-full ${
-                        task.status === 'active'
-                          ? 'bg-black text-white'
-                          : 'bg-gray-400 text-gray-900'
-                      }`}
-                    >
-                      {task.status}
-                    </span>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                    {task.subtasks?.length || 0} subtasks
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                    {calculateTotalPoints(task.subtasks)} pts
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
@@ -192,7 +306,7 @@ export default function TaskManagement() {
                       Edit
                     </button>
                     <button
-                      onClick={() => handleDelete(task.id)}
+                      onClick={() => handleDelete(task.task_id)}
                       className="text-gray-900 hover:text-black font-bold underline"
                     >
                       Delete
@@ -207,100 +321,151 @@ export default function TaskManagement() {
 
       {/* Create/Edit Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
+          <div className="bg-white rounded-lg p-8 max-w-3xl w-full mx-4 my-8">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">
               {editingTask ? 'Edit Task' : 'Create New Task'}
             </h3>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
                 <label className="block text-sm font-bold text-gray-900 mb-2">
-                  Title *
+                  Heading *
                 </label>
                 <input
                   type="text"
                   required
-                  value={formData.title}
+                  value={formData.heading}
                   onChange={(e) =>
-                    setFormData({ ...formData, title: e.target.value })
+                    setFormData({ ...formData, heading: e.target.value })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter task title"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                  placeholder="Enter task heading"
                 />
               </div>
 
               <div className="mb-4">
                 <label className="block text-sm font-bold text-gray-900 mb-2">
-                  Description
+                  Description *
                 </label>
                 <textarea
+                  required
                   value={formData.description}
                   onChange={(e) =>
                     setFormData({ ...formData, description: e.target.value })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
                   rows="3"
                   placeholder="Enter task description"
                 />
               </div>
 
-              <div className="mb-4">
-                <label className="block text-sm font-bold text-gray-900 mb-2">
-                  Points *
-                </label>
-                <input
-                  type="number"
-                  required
-                  value={formData.points}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      points: parseInt(e.target.value),
-                    })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter points"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-2">
+                    Category *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.category}
+                    onChange={(e) =>
+                      setFormData({ ...formData, category: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                    placeholder="e.g., Development, Design, Marketing"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-2">
+                    Timeline *
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    value={formData.timeline}
+                    onChange={(e) =>
+                      setFormData({ ...formData, timeline: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                  />
+                </div>
               </div>
 
-              <div className="mb-4">
-                <label className="block text-sm font-bold text-gray-900 mb-2">
-                  Category *
-                </label>
-                <select
-                  value={formData.category}
-                  onChange={(e) =>
-                    setFormData({ ...formData, category: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="daily">Daily</option>
-                  <option value="weekly">Weekly</option>
-                  <option value="monthly">Monthly</option>
-                  <option value="special">Special</option>
-                </select>
-              </div>
-
+              {/* Subtasks Section */}
               <div className="mb-6">
-                <label className="block text-sm font-bold text-gray-900 mb-2">
-                  Status *
-                </label>
-                <select
-                  value={formData.status}
-                  onChange={(e) =>
-                    setFormData({ ...formData, status: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
+                <div className="flex justify-between items-center mb-3">
+                  <label className="block text-sm font-bold text-gray-900">
+                    Subtasks *
+                  </label>
+                  <button
+                    type="button"
+                    onClick={addSubtask}
+                    className="text-sm bg-gray-200 text-gray-900 px-3 py-1 rounded hover:bg-gray-300 font-semibold"
+                  >
+                    + Add Subtask
+                  </button>
+                </div>
+
+                <div className="space-y-3 max-h-64 overflow-y-auto">
+                  {subtasks.map((subtask, index) => (
+                    <div
+                      key={index}
+                      className="flex gap-2 items-start p-3 bg-gray-50 rounded-lg"
+                    >
+                      <div className="flex-1">
+                        <input
+                          type="text"
+                          required
+                          value={subtask.title}
+                          onChange={(e) =>
+                            updateSubtask(index, 'title', e.target.value)
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm"
+                          placeholder="Subtask title"
+                        />
+                      </div>
+                      <div className="w-24">
+                        <input
+                          type="number"
+                          required
+                          min="0"
+                          value={subtask.points}
+                          onChange={(e) =>
+                            updateSubtask(index, 'points', e.target.value)
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm"
+                          placeholder="Points"
+                        />
+                      </div>
+                      {subtasks.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeSubtask(index)}
+                          className="text-red-600 hover:text-red-800 font-bold px-2"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-2 text-right">
+                  <span className="text-sm font-bold text-gray-900">
+                    Total Points:{' '}
+                    {subtasks.reduce(
+                      (sum, st) => sum + (parseInt(st.points) || 0),
+                      0
+                    )}
+                  </span>
+                </div>
               </div>
 
               <div className="flex gap-3">
                 <button
                   type="submit"
-                  className="flex-1 bg-black text-white py-2 rounded-lg hover:bg-gray-800 transition"
+                  className="flex-1 bg-black text-white py-2 rounded-lg hover:bg-gray-800 transition font-semibold"
                 >
                   {editingTask ? 'Update Task' : 'Create Task'}
                 </button>
