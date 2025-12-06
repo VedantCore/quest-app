@@ -30,14 +30,25 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }) {
         email: user.email,
       });
 
+      // Check if user already exists in Supabase
+      const { data: existingUser } = await supabase
+        .from('users')
+        .select('role')
+        .eq('user_id', user.uid)
+        .single();
+
       // Sync user to Supabase
       const userData = {
         user_id: user.uid,
         email: user.email,
         name: user.displayName || email.split('@')[0],
-        role: 'user',
         avatar_url: user.photoURL || null,
       };
+
+      // Only set role if user doesn't exist (preserve existing role)
+      if (!existingUser) {
+        userData.role = 'user';
+      }
 
       console.log('🔵 Attempting Supabase sync with data:', userData);
       const { data, error: supabaseError } = await supabase
@@ -75,13 +86,24 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }) {
         email: user.email,
       });
 
+      // Check if user already exists in Supabase
+      const { data: existingUser } = await supabase
+        .from('users')
+        .select('role')
+        .eq('user_id', user.uid)
+        .single();
+
       const userData = {
         user_id: user.uid,
         email: user.email,
         name: user.displayName || 'User',
-        role: 'user',
         avatar_url: user.photoURL || null,
       };
+
+      // Only set role if user doesn't exist (preserve existing role)
+      if (!existingUser) {
+        userData.role = 'user';
+      }
 
       console.log('🔵 Attempting Supabase sync with data:', userData);
       const { data, error: supabaseError } = await supabase

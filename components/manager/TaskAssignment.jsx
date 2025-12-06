@@ -117,7 +117,7 @@ export default function TaskAssignment() {
 
   const handleAssign = async () => {
     try {
-      const { type, id, taskId, assignedUserId } = assignmentData;
+      const { type, id, assignedUserId } = assignmentData;
 
       if (!assignedUserId) {
         alert('Please select a user');
@@ -125,55 +125,43 @@ export default function TaskAssignment() {
       }
 
       if (type === 'task') {
-        // Check if assignment already exists
-        const { data: existing } = await supabase
+        // Create new task assignment (only insert, no update)
+        console.log('Creating new task assignment:', {
+          task_id: id,
+          user_id: assignedUserId,
+        });
+        const { data: insertedData, error } = await supabase
           .from('task_assignments')
-          .select('assignment_id')
-          .eq('task_id', id)
-          .single();
-
-        if (existing) {
-          // Update existing assignment
-          const { error } = await supabase
-            .from('task_assignments')
-            .update({ user_id: assignedUserId })
-            .eq('task_id', id);
-
-          if (error) throw error;
-        } else {
-          // Create new assignment
-          const { error } = await supabase.from('task_assignments').insert({
+          .insert({
             task_id: id,
             user_id: assignedUserId,
-          });
+          })
+          .select();
 
-          if (error) throw error;
+        if (error) {
+          console.error('Error inserting task assignment:', error);
+          throw error;
         }
+        console.log('Successfully created task assignment:', insertedData);
       } else {
-        // Check if assignment already exists
-        const { data: existing } = await supabase
+        // Create new subtask assignment (only insert, no update)
+        console.log('Creating new subtask assignment:', {
+          subtask_id: id,
+          user_id: assignedUserId,
+        });
+        const { data: insertedData, error } = await supabase
           .from('subtask_assignments')
-          .select('assignment_id')
-          .eq('subtask_id', id)
-          .single();
-
-        if (existing) {
-          // Update existing assignment
-          const { error } = await supabase
-            .from('subtask_assignments')
-            .update({ user_id: assignedUserId })
-            .eq('subtask_id', id);
-
-          if (error) throw error;
-        } else {
-          // Create new assignment
-          const { error } = await supabase.from('subtask_assignments').insert({
+          .insert({
             subtask_id: id,
             user_id: assignedUserId,
-          });
+          })
+          .select();
 
-          if (error) throw error;
+        if (error) {
+          console.error('Error inserting subtask assignment:', error);
+          throw error;
         }
+        console.log('Successfully created subtask assignment:', insertedData);
       }
 
       setShowAssignModal(false);
@@ -412,21 +400,35 @@ export default function TaskAssignment() {
                     {/* Task Assignment Info */}
                     <div className="mt-4 ml-10 flex items-center gap-2">
                       {assignedUser ? (
-                        <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg">
-                          <span className="text-sm text-gray-700">
-                            🎯 Assigned to: <strong>{assignedUser.name}</strong>
-                          </span>
+                        <>
+                          <div className="flex items-center gap-2 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
+                            <span className="text-sm text-green-700">
+                              🎯 Assigned to:{' '}
+                              <strong>{assignedUser.name}</strong>
+                              {` (${assignedUser.email})`}
+                            </span>
+                            <button
+                              onClick={() =>
+                                handleUnassign('task', task.task_id)
+                              }
+                              className="text-red-500 hover:text-red-700 text-xs font-semibold"
+                              title="Unassign user"
+                            >
+                              ✕
+                            </button>
+                          </div>
                           <button
-                            onClick={() => handleUnassign('task', task.task_id)}
-                            className="text-red-500 hover:text-red-700 text-xs"
+                            disabled
+                            className="text-sm px-3 py-1.5 rounded transition bg-gray-300 text-gray-500 cursor-not-allowed"
+                            title="Already assigned - unassign first to reassign"
                           >
-                            ✕
+                            Already Assigned
                           </button>
-                        </div>
+                        </>
                       ) : (
                         <button
                           onClick={() => openAssignModal('task', task)}
-                          className="text-sm bg-black text-white px-3 py-1.5 rounded hover:bg-gray-800 transition"
+                          className="text-sm px-3 py-1.5 rounded transition bg-black text-white hover:bg-gray-800 cursor-pointer"
                         >
                           Assign to User
                         </button>
@@ -482,22 +484,32 @@ export default function TaskAssignment() {
 
                           <div className="flex items-center gap-2 ml-4">
                             {subtaskUser ? (
-                              <div className="flex items-center gap-2 bg-gray-50 px-3 py-1 rounded">
-                                <span className="text-xs text-gray-700">
-                                  👤 {subtaskUser.name}
-                                </span>
+                              <>
+                                <div className="flex items-center gap-2 bg-green-50 px-2 py-1 rounded border border-green-200">
+                                  <span className="text-xs text-green-700 font-medium">
+                                    👤 {subtaskUser.name}
+                                  </span>
+                                  <button
+                                    onClick={() =>
+                                      handleUnassign(
+                                        'subtask',
+                                        subtask.subtask_id
+                                      )
+                                    }
+                                    className="text-red-500 hover:text-red-700 text-xs font-semibold"
+                                    title="Unassign user"
+                                  >
+                                    ✕
+                                  </button>
+                                </div>
                                 <button
-                                  onClick={() =>
-                                    handleUnassign(
-                                      'subtask',
-                                      subtask.subtask_id
-                                    )
-                                  }
-                                  className="text-red-500 hover:text-red-700 text-xs"
+                                  disabled
+                                  className="text-xs px-3 py-1 rounded transition bg-gray-300 text-gray-500 cursor-not-allowed"
+                                  title="Already assigned - unassign first"
                                 >
-                                  ✕
+                                  Assigned
                                 </button>
-                              </div>
+                              </>
                             ) : (
                               <button
                                 onClick={() =>
@@ -507,7 +519,7 @@ export default function TaskAssignment() {
                                     task.task_id
                                   )
                                 }
-                                className="text-xs bg-gray-700 text-white px-3 py-1 rounded hover:bg-gray-600 transition"
+                                className="text-xs px-3 py-1 rounded transition bg-gray-700 text-white hover:bg-gray-600 cursor-pointer"
                               >
                                 Assign
                               </button>
