@@ -6,7 +6,7 @@ import { auth } from '../lib/firebase';
 import { useRouter } from 'next/navigation';
 
 export default function Navbar({ onOpenLogin, onOpenSignup }) {
-  const { user, loading } = useAuth();
+  const { user, userRole, loading } = useAuth();
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -41,6 +41,31 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
           <>
             {user ? (
               <div className="flex items-center space-x-4">
+                {/* Dashboard Links based on role */}
+                {userRole === 'admin' && (
+                  <Link
+                    href="/admin-dashboard"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-100 rounded-md"
+                  >
+                    Admin Dashboard
+                  </Link>
+                )}
+                {userRole === 'manager' && (
+                  <Link
+                    href="/manager-dashboard"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-100 rounded-md"
+                  >
+                    Manager Dashboard
+                  </Link>
+                )}
+                {userRole === 'user' && (
+                  <Link
+                    href="/user-dashboard"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-100 rounded-md"
+                  >
+                    My Dashboard
+                  </Link>
+                )}
                 <span className="text-gray-700">
                   Hi, {user.email?.split('@')[0]}
                 </span>
