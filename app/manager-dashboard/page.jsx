@@ -70,7 +70,7 @@ export default function ManagerDashboard() {
       {/* Header */}
       <div className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-[#13B5A0]">
             Manager Dashboard
           </h1>
           <p className="mt-1 text-sm text-gray-500">
@@ -83,7 +83,7 @@ export default function ManagerDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Column 1: My Assigned Tasks */}
           <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+            <h2 className="text-xl font-bold text-[#13B5A0] mb-4 flex items-center">
               <span className="mr-2">📋</span> My Managed Tasks
             </h2>
             {myTasks.length === 0 ? (
@@ -94,13 +94,13 @@ export default function ManagerDashboard() {
                   <Link
                     href={`/manager-dashboard/task/${task.task_id}`}
                     key={task.task_id}
-                    className="block border rounded-lg p-4 hover:bg-blue-50 transition cursor-pointer group"
+                    className="block border rounded-lg p-4 hover:bg-teal-50 transition cursor-pointer group"
                   >
                     <div className="flex justify-between items-start">
-                      <h3 className="font-semibold text-lg text-gray-900 group-hover:text-blue-700">
+                      <h3 className="font-semibold text-lg text-[#13B5A0] group-hover:text-[#0f8e7e]">
                         {task.title}
                       </h3>
-                      <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                      <span className="text-xs text-[#13B5A0] bg-teal-50 px-2 py-1 rounded-full border border-[#13B5A0]">
                         View Participants →
                       </span>
                     </div>
@@ -130,7 +130,7 @@ export default function ManagerDashboard() {
 
           {/* Column 2: All Available Tasks */}
           <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+            <h2 className="text-xl font-bold text-[#13B5A0] mb-4 flex items-center">
               <span className="mr-2">🌍</span> All Available Tasks
             </h2>
             {allTasks.length === 0 ? (
@@ -142,7 +142,7 @@ export default function ManagerDashboard() {
                     key={task.task_id}
                     className="border rounded-lg p-4 hover:bg-gray-50 transition"
                   >
-                    <h3 className="font-semibold text-lg text-gray-900">
+                    <h3 className="font-semibold text-lg text-[#13B5A0]">
                       {task.title}
                     </h3>
                     <p className="text-sm text-gray-600 mt-1 line-clamp-2">

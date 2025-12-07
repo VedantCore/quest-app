@@ -115,7 +115,7 @@ export default function TaskParticipantsPage() {
         <div className="text-xl text-red-500 mb-4">Task not found</div>
         <Link
           href="/manager-dashboard"
-          className="text-blue-600 hover:underline"
+          className="text-[#13B5A0] hover:underline"
         >
           Back to Dashboard
         </Link>
@@ -129,12 +129,12 @@ export default function TaskParticipantsPage() {
       <div className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{task.title}</h1>
+            <h1 className="text-3xl font-bold text-[#13B5A0]">{task.title}</h1>
             <p className="mt-1 text-sm text-gray-500">Task Participants</p>
           </div>
           <Link
             href="/manager-dashboard"
-            className="text-sm text-blue-600 hover:text-blue-800"
+            className="text-sm text-[#13B5A0] hover:text-[#0f8e7e]"
           >
             ← Back to Dashboard
           </Link>
@@ -144,7 +144,7 @@ export default function TaskParticipantsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 pb-12">
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-medium text-gray-900">
+            <h2 className="text-lg font-medium text-[#13B5A0]">
               Enrolled Users ({participants.length})
             </h2>
           </div>
@@ -159,7 +159,7 @@ export default function TaskParticipantsPage() {
                 <li
                   key={participant.user_id}
                   onClick={() => handleUserClick(participant)}
-                  className="px-6 py-4 hover:bg-blue-50 cursor-pointer transition"
+                  className="px-6 py-4 hover:bg-teal-50 cursor-pointer transition"
                 >
                   <div className="flex items-center space-x-4">
                     <div className="flex-shrink-0">
@@ -170,13 +170,13 @@ export default function TaskParticipantsPage() {
                           alt=""
                         />
                       ) : (
-                        <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+                        <div className="h-10 w-10 rounded-full bg-teal-100 flex items-center justify-center text-[#13B5A0] font-bold">
                           {participant.email[0].toUpperCase()}
                         </div>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
+                      <p className="text-sm font-medium text-[#13B5A0] truncate">
                         {participant.name || participant.email}
                       </p>
                       <p className="text-sm text-gray-500 truncate">
@@ -187,7 +187,7 @@ export default function TaskParticipantsPage() {
                       Joined:{' '}
                       {new Date(participant.joined_at).toLocaleDateString()}
                     </div>
-                    <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-[#13B5A0]">
                       {participant.total_points} pts
                     </div>
                     <div className="ml-4 text-gray-400">→</div>
@@ -204,7 +204,7 @@ export default function TaskParticipantsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-              <h3 className="text-xl font-bold text-gray-900">
+              <h3 className="text-xl font-bold text-[#13B5A0]">
                 {selectedUser.name || selectedUser.email}'s Progress
               </h3>
               <button
@@ -233,14 +233,14 @@ export default function TaskParticipantsPage() {
                       >
                         <div className="flex justify-between items-start mb-2">
                           <div>
-                            <h4 className="font-semibold text-gray-900">
+                            <h4 className="font-semibold text-[#13B5A0]">
                               Step {index + 1}: {step.title}
                             </h4>
                             <p className="text-sm text-gray-600 mt-1">
                               {step.description}
                             </p>
                           </div>
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-[#13B5A0]">
                             {step.points_reward} pts
                           </span>
                         </div>
