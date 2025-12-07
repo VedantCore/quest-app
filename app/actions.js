@@ -229,3 +229,47 @@ export async function rejectSubmission(submissionId, managerId) {
     return { success: false, message: 'Failed to reject submission.' };
   }
 }
+
+/**
+ * Get tasks assigned to a specific manager
+ */
+export async function getManagerTasks(managerId) {
+  try {
+    const { data, error } = await supabase
+      .from('tasks')
+      .select('*')
+      .eq('assigned_manager_id', managerId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error fetching manager tasks:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Get all available tasks
+ */
+export async function getAllTasks() {
+  try {
+    const { data, error } = await supabase
+      .from('tasks')
+      .select(
+        `
+        *,
+        manager:users!tasks_assigned_manager_id_fkey (email)
+      `
+      )
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error fetching all tasks:', error);
+    return { success: false, error: error.message };
+  }
+}

@@ -26,7 +26,7 @@ export default function TaskAssignment() {
 
   const loadSubmissions = async () => {
     setLoading(true);
-    const result = await getPendingSubmissions(user.id);
+    const result = await getPendingSubmissions(user.uid);
     if (result.success) {
       setSubmissions(result.data || []);
     } else {
@@ -52,7 +52,7 @@ export default function TaskAssignment() {
     setProcessingId(submissionId);
     closeReviewModal();
 
-    const result = await approveSubmission(submissionId, user.id);
+    const result = await approveSubmission(submissionId, user.uid);
 
     if (result.success) {
       setSubmissions((prev) =>
@@ -72,7 +72,7 @@ export default function TaskAssignment() {
     setProcessingId(submissionId);
     closeReviewModal();
 
-    const result = await rejectSubmission(submissionId, user.id);
+    const result = await rejectSubmission(submissionId, user.uid);
 
     if (result.success) {
       setSubmissions((prev) =>

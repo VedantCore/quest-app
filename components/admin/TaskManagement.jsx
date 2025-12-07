@@ -2,9 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { createTask } from '@/app/actions';
+import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
 
 export default function TaskManagement() {
+  const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [managers, setManagers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -58,12 +60,16 @@ export default function TaskManagement() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!user) {
+      toast.error('You must be logged in to create a task');
+      return;
+    }
     try {
       // Use Server Action
       const result = await createTask(
         {
           ...formData,
-          createdBy: (await supabase.auth.getUser()).data.user?.id, // Assuming auth is set up
+          createdBy: user.uid,
         },
         steps
       );
