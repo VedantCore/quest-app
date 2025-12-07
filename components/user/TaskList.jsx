@@ -44,17 +44,17 @@ const CircularProgress = ({ percentage, size = 50, strokeWidth = 4 }) => {
   );
 };
 
-export default function TaskList({ userId, onStatsUpdate }) {
+export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedTaskId, setExpandedTaskId] = useState(null);
-  const [filter, setFilter] = useState('all'); // all, active, completed
+  const [filter, setFilter] = useState(mode === 'available' ? 'latest' : 'all');
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchUserTasks();
-  }, [userId]);
+  }, [userId, mode]);
 
   const fetchUserTasks = async () => {
     try {
@@ -94,7 +94,7 @@ export default function TaskList({ userId, onStatsUpdate }) {
       if (submissionsError) throw submissionsError;
 
       // Process tasks to include enrollment and submission status
-      const processedTasks = allTasks.map((task) => {
+      let processedTasks = allTasks.map((task) => {
         const isEnrolled = enrolledTaskIds.has(task.task_id);
 
         const stepsWithStatus = task.task_steps.map((step) => {
@@ -141,23 +141,47 @@ export default function TaskList({ userId, onStatsUpdate }) {
         };
       });
 
+      // Filter based on mode
+      if (mode === 'enrolled') {
+        processedTasks = processedTasks.filter((t) => t.isEnrolled);
+      } else if (mode === 'available') {
+        // In available mode, we might want to show all, or just unenrolled.
+        // Showing all allows users to see what they've joined too, but maybe we should prioritize unenrolled.
+        // For now, let's show all, but maybe sort unenrolled first?
+        processedTasks.sort((a, b) => {
+          if (a.isEnrolled === b.isEnrolled) return 0;
+          return a.isEnrolled ? 1 : -1; // Unenrolled first
+        });
+      }
+
       setTasks(processedTasks);
 
-      // Calculate and send stats to parent
+      // Calculate and send stats to parent (always based on enrolled tasks)
       if (onStatsUpdate) {
-        const activeTasks = processedTasks.filter(
-          (t) => t.isEnrolled && t.progress < 100
+        // We need to calculate stats based on ALL enrolled tasks, not just the filtered ones if we are in 'available' mode.
+        // But wait, processedTasks might be filtered if mode='enrolled'.
+        // If mode='available', processedTasks has all tasks.
+
+        // To be safe, we should probably calculate stats from the full list if possible,
+        // but here we only have processedTasks which might be filtered.
+        // However, onStatsUpdate is primarily used in UserDashboard where mode='enrolled',
+        // so processedTasks contains all enrolled tasks.
+        // In TasksPage (mode='available'), onStatsUpdate is likely not passed or ignored.
+
+        const enrolledTasks = processedTasks.filter((t) => t.isEnrolled);
+
+        const activeTasks = enrolledTasks.filter(
+          (t) => t.progress < 100
         ).length;
-        const completedTasks = processedTasks.filter(
-          (t) => t.isEnrolled && t.progress === 100
+        const completedTasks = enrolledTasks.filter(
+          (t) => t.progress === 100
         ).length;
-        const totalEarnedPoints = processedTasks.reduce(
-          (sum, t) => sum + (t.isEnrolled ? t.earnedPoints : 0),
+        const totalEarnedPoints = enrolledTasks.reduce(
+          (sum, t) => sum + t.earnedPoints,
           0
         );
 
         // Overall progress across enrolled tasks
-        const enrolledTasks = processedTasks.filter((t) => t.isEnrolled);
         const totalEnrolledSteps = enrolledTasks.reduce(
           (sum, t) => sum + t.steps.length,
           0
@@ -251,19 +275,48 @@ export default function TaskList({ userId, onStatsUpdate }) {
 
   // Filter tasks based on selected filter and search
   const filteredTasks = tasks.filter((task) => {
-    const matchesFilter =
-      filter === 'all'
-        ? true
-        : filter === 'active'
-        ? task.isEnrolled && task.progress < 100
-        : filter === 'completed'
-        ? task.isEnrolled && task.progress === 100
-        : true;
     const matchesSearch =
       task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       task.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesFilter && matchesSearch;
+
+    if (!matchesSearch) return false;
+
+    if (mode === 'enrolled') {
+      if (filter === 'active') return task.isEnrolled && task.progress < 100;
+      if (filter === 'completed')
+        return task.isEnrolled && task.progress === 100;
+      return true;
+    } else {
+      if (filter === 'my-tasks') return task.isEnrolled;
+      return true;
+    }
   });
+
+  // Sort tasks if needed
+  if (mode === 'available') {
+    if (filter === 'latest') {
+      filteredTasks.sort(
+        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      );
+    } else if (filter === 'oldest') {
+      filteredTasks.sort(
+        (a, b) => new Date(a.created_at) - new Date(b.created_at)
+      );
+    }
+  }
+
+  const filterOptions =
+    mode === 'enrolled'
+      ? [
+          { key: 'all', label: 'All' },
+          { key: 'active', label: 'Active' },
+          { key: 'completed', label: 'Completed' },
+        ]
+      : [
+          { key: 'latest', label: 'Latest' },
+          { key: 'oldest', label: 'Oldest' },
+          { key: 'my-tasks', label: 'My Tasks' },
+        ];
 
   return (
     <div className="space-y-6">
@@ -298,17 +351,7 @@ export default function TaskList({ userId, onStatsUpdate }) {
             </svg>
           </div>
           <div className="flex gap-2">
-            {[
-              { key: 'all', label: `All` },
-              {
-                key: 'active',
-                label: `Active`,
-              },
-              {
-                key: 'completed',
-                label: `Completed`,
-              },
-            ].map((opt) => (
+            {filterOptions.map((opt) => (
               <button
                 key={opt.key}
                 onClick={() => setFilter(opt.key)}

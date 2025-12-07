@@ -59,12 +59,20 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                   </Link>
                 )}
                 {userRole === 'user' && (
-                  <Link
-                    href="/user-dashboard"
-                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-100 rounded-md"
-                  >
-                    My Dashboard
-                  </Link>
+                  <>
+                    <Link
+                      href="/tasks"
+                      className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-100 rounded-md"
+                    >
+                      Explore Tasks
+                    </Link>
+                    <Link
+                      href="/user-dashboard"
+                      className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-100 rounded-md"
+                    >
+                      My Dashboard
+                    </Link>
+                  </>
                 )}
                 <span className="text-gray-700">
                   Hi, {user.email?.split('@')[0]}

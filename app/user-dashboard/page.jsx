@@ -157,7 +157,11 @@ export default function UserDashboard() {
         {/* Tab Content */}
         <div className="mt-6">
           {activeTab === 'tasks' && (
-            <TaskList userId={user.uid} onStatsUpdate={setStats} />
+            <TaskList
+              userId={user.uid}
+              onStatsUpdate={setStats}
+              mode="enrolled"
+            />
           )}
           {activeTab === 'profile' && (
             <Profile userId={user.uid} onStatsUpdate={setStats} />
