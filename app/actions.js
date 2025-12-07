@@ -273,3 +273,103 @@ export async function getAllTasks() {
     return { success: false, error: error.message };
   }
 }
+
+/**
+ * Get details of a specific task
+ */
+export async function getTaskDetails(taskId) {
+  try {
+    const { data, error } = await supabase
+      .from('tasks')
+      .select(
+        `
+        *,
+        task_steps (*)
+      `
+      )
+      .eq('task_id', taskId)
+      .single();
+
+    if (error) throw error;
+
+    // Sort steps by creation or some order if needed
+    if (data.task_steps) {
+      data.task_steps.sort(
+        (a, b) => new Date(a.created_at) - new Date(b.created_at)
+      );
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error fetching task details:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Get participants for a specific task with their submissions
+ */
+export async function getTaskParticipants(taskId) {
+  try {
+    // 1. Get enrollments
+    const { data: enrollments, error: enrollmentsError } = await supabase
+      .from('task_enrollments')
+      .select('user_id, joined_at')
+      .eq('task_id', taskId);
+
+    if (enrollmentsError) throw enrollmentsError;
+
+    if (!enrollments || enrollments.length === 0) {
+      return { success: true, data: [] };
+    }
+
+    // 2. Get user details
+    const userIds = enrollments.map((e) => e.user_id);
+    const { data: users, error: usersError } = await supabase
+      .from('users')
+      .select('user_id, name, email, avatar_url, total_points')
+      .in('user_id', userIds);
+
+    if (usersError) throw usersError;
+
+    // 3. Get all steps for this task to filter submissions
+    const { data: steps } = await supabase
+      .from('task_steps')
+      .select('step_id')
+      .eq('task_id', taskId);
+
+    const stepIds = steps ? steps.map((s) => s.step_id) : [];
+
+    // 4. Get submissions for these users and steps
+    let submissions = [];
+    if (stepIds.length > 0) {
+      const { data: subs, error: subsError } = await supabase
+        .from('step_submissions')
+        .select('*')
+        .in('step_id', stepIds)
+        .in('user_id', userIds);
+
+      if (subsError) throw subsError;
+      submissions = subs || [];
+    }
+
+    // 5. Merge data
+    const participants = users.map((user) => {
+      const enrollment = enrollments.find((e) => e.user_id === user.user_id);
+      const userSubmissions = submissions.filter(
+        (s) => s.user_id === user.user_id
+      );
+
+      return {
+        ...user,
+        joined_at: enrollment.joined_at,
+        submissions: userSubmissions,
+      };
+    });
+
+    return { success: true, data: participants };
+  } catch (error) {
+    console.error('Error fetching task participants:', error);
+    return { success: false, error: error.message };
+  }
+}

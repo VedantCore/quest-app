@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { getManagerTasks, getAllTasks } from '@/app/actions';
@@ -90,13 +91,19 @@ export default function ManagerDashboard() {
             ) : (
               <div className="space-y-4">
                 {myTasks.map((task) => (
-                  <div
+                  <Link
+                    href={`/manager-dashboard/task/${task.task_id}`}
                     key={task.task_id}
-                    className="border rounded-lg p-4 hover:bg-gray-50 transition"
+                    className="block border rounded-lg p-4 hover:bg-blue-50 transition cursor-pointer group"
                   >
-                    <h3 className="font-semibold text-lg text-gray-900">
-                      {task.title}
-                    </h3>
+                    <div className="flex justify-between items-start">
+                      <h3 className="font-semibold text-lg text-gray-900 group-hover:text-blue-700">
+                        {task.title}
+                      </h3>
+                      <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                        View Participants →
+                      </span>
+                    </div>
                     <p className="text-sm text-gray-600 mt-1 line-clamp-2">
                       {task.description}
                     </p>
@@ -115,7 +122,7 @@ export default function ManagerDashboard() {
                         {task.is_active ? 'Active' : 'Inactive'}
                       </span>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
