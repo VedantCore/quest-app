@@ -9,7 +9,7 @@ export default function Home() {
   const [showSignupModal, setShowSignupModal] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <Navbar
         onOpenLogin={() => setShowLoginModal(true)}
         onOpenSignup={() => setShowSignupModal(true)}

@@ -33,7 +33,7 @@ export default function UserDashboard() {
 
   if (!user || userRole === 'admin' || userRole === 'manager') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center bg-white rounded-2xl shadow-xl p-12 border border-gray-200">
           <div className="text-6xl mb-4">🚫</div>
           <div className="text-2xl font-bold text-gray-900 mb-2">
@@ -51,7 +51,7 @@ export default function UserDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
