@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
+import { joinTask, submitStep } from '@/app/actions';
 
 const CircularProgress = ({ percentage, size = 50, strokeWidth = 4 }) => {
   const radius = (size - strokeWidth) / 2;
@@ -59,149 +60,121 @@ export default function TaskList({ userId, onStatsUpdate }) {
       setLoading(true);
       setError(null);
 
-      // Fetch tasks assigned to the user
-      const { data: taskAssignments, error: taskError } = await supabase
-        .from('task_assignments')
+      // 1. Fetch all tasks with steps
+      const { data: allTasks, error: tasksError } = await supabase
+        .from('tasks')
         .select(
           `
-          assignment_id,
-          assigned_at,
-          tasks (
-            task_id,
-            heading,
-            description,
-            category,
-            timeline,
-            status,
-            created_at,
-            subtasks (
-              subtask_id,
-              title,
-              points,
-              is_completed,
-              created_at
-            )
-          )
+          *,
+          task_steps (*)
         `
         )
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (tasksError) throw tasksError;
+
+      // 2. Fetch user enrollments
+      const { data: enrollments, error: enrollmentsError } = await supabase
+        .from('task_enrollments')
+        .select('task_id')
         .eq('user_id', userId);
 
-      // Fetch subtasks assigned to the user
-      const { data: subtaskAssignments, error: subtaskError } = await supabase
-        .from('subtask_assignments')
-        .select(
-          `
-          assignment_id,
-          assigned_at,
-          subtasks (
-            subtask_id,
-            title,
-            points,
-            is_completed,
-            task_id,
-            tasks (
-              task_id,
-              heading,
-              description,
-              category,
-              timeline,
-              status
-            )
-          )
-        `
-        )
+      if (enrollmentsError) throw enrollmentsError;
+
+      const enrolledTaskIds = new Set(enrollments?.map((e) => e.task_id));
+
+      // 3. Fetch user submissions
+      const { data: submissions, error: submissionsError } = await supabase
+        .from('step_submissions')
+        .select('*')
         .eq('user_id', userId);
 
-      if (taskError) throw taskError;
-      if (subtaskError) throw subtaskError;
+      if (submissionsError) throw submissionsError;
 
-      // Combine and deduplicate tasks
-      const allTasks = new Map();
+      // Process tasks to include enrollment and submission status
+      const processedTasks = allTasks.map((task) => {
+        const isEnrolled = enrolledTaskIds.has(task.task_id);
 
-      // Add full task assignments
-      taskAssignments?.forEach((assignment) => {
-        if (assignment.tasks) {
-          allTasks.set(assignment.tasks.task_id, {
-            ...assignment.tasks,
-            assignmentType: 'full-task',
-            assignedAt: assignment.assigned_at,
-          });
-        }
+        const stepsWithStatus = task.task_steps.map((step) => {
+          const submission = submissions?.find(
+            (s) => s.step_id === step.step_id
+          );
+          return {
+            ...step,
+            status: submission ? submission.status : 'NOT_STARTED',
+            submission_id: submission?.submission_id,
+          };
+        });
+
+        // Calculate progress
+        const totalSteps = stepsWithStatus.length;
+        const completedSteps = stepsWithStatus.filter(
+          (s) => s.status === 'APPROVED'
+        ).length;
+        const progress =
+          totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
+
+        // Calculate points
+        const totalPoints = stepsWithStatus.reduce(
+          (sum, s) => sum + (s.points_reward || 0),
+          0
+        );
+        const earnedPoints = stepsWithStatus
+          .filter((s) => s.status === 'APPROVED')
+          .reduce((sum, s) => sum + (s.points_reward || 0), 0);
+
+        return {
+          ...task,
+          isEnrolled,
+          steps: stepsWithStatus,
+          progress,
+          totalPoints,
+          earnedPoints,
+          status:
+            progress === 100
+              ? 'completed'
+              : progress > 0
+              ? 'in-progress'
+              : 'not-started',
+        };
       });
 
-      // Add tasks from subtask assignments
-      subtaskAssignments?.forEach((assignment) => {
-        if (assignment.subtasks?.tasks) {
-          const taskId = assignment.subtasks.tasks.task_id;
-          if (!allTasks.has(taskId)) {
-            allTasks.set(taskId, {
-              ...assignment.subtasks.tasks,
-              subtasks: [],
-              assignmentType: 'subtask-only',
-              assignedSubtaskIds: [],
-            });
-          }
-          // Add the assigned subtask to the task
-          const task = allTasks.get(taskId);
-          if (!task.assignedSubtaskIds) {
-            task.assignedSubtaskIds = [];
-          }
-          task.assignedSubtaskIds.push(assignment.subtasks.subtask_id);
-
-          // Add the subtask object itself to the subtasks array
-          if (!task.subtasks) {
-            task.subtasks = [];
-          }
-          task.subtasks.push({
-            subtask_id: assignment.subtasks.subtask_id,
-            title: assignment.subtasks.title,
-            points: assignment.subtasks.points,
-            is_completed: assignment.subtasks.is_completed,
-            task_id: assignment.subtasks.task_id,
-          });
-        }
-      });
-
-      const tasksArray = Array.from(allTasks.values());
-      setTasks(tasksArray);
+      setTasks(processedTasks);
 
       // Calculate and send stats to parent
       if (onStatsUpdate) {
-        const activeTasks = tasksArray.filter(
-          (t) => t.status !== 'completed'
+        const activeTasks = processedTasks.filter(
+          (t) => t.isEnrolled && t.progress < 100
         ).length;
-        const completedTasks = tasksArray.filter(
-          (t) => t.status === 'completed'
+        const completedTasks = processedTasks.filter(
+          (t) => t.isEnrolled && t.progress === 100
         ).length;
-        let totalPoints = 0;
-        let earnedPoints = 0;
-        let completedSubtasks = 0;
-        let totalSubtasks = 0;
+        const totalEarnedPoints = processedTasks.reduce(
+          (sum, t) => sum + (t.isEnrolled ? t.earnedPoints : 0),
+          0
+        );
 
-        tasksArray.forEach((task) => {
-          const progress = calculateProgress(
-            task.subtasks,
-            task.assignedSubtaskIds
-          );
-          const points = calculatePoints(
-            task.subtasks,
-            task.assignedSubtaskIds
-          );
-          totalPoints += points.total;
-          earnedPoints += points.earned;
-          completedSubtasks += progress.completed;
-          totalSubtasks += progress.total;
-        });
-
+        // Overall progress across enrolled tasks
+        const enrolledTasks = processedTasks.filter((t) => t.isEnrolled);
+        const totalEnrolledSteps = enrolledTasks.reduce(
+          (sum, t) => sum + t.steps.length,
+          0
+        );
+        const totalCompletedSteps = enrolledTasks.reduce(
+          (sum, t) =>
+            sum + t.steps.filter((s) => s.status === 'APPROVED').length,
+          0
+        );
         const overallProgress =
-          totalSubtasks > 0
-            ? Math.round((completedSubtasks / totalSubtasks) * 100)
+          totalEnrolledSteps > 0
+            ? Math.round((totalCompletedSteps / totalEnrolledSteps) * 100)
             : 0;
 
         onStatsUpdate({
           activeTasks,
           completedTasks,
-          totalPoints: earnedPoints,
+          totalPoints: totalEarnedPoints,
           overallProgress,
         });
       }
@@ -213,37 +186,22 @@ export default function TaskList({ userId, onStatsUpdate }) {
     }
   };
 
-  const calculateProgress = (subtasks, assignedSubtaskIds) => {
-    if (!subtasks || subtasks.length === 0)
-      return { completed: 0, total: 0, percentage: 0 };
-
-    const relevantSubtasks = assignedSubtaskIds
-      ? subtasks.filter((st) => assignedSubtaskIds.includes(st.subtask_id))
-      : subtasks;
-
-    const completed = relevantSubtasks.filter((st) => st.is_completed).length;
-    const total = relevantSubtasks.length;
-    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
-
-    return { completed, total, percentage };
+  const handleJoin = async (taskId) => {
+    const result = await joinTask(taskId, userId);
+    if (result.success) {
+      fetchUserTasks(); // Refresh data
+    } else {
+      alert(result.message);
+    }
   };
 
-  const calculatePoints = (subtasks, assignedSubtaskIds) => {
-    if (!subtasks || subtasks.length === 0) return { earned: 0, total: 0 };
-
-    const relevantSubtasks = assignedSubtaskIds
-      ? subtasks.filter((st) => assignedSubtaskIds.includes(st.subtask_id))
-      : subtasks;
-
-    const earned = relevantSubtasks
-      .filter((st) => st.is_completed)
-      .reduce((sum, st) => sum + (st.points || 0), 0);
-    const total = relevantSubtasks.reduce(
-      (sum, st) => sum + (st.points || 0),
-      0
-    );
-
-    return { earned, total };
+  const handleSubmit = async (stepId) => {
+    const result = await submitStep(stepId, userId);
+    if (result.success) {
+      fetchUserTasks(); // Refresh data
+    } else {
+      alert(result.message);
+    }
   };
 
   if (loading) {
@@ -281,11 +239,9 @@ export default function TaskList({ userId, onStatsUpdate }) {
     return (
       <div className="rounded-xl border border-gray-200 bg-white p-10 text-center">
         <h3 className="text-xl font-semibold text-gray-900 mb-2">
-          No tasks yet
+          No tasks available
         </h3>
-        <p className="text-gray-600">
-          When tasks are assigned, you’ll see them here.
-        </p>
+        <p className="text-gray-600">Check back later for new quests!</p>
       </div>
     );
   }
@@ -296,14 +252,13 @@ export default function TaskList({ userId, onStatsUpdate }) {
       filter === 'all'
         ? true
         : filter === 'active'
-        ? task.status !== 'completed'
+        ? task.isEnrolled && task.progress < 100
         : filter === 'completed'
-        ? task.status === 'completed'
+        ? task.isEnrolled && task.progress === 100
         : true;
     const matchesSearch =
-      task.heading.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      task.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      task.category.toLowerCase().includes(searchQuery.toLowerCase());
+      task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      task.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
@@ -322,7 +277,7 @@ export default function TaskList({ userId, onStatsUpdate }) {
           <div className="flex-1 relative">
             <input
               type="text"
-              placeholder="Search by title, description, or category"
+              placeholder="Search by title or description"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
@@ -341,18 +296,14 @@ export default function TaskList({ userId, onStatsUpdate }) {
           </div>
           <div className="flex gap-2">
             {[
-              { key: 'all', label: `All (${tasks.length})` },
+              { key: 'all', label: `All` },
               {
                 key: 'active',
-                label: `Active (${
-                  tasks.filter((t) => t.status !== 'completed').length
-                })`,
+                label: `Active`,
               },
               {
                 key: 'completed',
-                label: `Completed (${
-                  tasks.filter((t) => t.status === 'completed').length
-                })`,
+                label: `Completed`,
               },
             ].map((opt) => (
               <button
@@ -394,15 +345,6 @@ export default function TaskList({ userId, onStatsUpdate }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filteredTasks.map((task) => {
           const isExpanded = expandedTaskId === task.task_id;
-          const progress = calculateProgress(
-            task.subtasks,
-            task.assignedSubtaskIds
-          );
-          const points = calculatePoints(
-            task.subtasks,
-            task.assignedSubtaskIds
-          );
-          const isFullTask = task.assignmentType === 'full-task';
 
           return (
             <div
@@ -420,45 +362,44 @@ export default function TaskList({ userId, onStatsUpdate }) {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2 flex-wrap">
                       <h3 className="text-lg font-semibold text-gray-900">
-                        {task.heading}
+                        {task.title}
                       </h3>
-                      <span
-                        className={`px-2.5 py-0.5 rounded text-xs font-bold border ${
-                          task.status === 'completed'
-                            ? 'bg-black text-white border-black'
-                            : task.status === 'in-progress'
-                            ? 'bg-gray-200 text-gray-900 border-gray-300'
-                            : 'bg-gray-100 text-gray-700 border-gray-200'
-                        }`}
-                      >
-                        {task.status.replace('-', ' ')}
-                      </span>
-                      {!isFullTask && (
-                        <span className="px-2.5 py-0.5 rounded text-xs font-medium border bg-gray-100 text-gray-800 border-gray-200">
-                          Partial assignment
+                      {task.isEnrolled ? (
+                        <span
+                          className={`px-2.5 py-0.5 rounded text-xs font-bold border ${
+                            task.progress === 100
+                              ? 'bg-black text-white border-black'
+                              : 'bg-green-100 text-green-800 border-green-200'
+                          }`}
+                        >
+                          {task.progress === 100 ? 'Completed' : 'Enrolled'}
                         </span>
+                      ) : (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleJoin(task.task_id);
+                          }}
+                          className="px-3 py-1 rounded text-xs font-bold bg-blue-600 text-white hover:bg-blue-700"
+                        >
+                          Join Quest
+                        </button>
                       )}
                     </div>
                     <p className="text-gray-700 text-sm mb-3 leading-relaxed">
                       {task.description}
                     </p>
                     <div className="flex items-center gap-3 text-xs text-gray-700">
-                      <span className="inline-flex items-center gap-1 bg-gray-100 px-2.5 py-1 rounded">
-                        <span className="font-medium">{task.category}</span>
-                      </span>
-                      <span className="inline-flex items-center gap-1 bg-gray-100 px-2.5 py-1 rounded">
-                        <span className="font-medium">{task.timeline}</span>
-                      </span>
                       <span className="inline-flex items-center gap-1 bg-gray-100 text-gray-900 px-2.5 py-1 rounded border border-gray-200">
                         <span className="font-bold">
-                          {points.earned}/{points.total} pts
+                          {task.earnedPoints}/{task.totalPoints} pts
                         </span>
                       </span>
                     </div>
                   </div>
 
                   <div className="flex flex-col items-center gap-3 ml-2">
-                    <CircularProgress percentage={progress.percentage} />
+                    <CircularProgress percentage={task.progress} />
                     <button
                       className="text-gray-500 hover:text-gray-900"
                       aria-label={isExpanded ? 'Collapse task' : 'Expand task'}
@@ -477,64 +418,76 @@ export default function TaskList({ userId, onStatsUpdate }) {
                     </button>
                   </div>
                 </div>
-
-                {/* Progress Bar - Removed */}
               </div>
 
               {/* Subtasks - Expanded View */}
               {isExpanded && (
                 <div className="border-t border-gray-200 bg-gray-50 p-5">
-                  {task.subtasks && task.subtasks.length > 0 ? (
+                  {task.steps && task.steps.length > 0 ? (
                     <div className="space-y-3">
-                      {task.subtasks
-                        .filter((st) =>
-                          isFullTask
-                            ? true
-                            : task.assignedSubtaskIds?.includes(st.subtask_id)
-                        )
-                        .map((subtask, index) => (
-                          <div
-                            key={subtask.subtask_id}
-                            className={`p-4 rounded-lg border transition-colors ${
-                              subtask.is_completed
-                                ? 'border-gray-300 bg-gray-100'
-                                : 'border-gray-200 bg-white'
-                            }`}
-                          >
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="flex-1">
-                                <p
-                                  className={`text-sm font-medium ${
-                                    subtask.is_completed
-                                      ? 'text-gray-500 line-through'
-                                      : 'text-gray-900'
-                                  }`}
-                                >
-                                  {index + 1}. {subtask.title}
-                                </p>
-                                <div className="mt-1 text-xs text-gray-600">
-                                  <span className="inline-flex items-center gap-1 bg-gray-100 text-gray-800 px-2 py-0.5 rounded border border-gray-200">
-                                    {subtask.points} pts
-                                  </span>
-                                </div>
-                              </div>
-                              <span
-                                className={`shrink-0 px-2.5 py-1 rounded text-xs font-bold border ${
-                                  subtask.is_completed
-                                    ? 'bg-black text-white border-black'
-                                    : 'bg-gray-100 text-gray-700 border-gray-200'
+                      {task.steps.map((step, index) => (
+                        <div
+                          key={step.step_id}
+                          className={`p-4 rounded-lg border transition-colors ${
+                            step.status === 'APPROVED'
+                              ? 'border-gray-300 bg-gray-100'
+                              : 'border-gray-200 bg-white'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1">
+                              <p
+                                className={`text-sm font-medium ${
+                                  step.status === 'APPROVED'
+                                    ? 'text-gray-500 line-through'
+                                    : 'text-gray-900'
                                 }`}
                               >
-                                {subtask.is_completed ? 'Done' : 'Pending'}
-                              </span>
+                                {index + 1}. {step.title}
+                              </p>
+                              <p className="text-xs text-gray-500 mt-1">
+                                {step.description}
+                              </p>
+                              <div className="mt-1 text-xs text-gray-600">
+                                <span className="inline-flex items-center gap-1 bg-gray-100 text-gray-800 px-2 py-0.5 rounded border border-gray-200">
+                                  {step.points_reward} pts
+                                </span>
+                              </div>
                             </div>
+
+                            {task.isEnrolled && (
+                              <div className="shrink-0">
+                                {step.status === 'NOT_STARTED' && (
+                                  <button
+                                    onClick={() => handleSubmit(step.step_id)}
+                                    className="px-2.5 py-1 rounded text-xs font-bold bg-indigo-600 text-white hover:bg-indigo-700"
+                                  >
+                                    Submit
+                                  </button>
+                                )}
+                                {step.status === 'PENDING' && (
+                                  <span className="px-2.5 py-1 rounded text-xs font-bold bg-yellow-100 text-yellow-800 border border-yellow-200">
+                                    Pending Review
+                                  </span>
+                                )}
+                                {step.status === 'APPROVED' && (
+                                  <span className="px-2.5 py-1 rounded text-xs font-bold bg-green-100 text-green-800 border border-green-200">
+                                    Approved
+                                  </span>
+                                )}
+                                {step.status === 'REJECTED' && (
+                                  <span className="px-2.5 py-1 rounded text-xs font-bold bg-red-100 text-red-800 border border-red-200">
+                                    Rejected
+                                  </span>
+                                )}
+                              </div>
+                            )}
                           </div>
-                        ))}
+                        </div>
+                      ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-600">
-                      No subtasks available.
-                    </p>
+                    <p className="text-sm text-gray-600">No steps available.</p>
                   )}
                 </div>
               )}

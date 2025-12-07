@@ -26,21 +26,20 @@ export default function Profile({ userId, onStatsUpdate }) {
 
       if (userError) throw userError;
       setUserInfo(userData);
+      setTotalPoints(userData.total_points || 0);
 
       // Fetch points history
       const { data: historyData, error: historyError } = await supabase
-        .from('point_history')
+        .from('user_point_history')
         .select(
           `
           history_id,
           points_earned,
           earned_at,
-          subtasks (
-            subtask_id,
+          step:task_steps (
             title,
-            tasks (
-              task_id,
-              heading
+            task:tasks (
+              title
             )
           )
         `
@@ -50,30 +49,21 @@ export default function Profile({ userId, onStatsUpdate }) {
 
       if (historyError) {
         console.error('Error fetching points history:', historyError);
-        // Don't throw, just set empty array
         setPointsHistory([]);
       } else {
         setPointsHistory(historyData || []);
 
-        // Calculate total points
-        const total =
-          historyData?.reduce(
-            (sum, item) => sum + (item.points_earned || 0),
-            0
-          ) || 0;
-        setTotalPoints(total);
-
         // Send stats to parent if callback exists
         if (onStatsUpdate) {
           onStatsUpdate({
-            totalPoints: total,
+            totalPoints: userData.total_points || 0,
             completedTasks: historyData?.length || 0,
           });
         }
       }
     } catch (error) {
       console.error('Error fetching user profile:', error);
-      alert('Error loading profile: ' + error.message);
+      // alert('Error loading profile: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -320,13 +310,13 @@ export default function Profile({ userId, onStatsUpdate }) {
                       </div>
                       <div className="flex-1">
                         <h4 className="font-bold text-gray-900 text-lg mb-1">
-                          {item.subtasks?.title || 'Task Completed'}
+                          {item.step?.title || 'Task Completed'}
                         </h4>
-                        {item.subtasks?.tasks && (
+                        {item.step?.task && (
                           <p className="text-sm text-gray-600 mb-1">
                             📁 From:{' '}
                             <span className="font-semibold text-gray-900">
-                              {item.subtasks.tasks.heading}
+                              {item.step.task.title}
                             </span>
                           </p>
                         )}
