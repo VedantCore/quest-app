@@ -202,3 +202,30 @@ export async function getPendingSubmissions(managerId) {
     return { success: false, error: error.message };
   }
 }
+
+/**
+ * Manager rejects a submission
+ */
+export async function rejectSubmission(submissionId, managerId) {
+  try {
+    const { error } = await supabase
+      .from('step_submissions')
+      .update({
+        status: 'REJECTED',
+        reviewed_by: managerId,
+        reviewed_at: new Date().toISOString(),
+      })
+      .eq('submission_id', submissionId);
+
+    if (error) throw error;
+
+    revalidatePath('/manager-dashboard');
+    return {
+      success: true,
+      message: 'Submission rejected.',
+    };
+  } catch (error) {
+    console.error('Error rejecting submission:', error);
+    return { success: false, message: 'Failed to reject submission.' };
+  }
+}

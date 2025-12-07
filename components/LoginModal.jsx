@@ -4,6 +4,7 @@ import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../lib/firebase';
 import { supabase } from '../lib/supabase';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 export default function LoginModal({ isOpen, onClose, onSwitchToSignup }) {
   const [email, setEmail] = useState('');
@@ -63,15 +64,18 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }) {
           hint: supabaseError.hint,
           code: supabaseError.code,
         });
-        setError(`Auth successful but sync failed: ${supabaseError.message}`);
+        toast.error(
+          `Auth successful but sync failed: ${supabaseError.message}`
+        );
       } else {
         console.log('✅ Supabase sync successful:', data);
+        toast.success('Logged in successfully!');
       }
 
       onClose();
       router.push('/');
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message);
     }
   };
 
@@ -118,15 +122,18 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }) {
           hint: supabaseError.hint,
           code: supabaseError.code,
         });
-        setError(`Auth successful but sync failed: ${supabaseError.message}`);
+        toast.error(
+          `Auth successful but sync failed: ${supabaseError.message}`
+        );
       } else {
         console.log('✅ Supabase sync successful:', data);
+        toast.success('Logged in successfully!');
       }
 
       onClose();
       router.push('/');
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message);
     }
   };
 

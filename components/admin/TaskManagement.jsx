@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { createTask } from '@/app/actions';
+import toast from 'react-hot-toast';
 
 export default function TaskManagement() {
   const [tasks, setTasks] = useState([]);
@@ -68,15 +69,15 @@ export default function TaskManagement() {
       );
 
       if (result.success) {
-        alert('Task created successfully!');
+        toast.success('Task created successfully!');
         closeModal();
         fetchData();
       } else {
-        alert(result.message);
+        toast.error(result.message);
       }
     } catch (error) {
       console.error('Error saving task:', error);
-      alert('Error saving task: ' + error.message);
+      toast.error('Error saving task: ' + error.message);
     }
   };
 

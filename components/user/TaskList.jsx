@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { joinTask, submitStep } from '@/app/actions';
+import toast from 'react-hot-toast';
 
 const CircularProgress = ({ percentage, size = 50, strokeWidth = 4 }) => {
   const radius = (size - strokeWidth) / 2;
@@ -189,18 +190,20 @@ export default function TaskList({ userId, onStatsUpdate }) {
   const handleJoin = async (taskId) => {
     const result = await joinTask(taskId, userId);
     if (result.success) {
+      toast.success('Successfully joined the quest!');
       fetchUserTasks(); // Refresh data
     } else {
-      alert(result.message);
+      toast.error(result.message);
     }
   };
 
   const handleSubmit = async (stepId) => {
     const result = await submitStep(stepId, userId);
     if (result.success) {
+      toast.success('Step submitted for review!');
       fetchUserTasks(); // Refresh data
     } else {
-      alert(result.message);
+      toast.error(result.message);
     }
   };
 

@@ -1,13 +1,22 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { getPendingSubmissions, approveSubmission } from '@/app/actions';
+import {
+  getPendingSubmissions,
+  approveSubmission,
+  rejectSubmission,
+} from '@/app/actions';
 import { useAuth } from '@/context/AuthContext';
+import toast from 'react-hot-toast';
 
 export default function TaskAssignment() {
   const { user } = useAuth();
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState(null);
+
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedSubmission, setSelectedSubmission] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -21,30 +30,57 @@ export default function TaskAssignment() {
     if (result.success) {
       setSubmissions(result.data || []);
     } else {
-      alert('Failed to load submissions: ' + result.error);
+      toast.error('Failed to load submissions: ' + result.error);
     }
     setLoading(false);
   };
 
-  const handleApprove = async (submissionId) => {
-    if (
-      !confirm(
-        'Are you sure you want to approve this submission? Points will be awarded immediately.'
-      )
-    )
-      return;
+  const openReviewModal = (submission) => {
+    setSelectedSubmission(submission);
+    setIsModalOpen(true);
+  };
 
+  const closeReviewModal = () => {
+    setIsModalOpen(false);
+    setSelectedSubmission(null);
+  };
+
+  const handleApprove = async () => {
+    if (!selectedSubmission) return;
+
+    const submissionId = selectedSubmission.submission_id;
     setProcessingId(submissionId);
+    closeReviewModal();
+
     const result = await approveSubmission(submissionId, user.id);
 
     if (result.success) {
-      // Remove from list locally
       setSubmissions((prev) =>
         prev.filter((s) => s.submission_id !== submissionId)
       );
-      alert(result.message);
+      toast.success(result.message);
     } else {
-      alert(result.message);
+      toast.error(result.message);
+    }
+    setProcessingId(null);
+  };
+
+  const handleReject = async () => {
+    if (!selectedSubmission) return;
+
+    const submissionId = selectedSubmission.submission_id;
+    setProcessingId(submissionId);
+    closeReviewModal();
+
+    const result = await rejectSubmission(submissionId, user.id);
+
+    if (result.success) {
+      setSubmissions((prev) =>
+        prev.filter((s) => s.submission_id !== submissionId)
+      );
+      toast.success(result.message);
+    } else {
+      toast.error(result.message);
     }
     setProcessingId(null);
   };
@@ -52,7 +88,7 @@ export default function TaskAssignment() {
   if (loading) return <div className="p-4">Loading submissions...</div>;
 
   return (
-    <div className="bg-white shadow rounded-lg p-6">
+    <div className="bg-white shadow rounded-lg p-6 relative">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-bold text-gray-900">Pending Submissions</h2>
         <button
@@ -115,19 +151,80 @@ export default function TaskAssignment() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
-                      onClick={() => handleApprove(submission.submission_id)}
+                      onClick={() => openReviewModal(submission)}
                       disabled={processingId === submission.submission_id}
-                      className="text-white bg-green-600 hover:bg-green-700 px-3 py-1 rounded-md text-sm disabled:opacity-50"
+                      className="text-indigo-600 hover:text-indigo-900 disabled:opacity-50"
                     >
                       {processingId === submission.submission_id
                         ? 'Processing...'
-                        : 'Approve'}
+                        : 'Review'}
                     </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Review Modal */}
+      {isModalOpen && selectedSubmission && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6 m-4">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">
+              Review Submission
+            </h3>
+
+            <div className="mb-6 space-y-3">
+              <div>
+                <span className="text-sm font-medium text-gray-500">Task:</span>
+                <p className="text-gray-900">
+                  {selectedSubmission.step?.task?.title}
+                </p>
+              </div>
+              <div>
+                <span className="text-sm font-medium text-gray-500">Step:</span>
+                <p className="text-gray-900">
+                  {selectedSubmission.step?.title}
+                </p>
+              </div>
+              <div>
+                <span className="text-sm font-medium text-gray-500">User:</span>
+                <p className="text-gray-900">
+                  {selectedSubmission.user?.email}
+                </p>
+              </div>
+              <div>
+                <span className="text-sm font-medium text-gray-500">
+                  Points to Award:
+                </span>
+                <p className="text-gray-900 font-semibold">
+                  {selectedSubmission.step?.points_reward}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+              <button
+                onClick={closeReviewModal}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleReject}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              >
+                Reject
+              </button>
+              <button
+                onClick={handleApprove}
+                className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+              >
+                Approve
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
