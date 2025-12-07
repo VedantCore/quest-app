@@ -445,7 +445,9 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
                   </div>
 
                   <div className="flex flex-col items-center gap-3 ml-2">
-                    <CircularProgress percentage={task.progress} />
+                    {task.isEnrolled && (
+                      <CircularProgress percentage={task.progress} />
+                    )}
                     <button
                       className="text-gray-500 hover:text-gray-900"
                       aria-label={isExpanded ? 'Collapse task' : 'Expand task'}
