@@ -22,12 +22,17 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-[#faf8eb] relative font-sans text-[#171717]`}
       >
-        <AuthProvider>
-          <Toaster position="top-right" />
-          {children}
-        </AuthProvider>
+        {/* Grid Background */}
+        <div className="absolute inset-0 bg-grid-pattern opacity-[0.6] pointer-events-none z-0" />
+
+        <div className="relative z-10">
+          <AuthProvider>
+            <Toaster position="top-right" />
+            {children}
+          </AuthProvider>
+        </div>
       </body>
     </html>
   );

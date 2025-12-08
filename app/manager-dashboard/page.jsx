@@ -52,7 +52,7 @@ export default function ManagerDashboard() {
 
   if (loading || isLoadingData) {
     return (
-      <div className="min-h-screen bg-[#faf8eb] flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#171717]"></div>
       </div>
     );
@@ -61,13 +61,15 @@ export default function ManagerDashboard() {
   if (!user || userRole !== 'manager') return null;
 
   return (
-    <div className="min-h-screen bg-[#faf8eb] font-sans text-[#171717]">
+    <div className="min-h-screen font-sans text-[#171717]">
       <Navbar />
-      
+
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-8">
-          <h1 className="text-3xl font-bold text-[#171717]">Manager Dashboard</h1>
+          <h1 className="text-3xl font-bold text-[#171717]">
+            Manager Dashboard
+          </h1>
           <p className="mt-2 text-sm text-gray-500">
             Oversee your assigned tasks and monitor overall progress.
           </p>
@@ -79,11 +81,25 @@ export default function ManagerDashboard() {
           {/* Column 1: My Assigned Tasks */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
             <h2 className="text-xl font-bold text-[#171717] mb-6 flex items-center gap-2">
-              <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+              <svg
+                className="w-5 h-5 text-gray-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                />
+              </svg>
               My Managed Tasks
             </h2>
             {myTasks.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">No tasks assigned to you yet.</p>
+              <p className="text-gray-500 text-center py-8">
+                No tasks assigned to you yet.
+              </p>
             ) : (
               <div className="space-y-4">
                 {myTasks.map((task) => (
@@ -104,8 +120,17 @@ export default function ManagerDashboard() {
                       {task.description}
                     </p>
                     <div className="flex justify-between items-center text-xs text-gray-500 border-t border-gray-100 pt-3">
-                      <span>Created: {new Date(task.created_at).toLocaleDateString()}</span>
-                      <span className={`px-2 py-0.5 rounded-full ${task.is_active ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                      <span>
+                        Created:{' '}
+                        {new Date(task.created_at).toLocaleDateString()}
+                      </span>
+                      <span
+                        className={`px-2 py-0.5 rounded-full ${
+                          task.is_active
+                            ? 'bg-green-50 text-green-700'
+                            : 'bg-red-50 text-red-700'
+                        }`}
+                      >
                         {task.is_active ? 'Active' : 'Inactive'}
                       </span>
                     </div>
@@ -118,11 +143,25 @@ export default function ManagerDashboard() {
           {/* Column 2: All Available Tasks */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
             <h2 className="text-xl font-bold text-[#171717] mb-6 flex items-center gap-2">
-              <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <svg
+                className="w-5 h-5 text-gray-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
               All Tasks Overview
             </h2>
             {allTasks.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">No other tasks available.</p>
+              <p className="text-gray-500 text-center py-8">
+                No other tasks available.
+              </p>
             ) : (
               <div className="space-y-4">
                 {allTasks.map((task) => (
@@ -140,7 +179,13 @@ export default function ManagerDashboard() {
                       <span className="font-medium bg-gray-100 px-2 py-1 rounded">
                         Manager: {task.manager?.email || 'Unassigned'}
                       </span>
-                      <span className={`px-2 py-0.5 rounded-full ${task.is_active ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                      <span
+                        className={`px-2 py-0.5 rounded-full ${
+                          task.is_active
+                            ? 'bg-green-50 text-green-700'
+                            : 'bg-red-50 text-red-700'
+                        }`}
+                      >
                         {task.is_active ? 'Active' : 'Inactive'}
                       </span>
                     </div>

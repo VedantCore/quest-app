@@ -85,14 +85,16 @@ export default function TaskParticipantsPage() {
 
   useEffect(() => {
     if (selectedUser && participants.length > 0) {
-      const updatedUser = participants.find((p) => p.user_id === selectedUser.user_id);
+      const updatedUser = participants.find(
+        (p) => p.user_id === selectedUser.user_id
+      );
       if (updatedUser) setSelectedUser(updatedUser);
     }
   }, [participants]);
 
   if (loading || isLoadingData) {
     return (
-      <div className="min-h-screen bg-[#faf8eb] flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#171717]"></div>
       </div>
     );
@@ -101,15 +103,17 @@ export default function TaskParticipantsPage() {
   if (!task) return null;
 
   return (
-    <div className="min-h-screen bg-[#faf8eb] font-sans text-[#171717]">
+    <div className="min-h-screen font-sans text-[#171717]">
       <Navbar />
-      
+
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-8 flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-[#171717]">{task.title}</h1>
-            <p className="mt-2 text-sm text-gray-500">Manage participants and submissions</p>
+            <p className="mt-2 text-sm text-gray-500">
+              Manage participants and submissions
+            </p>
           </div>
           <Link
             href="/manager-dashboard"
@@ -124,7 +128,10 @@ export default function TaskParticipantsPage() {
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200 bg-gray-50/50">
             <h2 className="text-lg font-bold text-[#171717]">
-              Enrolled Users <span className="text-gray-500 font-normal ml-2">({participants.length})</span>
+              Enrolled Users{' '}
+              <span className="text-gray-500 font-normal ml-2">
+                ({participants.length})
+              </span>
             </h2>
           </div>
 
@@ -142,7 +149,11 @@ export default function TaskParticipantsPage() {
                 >
                   <div className="flex-shrink-0">
                     {participant.avatar_url ? (
-                      <img className="h-10 w-10 rounded-full border border-gray-200" src={participant.avatar_url} alt="" />
+                      <img
+                        className="h-10 w-10 rounded-full border border-gray-200"
+                        src={participant.avatar_url}
+                        alt=""
+                      />
                     ) : (
                       <div className="h-10 w-10 rounded-full bg-[#171717] flex items-center justify-center text-white font-bold text-sm">
                         {participant.email[0].toUpperCase()}
@@ -153,16 +164,29 @@ export default function TaskParticipantsPage() {
                     <p className="text-sm font-semibold text-[#171717] truncate">
                       {participant.name || participant.email}
                     </p>
-                    <p className="text-xs text-gray-500 truncate">{participant.email}</p>
+                    <p className="text-xs text-gray-500 truncate">
+                      {participant.email}
+                    </p>
                   </div>
                   <div className="text-sm text-gray-500">
-                    Joined: {new Date(participant.joined_at).toLocaleDateString()}
+                    Joined:{' '}
+                    {new Date(participant.joined_at).toLocaleDateString()}
                   </div>
                   <div className="px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700">
                     {participant.total_points} pts
                   </div>
-                  <svg className="w-5 h-5 text-gray-300 group-hover:text-gray-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  <svg
+                    className="w-5 h-5 text-gray-300 group-hover:text-gray-500 transition-colors"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
                   </svg>
                 </li>
               ))}
@@ -182,9 +206,22 @@ export default function TaskParticipantsPage() {
                 </h3>
                 <p className="text-sm text-gray-500">Task Progress Review</p>
               </div>
-              <button onClick={closeModal} className="text-gray-400 hover:text-[#171717] transition-colors">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <button
+                onClick={closeModal}
+                className="text-gray-400 hover:text-[#171717] transition-colors"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
@@ -193,15 +230,26 @@ export default function TaskParticipantsPage() {
               <div className="space-y-4">
                 {task.task_steps && task.task_steps.length > 0 ? (
                   task.task_steps.map((step, index) => {
-                    const submission = selectedUser.submissions?.find((s) => s.step_id === step.step_id);
-                    const status = submission ? submission.status : 'NOT_STARTED';
+                    const submission = selectedUser.submissions?.find(
+                      (s) => s.step_id === step.step_id
+                    );
+                    const status = submission
+                      ? submission.status
+                      : 'NOT_STARTED';
 
                     return (
-                      <div key={step.step_id} className="border border-gray-200 rounded-xl p-5 bg-white hover:border-gray-300 transition-colors">
+                      <div
+                        key={step.step_id}
+                        className="border border-gray-200 rounded-xl p-5 bg-white hover:border-gray-300 transition-colors"
+                      >
                         <div className="flex justify-between items-start mb-3">
                           <div>
-                            <h4 className="font-bold text-[#171717] text-sm">Step {index + 1}: {step.title}</h4>
-                            <p className="text-sm text-gray-600 mt-1">{step.description}</p>
+                            <h4 className="font-bold text-[#171717] text-sm">
+                              Step {index + 1}: {step.title}
+                            </h4>
+                            <p className="text-sm text-gray-600 mt-1">
+                              {step.description}
+                            </p>
                           </div>
                           <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2 py-1 rounded">
                             {step.points_reward} pts
@@ -210,17 +258,24 @@ export default function TaskParticipantsPage() {
 
                         <div className="flex items-center justify-between border-t border-gray-100 pt-4 mt-2">
                           <div className="flex items-center gap-3">
-                            <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${
-                              status === 'APPROVED' ? 'bg-green-50 text-green-700 border-green-100' :
-                              status === 'REJECTED' ? 'bg-red-50 text-red-700 border-red-100' :
-                              status === 'PENDING' ? 'bg-yellow-50 text-yellow-800 border-yellow-100' :
-                              'bg-gray-100 text-gray-600 border-gray-200'
-                            }`}>
+                            <span
+                              className={`text-xs font-bold px-2.5 py-1 rounded-full border ${
+                                status === 'APPROVED'
+                                  ? 'bg-green-50 text-green-700 border-green-100'
+                                  : status === 'REJECTED'
+                                  ? 'bg-red-50 text-red-700 border-red-100'
+                                  : status === 'PENDING'
+                                  ? 'bg-yellow-50 text-yellow-800 border-yellow-100'
+                                  : 'bg-gray-100 text-gray-600 border-gray-200'
+                              }`}
+                            >
                               {status.replace('_', ' ')}
                             </span>
                             {submission && (
                               <span className="text-xs text-gray-400">
-                                {new Date(submission.submitted_at).toLocaleDateString()}
+                                {new Date(
+                                  submission.submitted_at
+                                ).toLocaleDateString()}
                               </span>
                             )}
                           </div>
@@ -228,15 +283,29 @@ export default function TaskParticipantsPage() {
                           {status === 'PENDING' && (
                             <div className="flex gap-2">
                               <button
-                                onClick={() => handleAction(submission.submission_id, 'reject')}
-                                disabled={processingStepId === submission.submission_id}
+                                onClick={() =>
+                                  handleAction(
+                                    submission.submission_id,
+                                    'reject'
+                                  )
+                                }
+                                disabled={
+                                  processingStepId === submission.submission_id
+                                }
                                 className="px-3 py-1.5 text-xs font-semibold text-red-600 border border-red-200 rounded-lg hover:bg-red-50 disabled:opacity-50"
                               >
                                 Reject
                               </button>
                               <button
-                                onClick={() => handleAction(submission.submission_id, 'approve')}
-                                disabled={processingStepId === submission.submission_id}
+                                onClick={() =>
+                                  handleAction(
+                                    submission.submission_id,
+                                    'approve'
+                                  )
+                                }
+                                disabled={
+                                  processingStepId === submission.submission_id
+                                }
                                 className="px-3 py-1.5 text-xs font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50 shadow-sm"
                               >
                                 Approve
@@ -248,7 +317,9 @@ export default function TaskParticipantsPage() {
                     );
                   })
                 ) : (
-                  <p className="text-gray-500 text-center">No steps defined for this task.</p>
+                  <p className="text-gray-500 text-center">
+                    No steps defined for this task.
+                  </p>
                 )}
               </div>
             </div>
