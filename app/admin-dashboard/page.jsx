@@ -20,7 +20,7 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#171717]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#13B5A0]"></div>
       </div>
     );
   }
@@ -96,13 +96,13 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="min-h-screen font-sans text-[#171717]">
+    <div className="min-h-screen font-sans text-[#13B5A0]">
       <Navbar />
 
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-8">
-          <h1 className="text-3xl font-bold text-[#171717]">Admin Dashboard</h1>
+          <h1 className="text-3xl font-bold text-[#13B5A0]">Admin Dashboard</h1>
           <p className="mt-2 text-sm text-gray-500">
             Manage tasks, users, and system settings.
           </p>
@@ -121,7 +121,7 @@ export default function AdminDashboard() {
                   whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2
                   ${
                     activeTab === tab.id
-                      ? 'border-[#171717] text-[#171717]'
+                      ? 'border-[#13B5A0] text-[#13B5A0]'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }
                 `}

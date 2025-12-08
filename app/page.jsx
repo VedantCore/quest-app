@@ -38,15 +38,15 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="px-6 py-16 md:py-36 max-w-6xl mx-auto text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-gray-200 shadow-sm text-blue-700 text-xs sm:text-sm font-semibold mb-8 sm:mb-10 transition-transform hover:scale-105 cursor-default">
-          <span className="flex h-2 w-2 rounded-full bg-blue-600 animate-pulse"></span>
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-gray-200 shadow-sm text-[#13B5A0] text-xs sm:text-sm font-semibold mb-8 sm:mb-10 transition-transform hover:scale-105 cursor-default">
+          <span className="flex h-2 w-2 rounded-full bg-[#13B5A0] animate-pulse"></span>
           Quest is the future of Project Management
         </div>
 
-        <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight text-[#171717] mb-6 sm:mb-8 leading-[1.1] sm:leading-[1.1]">
+        <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight text-[#13B5A0] mb-6 sm:mb-8 leading-[1.1] sm:leading-[1.1]">
           Move fast, stay aligned,
           <br className="hidden md:block" />
-          <span className="text-blue-600 block md:inline">
+          <span className="text-[#13B5A0] block md:inline">
             {' '}
             build better together.
           </span>
@@ -61,7 +61,7 @@ export default function Home() {
         <div className="mt-8 sm:mt-12 flex justify-center">
           <button
             onClick={() => setShowSignupModal(true)}
-            className="w-full sm:w-auto px-8 py-4 text-lg font-semibold text-white bg-[#171717] rounded-xl hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
+            className="w-full sm:w-auto px-8 py-4 text-lg font-semibold text-white bg-[#13B5A0] rounded-xl hover:bg-[#13B5A0] transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
           >
             Start building your Quests
           </button>
@@ -72,7 +72,7 @@ export default function Home() {
       <section id="features" className="px-6 py-16 sm:py-24 scroll-mt-20">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 sm:mb-20">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#171717]">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#13B5A0]">
               Everything you need to ship
             </h2>
             <p className="mt-3 text-lg text-gray-600">
@@ -93,8 +93,8 @@ export default function Home() {
                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
                   />
                 ),
-                color: 'text-blue-600',
-                bg: 'bg-blue-50',
+                color: 'text-[#13B5A0]',
+                bg: 'bg-green-50',
               },
               {
                 title: 'Track',
@@ -107,7 +107,7 @@ export default function Home() {
                     d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
                   />
                 ),
-                color: 'text-green-600',
+                color: 'text-[#13B5A0]',
                 bg: 'bg-green-50',
               },
               {
@@ -141,7 +141,7 @@ export default function Home() {
                     {feature.icon}
                   </svg>
                 </div>
-                <h3 className="text-xl sm:text-2xl font-bold text-[#171717] mb-2 sm:mb-3">
+                <h3 className="text-xl sm:text-2xl font-bold text-[#13B5A0] mb-2 sm:mb-3">
                   {feature.title}
                 </h3>
                 <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
@@ -157,7 +157,7 @@ export default function Home() {
       <section id="pricing" className="px-6 py-16 sm:py-24 scroll-mt-20">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#171717]">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#13B5A0]">
               Simple, transparent pricing
             </h2>
             <p className="mt-3 text-lg text-gray-600">
@@ -206,20 +206,20 @@ export default function Home() {
                 key={i}
                 className={`relative p-8 bg-white rounded-2xl border ${
                   plan.popular
-                    ? 'border-blue-600 shadow-xl'
+                    ? 'border-[#13B5A0] shadow-xl'
                     : 'border-gray-200 shadow-sm'
                 } hover:shadow-lg transition-shadow`}
               >
                 {plan.popular && (
-                  <div className="absolute top-0 right-0 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl">
+                  <div className="absolute top-0 right-0 bg-[#13B5A0] text-white text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl">
                     POPULAR
                   </div>
                 )}
-                <h3 className="text-xl font-bold text-[#171717]">
+                <h3 className="text-xl font-bold text-[#13B5A0]">
                   {plan.name}
                 </h3>
                 <div className="mt-4 mb-2 flex items-baseline gap-1">
-                  <span className="text-4xl font-extrabold text-[#171717]">
+                  <span className="text-4xl font-extrabold text-[#13B5A0]">
                     {plan.price}
                   </span>
                   {plan.price !== 'Custom' && (
@@ -255,8 +255,8 @@ export default function Home() {
                 <button
                   className={`w-full py-3 rounded-xl font-semibold transition-all ${
                     plan.popular
-                      ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md'
-                      : 'bg-gray-50 text-[#171717] hover:bg-gray-100 border border-gray-200'
+                      ? 'bg-[#13B5A0] text-white hover:bg-[#13B5A0] shadow-md'
+                      : 'bg-gray-50 text-[#13B5A0] hover:bg-gray-100 border border-gray-200'
                   }`}
                 >
                   {plan.price === 'Custom' ? 'Contact Sales' : 'Get Started'}
@@ -272,7 +272,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto bg-white rounded-3xl border border-gray-200 p-8 sm:p-12 shadow-sm">
           <div className="flex flex-col md:flex-row gap-12 items-center">
             <div className="flex-1 space-y-6">
-              <h2 className="text-3xl font-bold text-[#171717]">About Quest</h2>
+              <h2 className="text-3xl font-bold text-[#13B5A0]">About Quest</h2>
               <p className="text-gray-600 leading-relaxed text-lg">
                 We believe project management shouldn't feel like a chore. Quest
                 was born from the frustration of complex, bloated tools that
@@ -280,7 +280,7 @@ export default function Home() {
               </p>
               <p className="text-gray-600 leading-relaxed text-lg">
                 Our mission is to empower teams to focus on what matters most:{' '}
-                <span className="font-semibold text-[#171717]">
+                <span className="font-semibold text-[#13B5A0]">
                   building great software
                 </span>
                 . We combine simplicity with power to create a tool that gets
@@ -288,12 +288,12 @@ export default function Home() {
               </p>
               <div className="pt-4 flex gap-4">
                 <div className="text-center">
-                  <p className="text-3xl font-bold text-blue-600">10k+</p>
+                  <p className="text-3xl font-bold text-[#13B5A0]">10k+</p>
                   <p className="text-sm text-gray-500">Active Users</p>
                 </div>
                 <div className="w-px bg-gray-200 h-12"></div>
                 <div className="text-center">
-                  <p className="text-3xl font-bold text-blue-600">5M+</p>
+                  <p className="text-3xl font-bold text-[#13B5A0]">5M+</p>
                   <p className="text-sm text-gray-500">Tasks Completed</p>
                 </div>
               </div>
@@ -303,7 +303,7 @@ export default function Home() {
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-purple-100 opacity-50"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="h-32 w-32 bg-white rounded-3xl shadow-xl flex items-center justify-center transform -rotate-6">
-                    <div className="h-16 w-16 bg-[#171717] rounded-xl"></div>
+                    <div className="h-16 w-16 bg-[#13B5A0] rounded-xl"></div>
                   </div>
                 </div>
               </div>
@@ -318,12 +318,12 @@ export default function Home() {
           <div className="bg-white border border-gray-200 rounded-[2rem] p-8 sm:p-16 relative overflow-hidden text-center shadow-xl">
             {/* Subtle Light Gradients */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-              <div className="absolute -top-24 -left-24 w-64 sm:w-96 h-64 sm:h-96 bg-blue-50/50 rounded-full blur-[100px]"></div>
+              <div className="absolute -top-24 -left-24 w-64 sm:w-96 h-64 sm:h-96 bg-green-50/50 rounded-full blur-[100px]"></div>
               <div className="absolute bottom-0 right-0 w-64 sm:w-96 h-64 sm:h-96 bg-purple-50/50 rounded-full blur-[100px]"></div>
             </div>
 
             <div className="relative z-10 max-w-3xl mx-auto">
-              <h2 className="text-3xl sm:text-5xl font-bold text-[#171717] mb-6 tracking-tight leading-tight">
+              <h2 className="text-3xl sm:text-5xl font-bold text-[#13B5A0] mb-6 tracking-tight leading-tight">
                 Ready to transform how <br className="hidden sm:block" /> you
                 build software?
               </h2>
@@ -334,13 +334,13 @@ export default function Home() {
               <div className="flex flex-col sm:flex-row justify-center gap-4">
                 <button
                   onClick={() => setShowSignupModal(true)}
-                  className="px-8 py-4 text-base font-semibold text-white bg-[#171717] rounded-xl hover:bg-black transition-all shadow-lg hover:-translate-y-1"
+                  className="px-8 py-4 text-base font-semibold text-white bg-[#13B5A0] rounded-xl hover:bg-[#13B5A0] transition-all shadow-lg hover:-translate-y-1"
                 >
                   Start Questing
                 </button>
                 <Link
                   href="#docs"
-                  className="px-8 py-4 text-base font-semibold text-[#171717] bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all shadow-sm hover:shadow"
+                  className="px-8 py-4 text-base font-semibold text-[#13B5A0] bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all shadow-sm hover:shadow"
                 >
                   Explore Documentation
                 </Link>
@@ -357,9 +357,9 @@ export default function Home() {
             <div className="col-span-2 lg:col-span-2">
               <Link
                 href="/"
-                className="text-2xl font-bold tracking-tight text-[#171717] flex items-center gap-2 mb-6"
+                className="text-2xl font-bold tracking-tight text-[#13B5A0] flex items-center gap-2 mb-6"
               >
-                <div className="h-8 w-8 rounded bg-[#171717]"></div>
+                <div className="h-8 w-8 rounded bg-[#13B5A0]"></div>
                 Quest
               </Link>
               <p className="text-gray-500 text-sm leading-relaxed max-w-xs mb-6">
@@ -395,12 +395,12 @@ export default function Home() {
             </div>
 
             <div>
-              <h3 className="font-bold text-[#171717] mb-4">Discover</h3>
+              <h3 className="font-bold text-[#13B5A0] mb-4">Discover</h3>
               <ul className="space-y-3 text-sm text-gray-600">
                 <li>
                   <Link
                     href="#"
-                    className="hover:text-blue-600 transition-colors"
+                    className="hover:text-[#13B5A0] transition-colors"
                   >
                     Start a Quest
                   </Link>
@@ -408,7 +408,7 @@ export default function Home() {
                 <li>
                   <Link
                     href="#"
-                    className="hover:text-blue-600 transition-colors"
+                    className="hover:text-[#13B5A0] transition-colors"
                   >
                     Templates
                   </Link>
@@ -416,7 +416,7 @@ export default function Home() {
                 <li>
                   <Link
                     href="#"
-                    className="hover:text-blue-600 transition-colors"
+                    className="hover:text-[#13B5A0] transition-colors"
                   >
                     Integration Gallery
                   </Link>
@@ -424,7 +424,7 @@ export default function Home() {
                 <li>
                   <Link
                     href="#"
-                    className="hover:text-blue-600 transition-colors"
+                    className="hover:text-[#13B5A0] transition-colors"
                   >
                     Roadmap
                   </Link>
@@ -433,12 +433,12 @@ export default function Home() {
             </div>
 
             <div>
-              <h3 className="font-bold text-[#171717] mb-4">Resources</h3>
+              <h3 className="font-bold text-[#13B5A0] mb-4">Resources</h3>
               <ul className="space-y-3 text-sm text-gray-600">
                 <li>
                   <Link
                     href="#"
-                    className="hover:text-blue-600 transition-colors"
+                    className="hover:text-[#13B5A0] transition-colors"
                   >
                     Documentation
                   </Link>
@@ -446,7 +446,7 @@ export default function Home() {
                 <li>
                   <Link
                     href="#"
-                    className="hover:text-blue-600 transition-colors"
+                    className="hover:text-[#13B5A0] transition-colors"
                   >
                     API Reference
                   </Link>
@@ -454,7 +454,7 @@ export default function Home() {
                 <li>
                   <Link
                     href="#"
-                    className="hover:text-blue-600 transition-colors"
+                    className="hover:text-[#13B5A0] transition-colors"
                   >
                     Community Forum
                   </Link>
@@ -462,7 +462,7 @@ export default function Home() {
                 <li>
                   <Link
                     href="#"
-                    className="hover:text-blue-600 transition-colors"
+                    className="hover:text-[#13B5A0] transition-colors"
                   >
                     Help Center
                   </Link>
@@ -471,12 +471,12 @@ export default function Home() {
             </div>
 
             <div>
-              <h3 className="font-bold text-[#171717] mb-4">Company</h3>
+              <h3 className="font-bold text-[#13B5A0] mb-4">Company</h3>
               <ul className="space-y-3 text-sm text-gray-600">
                 <li>
                   <Link
                     href="#"
-                    className="hover:text-blue-600 transition-colors"
+                    className="hover:text-[#13B5A0] transition-colors"
                   >
                     About Us
                   </Link>
@@ -484,7 +484,7 @@ export default function Home() {
                 <li>
                   <Link
                     href="#"
-                    className="hover:text-blue-600 transition-colors"
+                    className="hover:text-[#13B5A0] transition-colors"
                   >
                     Careers
                   </Link>
@@ -492,7 +492,7 @@ export default function Home() {
                 <li>
                   <Link
                     href="#"
-                    className="hover:text-blue-600 transition-colors"
+                    className="hover:text-[#13B5A0] transition-colors"
                   >
                     Legal
                   </Link>
@@ -500,7 +500,7 @@ export default function Home() {
                 <li>
                   <Link
                     href="#"
-                    className="hover:text-blue-600 transition-colors"
+                    className="hover:text-[#13B5A0] transition-colors"
                   >
                     Contact
                   </Link>
@@ -512,10 +512,10 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row justify-between items-center text-xs text-gray-400 font-medium pt-8 border-t border-black/5">
             <p>© 2025 Quest App Inc. All rights reserved.</p>
             <div className="flex gap-6 mt-4 sm:mt-0">
-              <Link href="#" className="hover:text-[#171717] transition-colors">
+              <Link href="#" className="hover:text-[#13B5A0] transition-colors">
                 Privacy Policy
               </Link>
-              <Link href="#" className="hover:text-[#171717] transition-colors">
+              <Link href="#" className="hover:text-[#13B5A0] transition-colors">
                 Terms of Service
               </Link>
             </div>

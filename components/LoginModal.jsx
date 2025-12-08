@@ -158,7 +158,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }) {
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-[#171717] transition-colors"
+          className="absolute top-4 right-4 text-gray-400 hover:text-[#13B5A0] transition-colors"
         >
           <svg
             className="w-6 h-6"
@@ -175,7 +175,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }) {
           </svg>
         </button>
 
-        <h2 className="text-3xl font-bold text-[#171717] mb-6">Log in</h2>
+        <h2 className="text-3xl font-bold text-[#13B5A0] mb-6">Log in</h2>
 
         {error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded text-sm">
@@ -187,7 +187,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }) {
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-[#171717] mb-1"
+              className="block text-sm font-medium text-[#13B5A0] mb-1"
             >
               Email
             </label>
@@ -196,7 +196,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }) {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-gray-300 text-[#171717] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#171717] focus:border-transparent placeholder-gray-400 transition-all"
+              className="w-full px-3 py-2 bg-white border border-gray-300 text-[#13B5A0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#13B5A0] focus:border-transparent placeholder-gray-400 transition-all"
               required
             />
           </div>
@@ -204,7 +204,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }) {
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-[#171717] mb-1"
+              className="block text-sm font-medium text-[#13B5A0] mb-1"
             >
               Password
             </label>
@@ -214,13 +214,13 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }) {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-gray-300 text-[#171717] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#171717] focus:border-transparent placeholder-gray-400 pr-10 transition-all"
+                className="w-full px-3 py-2 bg-white border border-gray-300 text-[#13B5A0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#13B5A0] focus:border-transparent placeholder-gray-400 pr-10 transition-all"
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#171717]"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#13B5A0]"
               >
                 {showPassword ? (
                   <svg
@@ -263,7 +263,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }) {
 
           <button
             type="submit"
-            className="w-full py-3 px-4 bg-[#171717] text-white font-medium rounded-lg hover:bg-black focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all shadow-sm hover:shadow"
+            className="w-full py-3 px-4 bg-[#13B5A0] text-white font-medium rounded-lg hover:bg-[#13B5A0] focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all shadow-sm hover:shadow"
           >
             Log in
           </button>
@@ -309,7 +309,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }) {
           Don't have an account?{' '}
           <button
             onClick={onSwitchToSignup}
-            className="text-[#171717] hover:underline font-semibold"
+            className="text-[#13B5A0] hover:underline font-semibold"
           >
             Sign up
           </button>

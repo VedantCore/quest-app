@@ -53,7 +53,7 @@ export default function ManagerDashboard() {
   if (loading || isLoadingData) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#171717]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#13B5A0]"></div>
       </div>
     );
   }
@@ -61,13 +61,13 @@ export default function ManagerDashboard() {
   if (!user || userRole !== 'manager') return null;
 
   return (
-    <div className="min-h-screen font-sans text-[#171717]">
+    <div className="min-h-screen font-sans text-[#13B5A0]">
       <Navbar />
 
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-8">
-          <h1 className="text-3xl font-bold text-[#171717]">
+          <h1 className="text-3xl font-bold text-[#13B5A0]">
             Manager Dashboard
           </h1>
           <p className="mt-2 text-sm text-gray-500">
@@ -80,7 +80,7 @@ export default function ManagerDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Column 1: My Assigned Tasks */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-            <h2 className="text-xl font-bold text-[#171717] mb-6 flex items-center gap-2">
+            <h2 className="text-xl font-bold text-[#13B5A0] mb-6 flex items-center gap-2">
               <svg
                 className="w-5 h-5 text-gray-500"
                 fill="none"
@@ -106,13 +106,13 @@ export default function ManagerDashboard() {
                   <Link
                     href={`/manager-dashboard/task/${task.task_id}`}
                     key={task.task_id}
-                    className="block border border-gray-200 rounded-xl p-5 hover:border-blue-300 hover:shadow-md transition-all group bg-white"
+                    className="block border border-gray-200 rounded-xl p-5 hover:border-green-300 hover:shadow-md transition-all group bg-white"
                   >
                     <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-bold text-lg text-[#171717] group-hover:text-blue-600 transition-colors">
+                      <h3 className="font-bold text-lg text-[#13B5A0] group-hover:text-[#13B5A0] transition-colors">
                         {task.title}
                       </h3>
-                      <span className="text-xs font-medium bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full">
+                      <span className="text-xs font-medium bg-green-50 text-[#13B5A0] px-2.5 py-1 rounded-full">
                         Manage
                       </span>
                     </div>
@@ -127,7 +127,7 @@ export default function ManagerDashboard() {
                       <span
                         className={`px-2 py-0.5 rounded-full ${
                           task.is_active
-                            ? 'bg-green-50 text-green-700'
+                            ? 'bg-green-50 text-[#13B5A0]'
                             : 'bg-red-50 text-red-700'
                         }`}
                       >
@@ -142,7 +142,7 @@ export default function ManagerDashboard() {
 
           {/* Column 2: All Available Tasks */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-            <h2 className="text-xl font-bold text-[#171717] mb-6 flex items-center gap-2">
+            <h2 className="text-xl font-bold text-[#13B5A0] mb-6 flex items-center gap-2">
               <svg
                 className="w-5 h-5 text-gray-500"
                 fill="none"
@@ -169,7 +169,7 @@ export default function ManagerDashboard() {
                     key={task.task_id}
                     className="border border-gray-200 rounded-xl p-5 hover:bg-gray-50 transition-colors"
                   >
-                    <h3 className="font-bold text-lg text-[#171717] mb-1">
+                    <h3 className="font-bold text-lg text-[#13B5A0] mb-1">
                       {task.title}
                     </h3>
                     <p className="text-sm text-gray-600 line-clamp-2 mb-3">
@@ -182,7 +182,7 @@ export default function ManagerDashboard() {
                       <span
                         className={`px-2 py-0.5 rounded-full ${
                           task.is_active
-                            ? 'bg-green-50 text-green-700'
+                            ? 'bg-green-50 text-[#13B5A0]'
                             : 'bg-red-50 text-red-700'
                         }`}
                       >

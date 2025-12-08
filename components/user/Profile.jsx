@@ -71,7 +71,7 @@ export default function Profile({ userId, onStatsUpdate }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#171717]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#13B5A0]"></div>
       </div>
     );
   }
@@ -79,7 +79,7 @@ export default function Profile({ userId, onStatsUpdate }) {
   if (!userInfo) {
     return (
       <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
-        <h3 className="text-lg font-bold text-[#171717]">Profile Not Found</h3>
+        <h3 className="text-lg font-bold text-[#13B5A0]">Profile Not Found</h3>
       </div>
     );
   }
@@ -104,7 +104,7 @@ export default function Profile({ userId, onStatsUpdate }) {
       {/* Account Information Card */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-          <h3 className="text-lg font-bold text-[#171717]">Account Information</h3>
+          <h3 className="text-lg font-bold text-[#13B5A0]">Account Information</h3>
         </div>
         
         <div className="p-6 sm:p-8">
@@ -114,7 +114,7 @@ export default function Profile({ userId, onStatsUpdate }) {
                 {userInfo.avatar_url ? (
                   <img src={userInfo.avatar_url} alt="Profile" className="w-24 h-24 rounded-full border-4 border-white shadow-md object-cover" />
                 ) : (
-                  <div className="w-24 h-24 rounded-full bg-[#171717] flex items-center justify-center text-3xl text-white shadow-md">
+                  <div className="w-24 h-24 rounded-full bg-[#13B5A0] flex items-center justify-center text-3xl text-white shadow-md">
                     {userInfo.name?.charAt(0).toUpperCase()}
                   </div>
                 )}
@@ -124,7 +124,7 @@ export default function Profile({ userId, onStatsUpdate }) {
                   </div>
                 )}
               </div>
-              <h2 className="text-2xl font-bold text-[#171717]">{userInfo.name}</h2>
+              <h2 className="text-2xl font-bold text-[#13B5A0]">{userInfo.name}</h2>
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 mt-2 border border-gray-200">
                 {userInfo.role.charAt(0).toUpperCase() + userInfo.role.slice(1)}
               </span>
@@ -132,10 +132,10 @@ export default function Profile({ userId, onStatsUpdate }) {
 
             <div className="flex-1 w-full">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div><label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Email Address</label><p className="text-[#171717] font-medium border-b border-gray-100 pb-2">{userInfo.email}</p></div>
+                <div><label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Email Address</label><p className="text-[#13B5A0] font-medium border-b border-gray-100 pb-2">{userInfo.email}</p></div>
                 <div><label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Date of Birth</label><p className="text-gray-400 font-medium border-b border-gray-100 pb-2 italic">Not set</p></div>
-                <div><label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Member Since</label><p className="text-[#171717] font-medium border-b border-gray-100 pb-2">{formatDate(userInfo.created_at)}</p></div>
-                <div><label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Sign-in Method</label><div className="flex items-center gap-2 border-b border-gray-100 pb-2">{isGoogleAuth ? <><span className="font-medium text-[#171717]">Google Account</span><span className="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded border border-green-100">Secure</span></> : <span className="font-medium text-[#171717]">Email & Password</span>}</div></div>
+                <div><label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Member Since</label><p className="text-[#13B5A0] font-medium border-b border-gray-100 pb-2">{formatDate(userInfo.created_at)}</p></div>
+                <div><label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Sign-in Method</label><div className="flex items-center gap-2 border-b border-gray-100 pb-2">{isGoogleAuth ? <><span className="font-medium text-[#13B5A0]">Google Account</span><span className="text-xs bg-green-50 text-[#13B5A0] px-2 py-0.5 rounded border border-green-100">Secure</span></> : <span className="font-medium text-[#13B5A0]">Email & Password</span>}</div></div>
                 <div className="md:col-span-2 pt-2"><label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Security</label>{isGoogleAuth ? <div className="text-sm text-gray-500 flex items-center gap-2"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>Password managed by Google</div> : <button onClick={handlePasswordReset} className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>Change Password</button>}</div>
               </div>
             </div>
@@ -145,14 +145,14 @@ export default function Profile({ userId, onStatsUpdate }) {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
-          { label: 'Total Earned', value: totalPoints, icon: <svg className="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>, color: 'blue' },
-          { label: 'Completed', value: pointsHistory.length, icon: <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>, color: 'green' },
+          { label: 'Total Earned', value: totalPoints, icon: <svg className="w-6 h-6 text-[#13B5A0]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>, color: 'blue' },
+          { label: 'Completed', value: pointsHistory.length, icon: <svg className="w-6 h-6 text-[#13B5A0]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>, color: 'green' },
           { label: 'Average', value: pointsHistory.length > 0 ? Math.round(totalPoints / pointsHistory.length) : 0, icon: <svg className="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>, color: 'purple' }
         ].map((stat, i) => (
           <div key={i} className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center gap-4">
               <div className={`w-12 h-12 bg-${stat.color}-50 rounded-xl flex items-center justify-center`}>{stat.icon}</div>
-              <div><p className="text-sm font-medium text-gray-500 uppercase tracking-wide">{stat.label}</p><p className="text-3xl font-bold text-[#171717]">{stat.value}</p></div>
+              <div><p className="text-sm font-medium text-gray-500 uppercase tracking-wide">{stat.label}</p><p className="text-3xl font-bold text-[#13B5A0]">{stat.value}</p></div>
             </div>
           </div>
         ))}
@@ -160,10 +160,10 @@ export default function Profile({ userId, onStatsUpdate }) {
 
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="px-6 py-5 border-b border-gray-100 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <h3 className="text-lg font-bold text-[#171717]">Points History</h3>
+          <h3 className="text-lg font-bold text-[#13B5A0]">Points History</h3>
           <div className="flex gap-2">
             {['all', 'thisWeek', 'thisMonth'].map((filter) => (
-              <button key={filter} onClick={() => setHistoryFilter(filter)} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${historyFilter === filter ? 'bg-[#171717] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>{filter === 'all' ? 'All Time' : filter === 'thisWeek' ? 'This Week' : 'This Month'}</button>
+              <button key={filter} onClick={() => setHistoryFilter(filter)} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${historyFilter === filter ? 'bg-[#13B5A0] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>{filter === 'all' ? 'All Time' : filter === 'thisWeek' ? 'This Week' : 'This Month'}</button>
             ))}
           </div>
         </div>
@@ -178,9 +178,9 @@ export default function Profile({ userId, onStatsUpdate }) {
               <div key={item.history_id} className="px-6 py-4 hover:bg-gray-50 transition-colors flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600"><svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg></div>
-                  <div><h4 className="font-semibold text-[#171717] text-sm">{item.step?.title || 'Task Completed'}</h4><p className="text-xs text-gray-500">{item.step?.task ? `From: ${item.step.task.title}` : 'General Award'} • {formatDate(item.earned_at)}</p></div>
+                  <div><h4 className="font-semibold text-[#13B5A0] text-sm">{item.step?.title || 'Task Completed'}</h4><p className="text-xs text-gray-500">{item.step?.task ? `From: ${item.step.task.title}` : 'General Award'} • {formatDate(item.earned_at)}</p></div>
                 </div>
-                <div className="font-bold text-green-600 bg-green-50 px-3 py-1 rounded-full text-sm border border-green-100">+{item.points_earned} pts</div>
+                <div className="font-bold text-[#13B5A0] bg-green-50 px-3 py-1 rounded-full text-sm border border-green-100">+{item.points_earned} pts</div>
               </div>
             ))
           )}

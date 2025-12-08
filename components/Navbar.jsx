@@ -44,9 +44,9 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
 
   // Common button styles for "smooth & clicky" feel
   const navLinkStyle =
-    'text-sm font-medium text-gray-600 hover:text-[#171717] px-4 py-2 rounded-lg hover:bg-gray-50 transition-all duration-200 active:scale-95';
+    'text-sm font-medium text-gray-600 hover:text-[#13B5A0] px-4 py-2 rounded-lg hover:bg-gray-50 transition-all duration-200 active:scale-95';
   const primaryButtonStyle =
-    'px-5 py-2.5 text-sm font-semibold text-white bg-[#171717] rounded-xl hover:bg-black transition-all duration-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-95';
+    'px-5 py-2.5 text-sm font-semibold text-white bg-[#13B5A0] rounded-xl hover:bg-[#13B5A0] transition-all duration-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-95';
   const secondaryButtonStyle =
     'px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 shadow-sm active:scale-95';
 
@@ -57,7 +57,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 -ml-2 text-gray-600 hover:text-[#171717] hover:bg-gray-100 rounded-lg transition-all active:scale-95"
+            className="md:hidden p-2 -ml-2 text-gray-600 hover:text-[#13B5A0] hover:bg-gray-100 rounded-lg transition-all active:scale-95"
           >
             <svg
               className="w-6 h-6"
@@ -86,9 +86,9 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
           {/* Brand Logo */}
           <Link
             href="/"
-            className="text-xl font-bold tracking-tight text-[#171717] flex items-center gap-2 group active:scale-95 transition-transform duration-200"
+            className="text-xl font-bold tracking-tight text-[#13B5A0] flex items-center gap-2 group active:scale-95 transition-transform duration-200"
           >
-            <div className="h-7 w-7 rounded-lg bg-[#171717] shadow-sm group-hover:shadow transition-all"></div>
+            <div className="h-7 w-7 rounded-lg bg-[#13B5A0] shadow-sm group-hover:shadow transition-all"></div>
             Quest
           </Link>
 
@@ -150,7 +150,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                         className="h-9 w-9 sm:h-10 sm:w-10 rounded-full border-2 border-white shadow-md object-cover ring-1 ring-gray-100"
                       />
                     ) : (
-                      <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-[#171717] text-white flex items-center justify-center text-sm font-medium shadow-md border-2 border-white ring-1 ring-gray-100">
+                      <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-[#13B5A0] text-white flex items-center justify-center text-sm font-medium shadow-md border-2 border-white ring-1 ring-gray-100">
                         {user.displayName
                           ? user.displayName.charAt(0).toUpperCase()
                           : user.email?.charAt(0).toUpperCase()}
@@ -163,14 +163,14 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                     <div className="absolute right-0 mt-3 w-72 origin-top-right rounded-2xl bg-white shadow-2xl ring-1 ring-black/5 focus:outline-none border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                       {/* User Info Header */}
                       <div className="px-5 py-4 border-b border-gray-100 bg-gray-50/50">
-                        <p className="text-sm font-bold text-[#171717] truncate">
+                        <p className="text-sm font-bold text-[#13B5A0] truncate">
                           {user.displayName || 'User'}
                         </p>
                         <p className="text-xs text-gray-500 truncate font-medium mb-3">
                           {user.email}
                         </p>
                         {/* Role Badge */}
-                        <span className="inline-flex items-center rounded-full bg-white px-2.5 py-0.5 text-xs font-bold text-[#171717] border border-gray-200 shadow-sm capitalize">
+                        <span className="inline-flex items-center rounded-full bg-white px-2.5 py-0.5 text-xs font-bold text-[#13B5A0] border border-gray-200 shadow-sm capitalize">
                           {userRole || 'User'}
                         </span>
                       </div>
@@ -179,10 +179,10 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                       <div className="p-2 space-y-1">
                         <Link
                           href="/user-dashboard?tab=profile"
-                          className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#171717] rounded-xl transition-colors group"
+                          className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#13B5A0] rounded-xl transition-colors group"
                           onClick={() => setIsProfileDropdownOpen(false)}
                         >
-                          <span className="p-1.5 bg-gray-100 rounded-lg text-gray-500 group-hover:text-[#171717] group-hover:bg-white transition-colors">
+                          <span className="p-1.5 bg-gray-100 rounded-lg text-gray-500 group-hover:text-[#13B5A0] group-hover:bg-white transition-colors">
                             <svg
                               className="w-4 h-4"
                               fill="none"
@@ -202,10 +202,10 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                         {(userRole === 'user' || !userRole) && (
                           <Link
                             href="/user-dashboard?tab=tasks"
-                            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#171717] rounded-xl transition-colors group"
+                            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#13B5A0] rounded-xl transition-colors group"
                             onClick={() => setIsProfileDropdownOpen(false)}
                           >
-                            <span className="p-1.5 bg-gray-100 rounded-lg text-gray-500 group-hover:text-[#171717] group-hover:bg-white transition-colors">
+                            <span className="p-1.5 bg-gray-100 rounded-lg text-gray-500 group-hover:text-[#13B5A0] group-hover:bg-white transition-colors">
                               <svg
                                 className="w-4 h-4"
                                 fill="none"
@@ -226,10 +226,10 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                         {userRole === 'admin' && (
                           <Link
                             href="/admin-dashboard"
-                            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#171717] rounded-xl transition-colors group"
+                            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#13B5A0] rounded-xl transition-colors group"
                             onClick={() => setIsProfileDropdownOpen(false)}
                           >
-                            <span className="p-1.5 bg-gray-100 rounded-lg text-gray-500 group-hover:text-[#171717] group-hover:bg-white transition-colors">
+                            <span className="p-1.5 bg-gray-100 rounded-lg text-gray-500 group-hover:text-[#13B5A0] group-hover:bg-white transition-colors">
                               <svg
                                 className="w-4 h-4"
                                 fill="none"
@@ -250,10 +250,10 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                         {userRole === 'manager' && (
                           <Link
                             href="/manager-dashboard"
-                            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#171717] rounded-xl transition-colors group"
+                            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#13B5A0] rounded-xl transition-colors group"
                             onClick={() => setIsProfileDropdownOpen(false)}
                           >
-                            <span className="p-1.5 bg-gray-100 rounded-lg text-gray-500 group-hover:text-[#171717] group-hover:bg-white transition-colors">
+                            <span className="p-1.5 bg-gray-100 rounded-lg text-gray-500 group-hover:text-[#13B5A0] group-hover:bg-white transition-colors">
                               <svg
                                 className="w-4 h-4"
                                 fill="none"
@@ -327,19 +327,19 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
               <>
                 <Link
                   href="/#features"
-                  className="block px-4 py-3 text-base font-medium text-gray-600 hover:text-[#171717] hover:bg-white rounded-xl transition-colors"
+                  className="block px-4 py-3 text-base font-medium text-gray-600 hover:text-[#13B5A0] hover:bg-white rounded-xl transition-colors"
                 >
                   Features
                 </Link>
                 <Link
                   href="/#pricing"
-                  className="block px-4 py-3 text-base font-medium text-gray-600 hover:text-[#171717] hover:bg-white rounded-xl transition-colors"
+                  className="block px-4 py-3 text-base font-medium text-gray-600 hover:text-[#13B5A0] hover:bg-white rounded-xl transition-colors"
                 >
                   Pricing
                 </Link>
                 <Link
                   href="/#about"
-                  className="block px-4 py-3 text-base font-medium text-gray-600 hover:text-[#171717] hover:bg-white rounded-xl transition-colors"
+                  className="block px-4 py-3 text-base font-medium text-gray-600 hover:text-[#13B5A0] hover:bg-white rounded-xl transition-colors"
                 >
                   About
                 </Link>
@@ -349,7 +349,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                 {userRole === 'user' || !userRole ? (
                   <Link
                     href="/user-dashboard?tab=tasks"
-                    className="block px-4 py-3 text-base font-medium text-gray-600 hover:text-[#171717] hover:bg-white rounded-xl transition-colors"
+                    className="block px-4 py-3 text-base font-medium text-gray-600 hover:text-[#13B5A0] hover:bg-white rounded-xl transition-colors"
                   >
                     My Quest
                   </Link>
@@ -360,7 +360,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                         ? '/admin-dashboard'
                         : '/manager-dashboard'
                     }
-                    className="block px-4 py-3 text-base font-medium text-gray-600 hover:text-[#171717] hover:bg-white rounded-xl transition-colors"
+                    className="block px-4 py-3 text-base font-medium text-gray-600 hover:text-[#13B5A0] hover:bg-white rounded-xl transition-colors"
                   >
                     Dashboard
                   </Link>
@@ -377,7 +377,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                 </button>
                 <button
                   onClick={onOpenSignup}
-                  className="w-full text-center px-4 py-3 text-base font-bold text-white bg-[#171717] rounded-xl shadow-lg active:scale-95"
+                  className="w-full text-center px-4 py-3 text-base font-bold text-white bg-[#13B5A0] rounded-xl shadow-lg active:scale-95"
                 >
                   Get started
                 </button>

@@ -414,8 +414,8 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
                         <span
                           className={`px-2.5 py-0.5 rounded text-xs font-bold border ${
                             task.progress === 100
-                              ? 'bg-black text-white border-black'
-                              : 'bg-green-100 text-green-800 border-green-200'
+                              ? 'bg-[#13B5A0] text-white border-[#13B5A0]'
+                              : 'bg-green-100 text-[#13B5A0] border-green-200'
                           }`}
                         >
                           {task.progress === 100 ? 'Completed' : 'Enrolled'}
@@ -426,7 +426,7 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
                             e.stopPropagation();
                             handleJoin(task.task_id);
                           }}
-                          className="px-3 py-1 rounded text-xs font-bold bg-blue-600 text-white hover:bg-blue-700"
+                          className="px-3 py-1 rounded text-xs font-bold bg-[#13B5A0] text-white hover:bg-[#13B5A0]"
                         >
                           Join Quest
                         </button>
@@ -519,7 +519,7 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
                                   </span>
                                 )}
                                 {step.status === 'APPROVED' && (
-                                  <span className="px-2.5 py-1 rounded text-xs font-bold bg-green-100 text-green-800 border border-green-200">
+                                  <span className="px-2.5 py-1 rounded text-xs font-bold bg-green-100 text-[#13B5A0] border border-green-200">
                                     Approved
                                   </span>
                                 )}

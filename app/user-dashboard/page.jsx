@@ -30,7 +30,7 @@ function DashboardContent() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#171717] mx-auto mb-4"></div>
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#13B5A0] mx-auto mb-4"></div>
       </div>
     );
   }
@@ -79,14 +79,14 @@ function DashboardContent() {
   ];
 
   return (
-    <div className="min-h-screen font-sans text-[#171717]">
+    <div className="min-h-screen font-sans text-[#13B5A0]">
       <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-4xl font-bold text-[#171717] mb-2">
+              <h1 className="text-4xl font-bold text-[#13B5A0] mb-2">
                 Welcome Back!
               </h1>
               <p className="text-lg text-gray-600">
@@ -105,11 +105,11 @@ function DashboardContent() {
                     <p className="text-sm text-gray-600 font-medium">
                       Active Tasks
                     </p>
-                    <p className="text-2xl font-bold text-[#171717]">
+                    <p className="text-2xl font-bold text-[#13B5A0]">
                       {stats.activeTasks}
                     </p>
                   </div>
-                  <div className="text-blue-600">
+                  <div className="text-[#13B5A0]">
                     <svg
                       className="w-8 h-8"
                       fill="none"
@@ -132,11 +132,11 @@ function DashboardContent() {
                     <p className="text-sm text-gray-600 font-medium">
                       Completed
                     </p>
-                    <p className="text-2xl font-bold text-[#171717]">
+                    <p className="text-2xl font-bold text-[#13B5A0]">
                       {stats.completedTasks}
                     </p>
                   </div>
-                  <div className="text-green-600">
+                  <div className="text-[#13B5A0]">
                     <svg
                       className="w-8 h-8"
                       fill="none"
@@ -159,7 +159,7 @@ function DashboardContent() {
                     <p className="text-sm text-gray-600 font-medium">
                       Total Points
                     </p>
-                    <p className="text-2xl font-bold text-[#171717]">
+                    <p className="text-2xl font-bold text-[#13B5A0]">
                       {stats.totalPoints}
                     </p>
                   </div>
@@ -186,7 +186,7 @@ function DashboardContent() {
                     <p className="text-sm text-gray-600 font-medium">
                       Progress
                     </p>
-                    <p className="text-2xl font-bold text-[#171717]">
+                    <p className="text-2xl font-bold text-[#13B5A0]">
                       {stats.overallProgress || 0}%
                     </p>
                   </div>
@@ -224,8 +224,8 @@ function DashboardContent() {
                 relative overflow-hidden flex items-center justify-center gap-2
                 ${
                   activeTab === tab.id
-                    ? 'text-white bg-[#171717]'
-                    : 'text-gray-600 hover:text-[#171717] hover:bg-gray-50'
+                    ? 'text-white bg-[#13B5A0]'
+                    : 'text-gray-600 hover:text-[#13B5A0] hover:bg-gray-50'
                 }
               `}
             >
@@ -257,7 +257,7 @@ export default function UserDashboard() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#171717]"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#13B5A0]"></div>
         </div>
       }
     >

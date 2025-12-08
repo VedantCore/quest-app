@@ -93,7 +93,7 @@ export default function TaskAssignment() {
         <h2 className="text-xl font-bold text-gray-900">Pending Submissions</h2>
         <button
           onClick={loadSubmissions}
-          className="text-sm text-blue-600 hover:text-blue-800"
+          className="text-sm text-[#13B5A0] hover:text-blue-800"
         >
           Refresh
         </button>
@@ -142,7 +142,7 @@ export default function TaskAssignment() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-[#13B5A0]">
                       {submission.step?.points_reward} pts
                     </span>
                   </td>
@@ -219,7 +219,7 @@ export default function TaskAssignment() {
               </button>
               <button
                 onClick={handleApprove}
-                className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                className="px-4 py-2 text-sm font-medium text-white bg-[#13B5A0] border border-transparent rounded-md hover:bg-[#13B5A0] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
               >
                 Approve
               </button>

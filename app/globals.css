@@ -2,14 +2,14 @@
 
 :root {
   --background: #faf8eb;
-  --foreground: #171717;
-  --primary: #2563eb; /* blue-600 */
+  --foreground: #13b5a0;
+  --primary: #13b5a0;
   --primary-ink: #ffffff;
   --surface: #ffffff;
-  --muted-surface: #f9fafb; /* gray-50 */
-  --border: #e5e7eb; /* gray-200 */
-  --text: #111827; /* gray-900 */
-  --text-muted: #6b7280; /* gray-500 */
+  --muted-surface: #f0fdf4; /* green-50 - keeping for now or should I change? */
+  --border: #bbf7d0; /* green-200 */
+  --text: #13b5a0;
+  --text-muted: #0f9080; /* darker shade of 13B5A0 */
   --success: #16a34a; /* green-600 */
   --warning: #ca8a04; /* amber-600 */
   --danger: #dc2626; /* red-600 */
@@ -56,4 +56,4 @@ body {
     linear-gradient(to bottom, #e5e7eb 1px, transparent 1px);
   mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
   -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
-} 
+}
