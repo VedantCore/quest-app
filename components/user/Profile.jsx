@@ -1,13 +1,18 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../context/AuthContext';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { auth } from '../../lib/firebase';
+import toast from 'react-hot-toast';
 
 export default function Profile({ userId, onStatsUpdate }) {
+  const { user: authUser } = useAuth();
   const [userInfo, setUserInfo] = useState(null);
   const [pointsHistory, setPointsHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalPoints, setTotalPoints] = useState(0);
-  const [historyFilter, setHistoryFilter] = useState('all'); // all, thisWeek, thisMonth
+  const [historyFilter, setHistoryFilter] = useState('all');
 
   useEffect(() => {
     fetchUserProfile();
@@ -16,44 +21,21 @@ export default function Profile({ userId, onStatsUpdate }) {
   const fetchUserProfile = async () => {
     try {
       setLoading(true);
-
-      // Fetch user information
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('user_id', userId)
-        .single();
-
+      const { data: userData, error: userError } = await supabase.from('users').select('*').eq('user_id', userId).single();
       if (userError) throw userError;
       setUserInfo(userData);
       setTotalPoints(userData.total_points || 0);
 
-      // Fetch points history
       const { data: historyData, error: historyError } = await supabase
         .from('user_point_history')
-        .select(
-          `
-          history_id,
-          points_earned,
-          earned_at,
-          step:task_steps (
-            title,
-            task:tasks (
-              title
-            )
-          )
-        `
-        )
+        .select(`history_id, points_earned, earned_at, step:task_steps (title, task:tasks (title))`)
         .eq('user_id', userId)
         .order('earned_at', { ascending: false });
 
       if (historyError) {
-        console.error('Error fetching points history:', historyError);
         setPointsHistory([]);
       } else {
         setPointsHistory(historyData || []);
-
-        // Send stats to parent if callback exists
         if (onStatsUpdate) {
           onStatsUpdate({
             totalPoints: userData.total_points || 0,
@@ -63,51 +45,45 @@ export default function Profile({ userId, onStatsUpdate }) {
       }
     } catch (error) {
       console.error('Error fetching user profile:', error);
-      // alert('Error loading profile: ' + error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+  const handlePasswordReset = async () => {
+    if (!authUser?.email) return;
+    try {
+      await sendPasswordResetEmail(auth, authUser.email);
+      toast.success('Password reset email sent!');
+    } catch (error) {
+      toast.error('Error sending reset email: ' + error.message);
+    }
   };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  };
+
+  const providerId = authUser?.providerData?.[0]?.providerId;
+  const isGoogleAuth = providerId === 'google.com';
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
-          <div className="text-lg text-gray-600 font-medium">
-            Loading profile...
-          </div>
-        </div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#171717]"></div>
       </div>
     );
   }
 
   if (!userInfo) {
     return (
-      <div className="bg-white rounded-2xl shadow-lg p-12 text-center border-2 border-red-200">
-        <div className="text-7xl mb-4">❌</div>
-        <h3 className="text-2xl font-bold text-gray-900 mb-3">
-          Profile Not Found
-        </h3>
-        <p className="text-gray-600 text-lg">
-          Unable to load your profile information.
-        </p>
+      <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
+        <h3 className="text-lg font-bold text-[#171717]">Profile Not Found</h3>
       </div>
     );
   }
 
-  // Filter points history
   const filterHistory = () => {
     const now = new Date();
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -124,224 +100,91 @@ export default function Profile({ userId, onStatsUpdate }) {
   const filteredHistory = filterHistory();
 
   return (
-    <div className="space-y-6">
-      {/* Enhanced Profile Card */}
-      <div className="bg-black rounded-3xl shadow-2xl p-8 text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full -mr-32 -mt-32"></div>
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white opacity-10 rounded-full -ml-24 -mb-24"></div>
-
-        <div className="relative z-10">
-          <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-6">
-            <div className="flex items-center gap-4">
-              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-4xl shadow-lg ring-4 ring-white ring-opacity-30">
-                👤
-              </div>
-              <div>
-                <h2 className="text-4xl font-extrabold mb-1 text-white">
-                  {userInfo.name}
-                </h2>
-                <p className="text-gray-300 text-lg mb-3">{userInfo.email}</p>
-                <div className="flex items-center gap-3 flex-wrap">
-                  <span className="px-4 py-1.5 bg-white/10 backdrop-blur-sm rounded-full text-sm font-bold border border-white/20 text-white">
-                    🎭{' '}
-                    {userInfo.role.charAt(0).toUpperCase() +
-                      userInfo.role.slice(1)}
-                  </span>
-                  <span className="text-sm text-gray-300 flex items-center gap-1">
-                    <span>📅</span>
-                    Joined {formatDate(userInfo.created_at).split(',')[0]}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div className="text-center bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-xl">
-              <div className="text-7xl font-black mb-2 text-white">
-                {totalPoints}
-              </div>
-              <p className="text-2xl font-bold text-white">Total Points</p>
-              <p className="text-sm text-gray-300 mt-1">Keep it up! 🚀</p>
-            </div>
-          </div>
+    <div className="space-y-8">
+      {/* Account Information Card */}
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+          <h3 className="text-lg font-bold text-[#171717]">Account Information</h3>
         </div>
-      </div>
-
-      {/* Enhanced Points Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 hover:shadow-xl transition-all">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center text-3xl shadow-md">
-              💰
-            </div>
-            <div className="text-right">
-              <p className="text-sm text-gray-500 font-bold uppercase tracking-wide">
-                Total Earned
-              </p>
-              <p className="text-4xl font-black text-gray-900">{totalPoints}</p>
-            </div>
-          </div>
-          <div className="text-xs text-gray-500 font-medium mt-2">
-            🎯 All-time points earned
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 hover:shadow-xl transition-all">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center text-3xl shadow-md">
-              ✅
-            </div>
-            <div className="text-right">
-              <p className="text-sm text-gray-500 font-bold uppercase tracking-wide">
-                Completed
-              </p>
-              <p className="text-4xl font-black text-gray-900">
-                {pointsHistory.length}
-              </p>
-            </div>
-          </div>
-          <div className="text-xs text-gray-500 font-medium mt-2">
-            📝 Total tasks completed
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 hover:shadow-xl transition-all">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center text-3xl shadow-md">
-              📊
-            </div>
-            <div className="text-right">
-              <p className="text-sm text-gray-500 font-bold uppercase tracking-wide">
-                Average
-              </p>
-              <p className="text-4xl font-black text-gray-900">
-                {pointsHistory.length > 0
-                  ? Math.round(totalPoints / pointsHistory.length)
-                  : 0}
-              </p>
-            </div>
-          </div>
-          <div className="text-xs text-gray-500 font-medium mt-2">
-            💎 Points per task
-          </div>
-        </div>
-      </div>
-
-      {/* Points History with Filters */}
-      <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
-        <div className="px-6 py-5 border-b border-gray-200 bg-gray-50">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                <span className="text-3xl">📜</span>
-                Points History
-              </h3>
-              <p className="text-sm text-gray-600 mt-1">
-                Track your earnings over time
-              </p>
-            </div>
-
-            {/* Filter Buttons */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => setHistoryFilter('all')}
-                className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
-                  historyFilter === 'all'
-                    ? 'bg-black text-white shadow-md'
-                    : 'bg-white text-gray-900 border border-gray-200 hover:bg-gray-50'
-                }`}
-              >
-                All Time
-              </button>
-              <button
-                onClick={() => setHistoryFilter('thisWeek')}
-                className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
-                  historyFilter === 'thisWeek'
-                    ? 'bg-black text-white shadow-md'
-                    : 'bg-white text-gray-900 border border-gray-200 hover:bg-gray-50'
-                }`}
-              >
-                This Week
-              </button>
-              <button
-                onClick={() => setHistoryFilter('thisMonth')}
-                className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
-                  historyFilter === 'thisMonth'
-                    ? 'bg-black text-white shadow-md'
-                    : 'bg-white text-gray-900 border border-gray-200 hover:bg-gray-50'
-                }`}
-              >
-                This Month
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {filteredHistory.length === 0 ? (
-          <div className="p-12 text-center">
-            <div className="text-7xl mb-4">📊</div>
-            <h4 className="text-xl font-bold text-gray-900 mb-2">
-              {historyFilter === 'all'
-                ? 'No Points Yet'
-                : 'No Points in This Period'}
-            </h4>
-            <p className="text-gray-600 text-lg">
-              {historyFilter === 'all'
-                ? 'Complete your assigned tasks to start earning points!'
-                : 'Try selecting a different time period or complete more tasks!'}
-            </p>
-          </div>
-        ) : (
-          <div>
-            <div className="px-6 py-3 bg-gray-50 border-b border-gray-200">
-              <p className="text-sm font-semibold text-gray-900">
-                Showing {filteredHistory.length}{' '}
-                {filteredHistory.length === 1 ? 'entry' : 'entries'}
-              </p>
-            </div>
-            <div className="divide-y divide-gray-200 max-h-96 overflow-y-auto">
-              {filteredHistory.map((item) => (
-                <div
-                  key={item.history_id}
-                  className="px-6 py-5 hover:bg-gray-50 transition-all cursor-pointer"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4 flex-1">
-                      <div className="w-12 h-12 bg-black rounded-xl flex items-center justify-center text-2xl shadow-md flex-shrink-0 text-white">
-                        🎯
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-bold text-gray-900 text-lg mb-1">
-                          {item.step?.title || 'Task Completed'}
-                        </h4>
-                        {item.step?.task && (
-                          <p className="text-sm text-gray-600 mb-1">
-                            📁 From:{' '}
-                            <span className="font-semibold text-gray-900">
-                              {item.step.task.title}
-                            </span>
-                          </p>
-                        )}
-                        <p className="text-xs text-gray-500 flex items-center gap-1">
-                          <span>🕐</span>
-                          {formatDate(item.earned_at)}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="ml-4 text-right flex-shrink-0">
-                      <div className="bg-black text-white px-5 py-3 rounded-xl shadow-lg">
-                        <div className="flex items-center gap-2">
-                          <span className="text-3xl font-black">
-                            +{item.points_earned}
-                          </span>
-                          <span className="text-sm font-bold">pts</span>
-                        </div>
-                      </div>
-                    </div>
+        
+        <div className="p-6 sm:p-8">
+          <div className="flex flex-col md:flex-row gap-8">
+            <div className="flex flex-col items-center text-center md:items-start md:text-left min-w-[200px]">
+              <div className="relative mb-4">
+                {userInfo.avatar_url ? (
+                  <img src={userInfo.avatar_url} alt="Profile" className="w-24 h-24 rounded-full border-4 border-white shadow-md object-cover" />
+                ) : (
+                  <div className="w-24 h-24 rounded-full bg-[#171717] flex items-center justify-center text-3xl text-white shadow-md">
+                    {userInfo.name?.charAt(0).toUpperCase()}
                   </div>
-                </div>
-              ))}
+                )}
+                {isGoogleAuth && (
+                  <div className="absolute bottom-0 right-0 bg-white p-1.5 rounded-full shadow-sm border border-gray-100">
+                    <svg className="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                  </div>
+                )}
+              </div>
+              <h2 className="text-2xl font-bold text-[#171717]">{userInfo.name}</h2>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 mt-2 border border-gray-200">
+                {userInfo.role.charAt(0).toUpperCase() + userInfo.role.slice(1)}
+              </span>
+            </div>
+
+            <div className="flex-1 w-full">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div><label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Email Address</label><p className="text-[#171717] font-medium border-b border-gray-100 pb-2">{userInfo.email}</p></div>
+                <div><label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Date of Birth</label><p className="text-gray-400 font-medium border-b border-gray-100 pb-2 italic">Not set</p></div>
+                <div><label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Member Since</label><p className="text-[#171717] font-medium border-b border-gray-100 pb-2">{formatDate(userInfo.created_at)}</p></div>
+                <div><label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Sign-in Method</label><div className="flex items-center gap-2 border-b border-gray-100 pb-2">{isGoogleAuth ? <><span className="font-medium text-[#171717]">Google Account</span><span className="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded border border-green-100">Secure</span></> : <span className="font-medium text-[#171717]">Email & Password</span>}</div></div>
+                <div className="md:col-span-2 pt-2"><label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Security</label>{isGoogleAuth ? <div className="text-sm text-gray-500 flex items-center gap-2"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>Password managed by Google</div> : <button onClick={handlePasswordReset} className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>Change Password</button>}</div>
+              </div>
             </div>
           </div>
-        )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {[
+          { label: 'Total Earned', value: totalPoints, icon: <svg className="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>, color: 'blue' },
+          { label: 'Completed', value: pointsHistory.length, icon: <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>, color: 'green' },
+          { label: 'Average', value: pointsHistory.length > 0 ? Math.round(totalPoints / pointsHistory.length) : 0, icon: <svg className="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>, color: 'purple' }
+        ].map((stat, i) => (
+          <div key={i} className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-4">
+              <div className={`w-12 h-12 bg-${stat.color}-50 rounded-xl flex items-center justify-center`}>{stat.icon}</div>
+              <div><p className="text-sm font-medium text-gray-500 uppercase tracking-wide">{stat.label}</p><p className="text-3xl font-bold text-[#171717]">{stat.value}</p></div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="px-6 py-5 border-b border-gray-100 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <h3 className="text-lg font-bold text-[#171717]">Points History</h3>
+          <div className="flex gap-2">
+            {['all', 'thisWeek', 'thisMonth'].map((filter) => (
+              <button key={filter} onClick={() => setHistoryFilter(filter)} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${historyFilter === filter ? 'bg-[#171717] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>{filter === 'all' ? 'All Time' : filter === 'thisWeek' ? 'This Week' : 'This Month'}</button>
+            ))}
+          </div>
+        </div>
+        <div className="divide-y divide-gray-100 max-h-[400px] overflow-y-auto">
+          {filteredHistory.length === 0 ? (
+            <div className="p-12 text-center">
+              <div className="flex justify-center mb-3"><svg className="w-12 h-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg></div>
+              <p className="text-gray-500">No activity found for this period.</p>
+            </div>
+          ) : (
+            filteredHistory.map((item) => (
+              <div key={item.history_id} className="px-6 py-4 hover:bg-gray-50 transition-colors flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600"><svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg></div>
+                  <div><h4 className="font-semibold text-[#171717] text-sm">{item.step?.title || 'Task Completed'}</h4><p className="text-xs text-gray-500">{item.step?.task ? `From: ${item.step.task.title}` : 'General Award'} • {formatDate(item.earned_at)}</p></div>
+                </div>
+                <div className="font-bold text-green-600 bg-green-50 px-3 py-1 rounded-full text-sm border border-green-100">+{item.points_earned} pts</div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
