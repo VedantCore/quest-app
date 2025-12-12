@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { createTask } from '@/app/actions';
+import { createTask, updateTask, deleteTask } from '@/app/actions';
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -13,6 +13,8 @@ export default function TaskManagement() {
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingTaskId, setEditingTaskId] = useState(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -73,15 +75,32 @@ export default function TaskManagement() {
     if (!user) return;
 
     try {
-      const taskPayload = { ...formData, createdBy: user.uid };
-      const result = await createTask(taskPayload, steps);
+      if (isEditing) {
+        const result = await updateTask(editingTaskId, formData, steps);
 
-      if (result.success) {
-        toast.success('Quest created successfully!');
-        closeCreateModal();
-        fetchData();
+        if (result.success) {
+          toast.success('Quest updated successfully!');
+          closeCreateModal();
+          fetchData();
+          if (selectedTask && selectedTask.task_id === editingTaskId) {
+            // Refresh selected task details if it's open
+            // We might need to re-fetch the specific task or just close it
+            setSelectedTask(null);
+          }
+        } else {
+          toast.error(result.message);
+        }
       } else {
-        toast.error(result.message);
+        const taskPayload = { ...formData, createdBy: user.uid };
+        const result = await createTask(taskPayload, steps);
+
+        if (result.success) {
+          toast.success('Quest created successfully!');
+          closeCreateModal();
+          fetchData();
+        } else {
+          toast.error(result.message);
+        }
       }
     } catch (error) {
       toast.error('Error saving quest: ' + error.message);
@@ -109,6 +128,8 @@ export default function TaskManagement() {
 
   const closeCreateModal = () => {
     setShowCreateModal(false);
+    setIsEditing(false);
+    setEditingTaskId(null);
     setFormData({
       title: '',
       description: '',
@@ -118,13 +139,94 @@ export default function TaskManagement() {
     setSteps([{ title: '', description: '', points_reward: 0 }]);
   };
 
+  const handleEditClick = (task) => {
+    setFormData({
+      title: task.title,
+      description: task.description,
+      assignedManagerId: task.assigned_manager_id || '',
+      deadline: task.deadline || '',
+    });
+
+    setSteps(
+      task.task_steps && task.task_steps.length > 0
+        ? task.task_steps.map((s) => ({
+            step_id: s.step_id,
+            title: s.title,
+            description: s.description,
+            points_reward: s.points_reward,
+          }))
+        : [{ title: '', description: '', points_reward: 0 }]
+    );
+
+    setIsEditing(true);
+    setEditingTaskId(task.task_id);
+    setShowCreateModal(true);
+    setSelectedTask(null);
+  };
+
+  const handleDeleteClick = (taskId) => {
+    toast(
+      (t) => (
+        <div className="flex flex-col gap-3 min-w-[200px]">
+          <p className="font-medium text-gray-800 text-sm">
+            Are you sure you want to delete this quest?
+          </p>
+          <div className="flex gap-2 justify-end">
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                toast.dismiss(t.id);
+                performDelete(taskId);
+              }}
+              className="px-3 py-1.5 text-xs font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        duration: 5000,
+        position: 'top-center',
+        style: {
+          background: '#fff',
+          color: '#333',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+          borderRadius: '12px',
+          padding: '16px',
+        },
+      }
+    );
+  };
+
+  const performDelete = async (taskId) => {
+    try {
+      const result = await deleteTask(taskId);
+      if (result.success) {
+        toast.success('Quest deleted successfully');
+        fetchData();
+        if (selectedTask && selectedTask.task_id === taskId) {
+          setSelectedTask(null);
+        }
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      toast.error('Error deleting quest: ' + error.message);
+    }
+  };
+
   const getManagerName = (id) =>
     managers.find((m) => m.user_id === id)?.name || 'Unassigned';
 
   const getDeadline = (dateStr) => {
     if (!dateStr) return 'N/A';
     const date = new Date(dateStr);
-    date.setDate(date.getDate() + 30);
     return date.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
@@ -162,6 +264,9 @@ export default function TaskManagement() {
                   Manager
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  Deadline
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   Conditions
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -170,13 +275,16 @@ export default function TaskManagement() {
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
+                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-100">
               {tasks.length === 0 ? (
                 <tr>
                   <td
-                    colSpan="5"
+                    colSpan="6"
                     className="px-6 py-12 text-center text-gray-500"
                   >
                     No quests found. Create your first quest!
@@ -210,6 +318,9 @@ export default function TaskManagement() {
                         {getManagerName(task.assigned_manager_id)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {getDeadline(task.deadline)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                         {task.task_steps?.length || 0} conditions
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#13B5A0]">
@@ -225,6 +336,52 @@ export default function TaskManagement() {
                         >
                           {task.is_active ? 'Active' : 'Inactive'}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditClick(task);
+                          }}
+                          className="text-gray-400 hover:text-[#13B5A0] transition-colors p-2 hover:bg-gray-50 rounded-lg"
+                          title="Edit Quest"
+                        >
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteClick(task.task_id);
+                          }}
+                          className="text-gray-400 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-lg ml-1"
+                          title="Delete Quest"
+                        >
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                          </svg>
+                        </button>
                       </td>
                     </tr>
                   );
@@ -360,7 +517,7 @@ export default function TaskManagement() {
                       <span className="font-bold text-[#13B5A0]">Deadline</span>
                     </div>
                     <p className="text-gray-600 text-sm font-medium pl-1">
-                      {getDeadline(selectedTask.created_at)}
+                      {getDeadline(selectedTask.deadline)}
                     </p>
                   </div>
 
@@ -467,8 +624,11 @@ export default function TaskManagement() {
               >
                 Close
               </button>
-              <button className="px-5 py-2.5 text-sm font-semibold text-white bg-[#13B5A0] rounded-xl hover:bg-[#13B5A0] transition-all shadow-lg hover:shadow-xl">
-                Save Changes
+              <button
+                onClick={() => handleEditClick(selectedTask)}
+                className="px-5 py-2.5 text-sm font-semibold text-white bg-[#13B5A0] rounded-xl hover:bg-[#13B5A0] transition-all shadow-lg hover:shadow-xl"
+              >
+                Edit Quest
               </button>
             </div>
           </div>
@@ -479,7 +639,7 @@ export default function TaskManagement() {
         <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-8 max-w-2xl w-full shadow-xl border border-gray-100 max-h-[90vh] overflow-y-auto">
             <h3 className="text-2xl font-bold text-[#13B5A0] mb-6">
-              Create New Quest
+              {isEditing ? 'Edit Quest' : 'Create New Quest'}
             </h3>
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
@@ -624,7 +784,7 @@ export default function TaskManagement() {
                   type="submit"
                   className="flex-1 bg-[#13B5A0] text-white py-3 rounded-xl hover:bg-[#13B5A0] transition font-semibold shadow-sm"
                 >
-                  Create Quest
+                  {isEditing ? 'Update Quest' : 'Create Quest'}
                 </button>
                 <button
                   type="button"
