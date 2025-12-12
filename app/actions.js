@@ -399,6 +399,19 @@ export async function getTaskDetails(taskId) {
 
     if (error) throw error;
 
+    // Fetch manager details manually to avoid ambiguous FK issues
+    if (data.assigned_manager_id) {
+      const { data: managerData } = await supabase
+        .from('users')
+        .select('name, email')
+        .eq('user_id', data.assigned_manager_id)
+        .single();
+
+      if (managerData) {
+        data.manager = managerData;
+      }
+    }
+
     // Sort steps by creation or some order if needed
     if (data.task_steps) {
       data.task_steps.sort(
