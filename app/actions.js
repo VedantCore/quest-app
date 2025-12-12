@@ -8,7 +8,6 @@ import { revalidatePath } from 'next/cache';
  */
 export async function createTask(taskData, steps) {
   try {
-    // 1. Insert Task
     const { data: task, error: taskError } = await supabase
       .from('tasks')
       .insert({
@@ -23,7 +22,6 @@ export async function createTask(taskData, steps) {
 
     if (taskError) throw taskError;
 
-    // 2. Insert Steps
     if (steps && steps.length > 0) {
       const stepsToInsert = steps.map((step) => ({
         task_id: task.task_id,
@@ -64,9 +62,7 @@ export async function joinTask(taskId, userId) {
       .select();
 
     if (error) {
-      // Handle UNIQUE constraint gracefully
       if (error.code === '23505') {
-        // Postgres unique_violation code
         return {
           success: false,
           message: 'You have already joined this task.',
@@ -114,12 +110,9 @@ export async function submitStep(stepId, userId) {
 
 /**
  * Manager approves a submission
- * This triggers the DB logic to award points automatically
  */
 export async function approveSubmission(submissionId, managerId) {
   try {
-    // We only update the status.
-    // The DB Trigger 'on_submission_approval' handles the point calculation and insertion.
     const { error } = await supabase
       .from('step_submissions')
       .update({
@@ -131,7 +124,6 @@ export async function approveSubmission(submissionId, managerId) {
 
     if (error) throw error;
 
-    // Immediate revalidation to reflect the DB's auto-calculated updates in the UI
     revalidatePath('/manager-dashboard');
     return {
       success: true,
@@ -148,7 +140,6 @@ export async function approveSubmission(submissionId, managerId) {
  */
 export async function getPendingSubmissions(managerId) {
   try {
-    // 1. Fetch submissions with user_id
     const { data: submissions, error } = await supabase
       .from('step_submissions')
       .select(
@@ -172,19 +163,16 @@ export async function getPendingSubmissions(managerId) {
 
     if (error) throw error;
 
-    // 2. Fetch user details manually to avoid ambiguous join error
-    // (step_submissions has multiple FKs to users: user_id and reviewed_by)
     if (submissions && submissions.length > 0) {
       const userIds = [...new Set(submissions.map((s) => s.user_id))];
 
       const { data: users, error: usersError } = await supabase
         .from('users')
-        .select('user_id, email')
+        .select('user_id, email, name')
         .in('user_id', userIds);
 
       if (usersError) throw usersError;
 
-      // Map users to submissions
       const userMap = {};
       users.forEach((u) => (userMap[u.user_id] = u));
 
@@ -237,7 +225,12 @@ export async function getManagerTasks(managerId) {
   try {
     const { data, error } = await supabase
       .from('tasks')
-      .select('*')
+      .select(
+        `
+        *,
+        task_steps (*)
+      `
+      )
       .eq('assigned_manager_id', managerId)
       .order('created_at', { ascending: false });
 
@@ -251,7 +244,7 @@ export async function getManagerTasks(managerId) {
 }
 
 /**
- * Get all available tasks
+ * Get all available tasks (Updated to include steps and manager details)
  */
 export async function getAllTasks() {
   try {
@@ -260,7 +253,8 @@ export async function getAllTasks() {
       .select(
         `
         *,
-        manager:users!tasks_assigned_manager_id_fkey (email)
+        task_steps (*),
+        manager:users!tasks_assigned_manager_id_fkey (name, email, avatar_url)
       `
       )
       .order('created_at', { ascending: false });
@@ -284,7 +278,8 @@ export async function getTaskDetails(taskId) {
       .select(
         `
         *,
-        task_steps (*)
+        task_steps (*),
+        manager:users!tasks_assigned_manager_id_fkey (name, email, avatar_url)
       `
       )
       .eq('task_id', taskId)
@@ -292,7 +287,6 @@ export async function getTaskDetails(taskId) {
 
     if (error) throw error;
 
-    // Sort steps by creation or some order if needed
     if (data.task_steps) {
       data.task_steps.sort(
         (a, b) => new Date(a.created_at) - new Date(b.created_at)
@@ -307,11 +301,10 @@ export async function getTaskDetails(taskId) {
 }
 
 /**
- * Get participants for a specific task with their submissions
+ * Get participants for a specific task
  */
 export async function getTaskParticipants(taskId) {
   try {
-    // 1. Get enrollments
     const { data: enrollments, error: enrollmentsError } = await supabase
       .from('task_enrollments')
       .select('user_id, joined_at')
@@ -323,7 +316,6 @@ export async function getTaskParticipants(taskId) {
       return { success: true, data: [] };
     }
 
-    // 2. Get user details
     const userIds = enrollments.map((e) => e.user_id);
     const { data: users, error: usersError } = await supabase
       .from('users')
@@ -332,7 +324,6 @@ export async function getTaskParticipants(taskId) {
 
     if (usersError) throw usersError;
 
-    // 3. Get all steps for this task to filter submissions
     const { data: steps } = await supabase
       .from('task_steps')
       .select('step_id')
@@ -340,7 +331,6 @@ export async function getTaskParticipants(taskId) {
 
     const stepIds = steps ? steps.map((s) => s.step_id) : [];
 
-    // 4. Get submissions for these users and steps
     let submissions = [];
     if (stepIds.length > 0) {
       const { data: subs, error: subsError } = await supabase
@@ -353,7 +343,6 @@ export async function getTaskParticipants(taskId) {
       submissions = subs || [];
     }
 
-    // 5. Merge data
     const participants = users.map((user) => {
       const enrollment = enrollments.find((e) => e.user_id === user.user_id);
       const userSubmissions = submissions.filter(
