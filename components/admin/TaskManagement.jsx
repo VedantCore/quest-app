@@ -21,6 +21,7 @@ export default function TaskManagement() {
     description: '',
     assignedManagerId: '',
     deadline: '',
+    level: 1,
   });
   const [steps, setSteps] = useState([
     { title: '', description: '', points_reward: 0 },
@@ -135,6 +136,7 @@ export default function TaskManagement() {
       description: '',
       assignedManagerId: '',
       deadline: '',
+      level: 1,
     });
     setSteps([{ title: '', description: '', points_reward: 0 }]);
   };
@@ -145,6 +147,7 @@ export default function TaskManagement() {
       description: task.description,
       assignedManagerId: task.assigned_manager_id || '',
       deadline: task.deadline || '',
+      level: task.level || 1,
     });
 
     setSteps(
@@ -234,6 +237,32 @@ export default function TaskManagement() {
     });
   };
 
+  const renderStars = (level) => {
+    return (
+      <div className="flex gap-0.5" title={`Difficulty ${level || 1}`}>
+        {[...Array(5)].map((_, i) => (
+          <svg
+            key={i}
+            className={`w-4 h-4 ${
+              i < (level || 1)
+                ? 'text-yellow-400 fill-yellow-400'
+                : 'text-gray-300'
+            }`}
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg>
+        ))}
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="text-center py-12 text-gray-500">Loading quests...</div>
@@ -261,6 +290,9 @@ export default function TaskManagement() {
                   Quest Title
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  Difficulty
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   Manager
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -284,7 +316,7 @@ export default function TaskManagement() {
               {tasks.length === 0 ? (
                 <tr>
                   <td
-                    colSpan="6"
+                    colSpan="8"
                     className="px-6 py-12 text-center text-gray-500"
                   >
                     No quests found. Create your first quest!
@@ -313,6 +345,9 @@ export default function TaskManagement() {
                             {task.description}
                           </div>
                         </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {renderStars(task.level)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                         {getManagerName(task.assigned_manager_id)}
@@ -401,6 +436,12 @@ export default function TaskManagement() {
                   {selectedTask.title}
                 </h3>
                 <div className="flex items-center gap-3 mt-2">
+                  <div className="flex items-center gap-2 bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
+                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      Difficulty:
+                    </span>
+                    {renderStars(selectedTask.level)}
+                  </div>
                   <span
                     className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
                       selectedTask.is_active
@@ -674,7 +715,7 @@ export default function TaskManagement() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Deadline
@@ -688,6 +729,28 @@ export default function TaskManagement() {
                     }
                     className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-gray-400 transition-all"
                   />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Difficulty
+                  </label>
+                  <select
+                    required
+                    value={formData.level}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        level: parseInt(e.target.value),
+                      })
+                    }
+                    className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-gray-400 transition-all"
+                  >
+                    {[1, 2, 3, 4, 5].map((lvl) => (
+                      <option key={lvl} value={lvl}>
+                        {lvl} {'★'.repeat(lvl) + '☆'.repeat(5 - lvl)}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">

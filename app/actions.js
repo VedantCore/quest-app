@@ -17,6 +17,7 @@ export async function createTask(taskData, steps) {
         created_by: taskData.createdBy,
         assigned_manager_id: taskData.assignedManagerId,
         deadline: taskData.deadline,
+        level: taskData.level,
         is_active: true,
       })
       .select()
@@ -64,6 +65,7 @@ export async function updateTask(taskId, taskData, steps) {
         description: taskData.description,
         assigned_manager_id: taskData.assignedManagerId,
         deadline: taskData.deadline,
+        level: taskData.level,
       })
       .eq('task_id', taskId);
 
