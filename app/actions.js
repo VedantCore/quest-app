@@ -1,6 +1,7 @@
 'use server';
 
 import { supabase } from '@/lib/supabase';
+import { adminAuth } from '@/lib/firebase-admin';
 import { revalidatePath } from 'next/cache';
 
 /**
@@ -420,7 +421,29 @@ export async function getTaskDetails(taskId) {
     return { success: false, error: error.message };
   }
 }
+/**
+ * Admin deletes a user from Firebase and Supabase
+ */
+export async function deleteUser(userId) {
+  try {
+    // 1. Delete from Firebase Authentication
+    await adminAuth.deleteUser(userId);
 
+    // 2. Delete from Supabase Users table
+    const { error } = await supabase
+      .from('users')
+      .delete()
+      .eq('user_id', userId);
+
+    if (error) throw error;
+
+    revalidatePath('/admin-dashboard');
+    return { success: true, message: 'User deleted successfully' };
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    return { success: false, error: error.message };
+  }
+}
 /**
  * Get participants for a specific task
  */

@@ -1,6 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { deleteUser } from '@/app/actions';
+import { toast } from 'react-hot-toast';
 
 export default function UserManagement() {
   const [users, setUsers] = useState([]);
@@ -44,6 +46,29 @@ export default function UserManagement() {
     } catch (error) {
       console.error('Error updating role:', error);
       alert('Error updating role: ' + error.message);
+    }
+  };
+
+  const handleDeleteUser = async (user) => {
+    if (
+      !confirm(
+        `Are you sure you want to delete user ${user.name}? This action cannot be undone.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const result = await deleteUser(user.user_id);
+      if (result.success) {
+        toast.success('User deleted successfully');
+        fetchUsers();
+      } else {
+        toast.error('Failed to delete user: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast.error('An error occurred while deleting the user');
     }
   };
 
@@ -266,13 +291,16 @@ export default function UserManagement() {
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   {renderSortableHeader('Joined', 'created_at')}
                 </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-100">
               {sortedUsers.length === 0 ? (
                 <tr>
                   <td
-                    colSpan="5"
+                    colSpan="6"
                     className="px-6 py-12 text-center text-gray-500"
                   >
                     No users found.
@@ -329,6 +357,27 @@ export default function UserManagement() {
                       {user.created_at
                         ? new Date(user.created_at).toLocaleDateString()
                         : 'N/A'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <button
+                        onClick={() => handleDeleteUser(user)}
+                        className="text-gray-400 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-lg"
+                        title="Delete User"
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
+                      </button>
                     </td>
                   </tr>
                 ))
