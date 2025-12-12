@@ -7,6 +7,10 @@ export default function UserManagement() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('all');
+  const [sortConfig, setSortConfig] = useState({
+    key: 'created_at',
+    direction: 'desc',
+  });
 
   useEffect(() => {
     fetchUsers();
@@ -50,6 +54,75 @@ export default function UserManagement() {
     const matchesRole = filterRole === 'all' || user.role === filterRole;
     return matchesSearch && matchesRole;
   });
+
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedUsers = [...filteredUsers].sort((a, b) => {
+    let aValue = a[sortConfig.key];
+    let bValue = b[sortConfig.key];
+
+    // Handle null/undefined values
+    if (aValue === null || aValue === undefined) aValue = '';
+    if (bValue === null || bValue === undefined) bValue = '';
+
+    // Special handling for numbers (points)
+    if (sortConfig.key === 'total_points') {
+      aValue = Number(aValue) || 0;
+      bValue = Number(bValue) || 0;
+    }
+
+    if (aValue < bValue) {
+      return sortConfig.direction === 'asc' ? -1 : 1;
+    }
+    if (aValue > bValue) {
+      return sortConfig.direction === 'asc' ? 1 : -1;
+    }
+    return 0;
+  });
+
+  const renderSortableHeader = (label, key) => {
+    const isActive = sortConfig.key === key;
+    const direction = sortConfig.direction;
+
+    return (
+      <div
+        className="flex items-center gap-1 cursor-pointer group"
+        onClick={() => handleSort(key)}
+      >
+        <span>{label}</span>
+        <div className="flex flex-col">
+          <svg
+            className={`w-2.5 h-2.5 ${
+              isActive && direction === 'asc'
+                ? 'text-[#13B5A0]'
+                : 'text-gray-300 group-hover:text-gray-400'
+            }`}
+            fill="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path d="M7 14l5-5 5 5H7z" />
+          </svg>
+          <svg
+            className={`w-2.5 h-2.5 -mt-0.5 ${
+              isActive && direction === 'desc'
+                ? 'text-[#13B5A0]'
+                : 'text-gray-300 group-hover:text-gray-400'
+            }`}
+            fill="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path d="M7 10l5 5 5-5H7z" />
+          </svg>
+        </div>
+      </div>
+    );
+  };
 
   if (loading)
     return (
@@ -179,24 +252,24 @@ export default function UserManagement() {
             <thead className="bg-gray-50/50">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  User
+                  {renderSortableHeader('User', 'name')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Email
+                  {renderSortableHeader('Email', 'email')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Role
+                  {renderSortableHeader('Role', 'role')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Points
+                  {renderSortableHeader('Points', 'total_points')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Joined
+                  {renderSortableHeader('Joined', 'created_at')}
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-100">
-              {filteredUsers.length === 0 ? (
+              {sortedUsers.length === 0 ? (
                 <tr>
                   <td
                     colSpan="5"
@@ -206,7 +279,7 @@ export default function UserManagement() {
                   </td>
                 </tr>
               ) : (
-                filteredUsers.map((user) => (
+                sortedUsers.map((user) => (
                   <tr
                     key={user.user_id}
                     className="hover:bg-gray-50/50 transition-colors"
