@@ -45,7 +45,8 @@ export default function UserList() {
           joined_at,
           tasks (
             *,
-            task_steps (points_reward)
+            task_steps (points_reward),
+            manager:users!assigned_manager_id (name)
           )
         `
         )
@@ -147,6 +148,9 @@ export default function UserList() {
                   Email
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  Points
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   Joined
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -158,7 +162,7 @@ export default function UserList() {
               {filteredUsers.length === 0 ? (
                 <tr>
                   <td
-                    colSpan="4"
+                    colSpan="5"
                     className="px-6 py-12 text-center text-gray-500"
                   >
                     No users found.
@@ -182,6 +186,9 @@ export default function UserList() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                       {user.email}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#13B5A0]">
+                      {user.total_points || 0} pts
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {user.created_at
@@ -317,6 +324,15 @@ export default function UserList() {
                           </span>
                           <span className="text-[#13B5A0] font-bold">
                             {task.earned_points} / {task.total_points}
+                          </span>
+                        </div>
+                        <div className="w-px h-3 bg-gray-300"></div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-medium text-gray-700">
+                            Manager:
+                          </span>
+                          <span className="text-gray-900">
+                            {task.manager?.name || 'Unassigned'}
                           </span>
                         </div>
                       </div>
