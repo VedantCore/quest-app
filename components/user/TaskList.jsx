@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { joinTask, submitStep } from '@/app/actions';
+import TaskDetailsModal from './TaskDetailsModal';
 import toast from 'react-hot-toast';
 
 const CircularProgress = ({ percentage, size = 50, strokeWidth = 4 }) => {
@@ -48,6 +49,7 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedTaskId, setExpandedTaskId] = useState(null);
+  const [selectedTask, setSelectedTask] = useState(null); // For Modal
   const [filter, setFilter] = useState(mode === 'available' ? 'latest' : 'all');
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState(null);
@@ -61,13 +63,14 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
       setLoading(true);
       setError(null);
 
-      // 1. Fetch all tasks with steps
+      // 1. Fetch all tasks with steps AND manager info
       const { data: allTasks, error: tasksError } = await supabase
         .from('tasks')
         .select(
           `
           *,
-          task_steps (*)
+          task_steps (*),
+          manager:users!tasks_assigned_manager_id_fkey (name, email, avatar_url)
         `
         )
         .eq('is_active', true)
@@ -93,7 +96,7 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
 
       if (submissionsError) throw submissionsError;
 
-      // Process tasks to include enrollment and submission status
+      // Process tasks
       let processedTasks = allTasks.map((task) => {
         const isEnrolled = enrolledTaskIds.has(task.task_id);
 
@@ -145,9 +148,6 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
       if (mode === 'enrolled') {
         processedTasks = processedTasks.filter((t) => t.isEnrolled);
       } else if (mode === 'available') {
-        // In available mode, we might want to show all, or just unenrolled.
-        // Showing all allows users to see what they've joined too, but maybe we should prioritize unenrolled.
-        // For now, let's show all, but maybe sort unenrolled first?
         processedTasks.sort((a, b) => {
           if (a.isEnrolled === b.isEnrolled) return 0;
           return a.isEnrolled ? 1 : -1; // Unenrolled first
@@ -156,20 +156,9 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
 
       setTasks(processedTasks);
 
-      // Calculate and send stats to parent (always based on enrolled tasks)
+      // Stats calculation logic
       if (onStatsUpdate) {
-        // We need to calculate stats based on ALL enrolled tasks, not just the filtered ones if we are in 'available' mode.
-        // But wait, processedTasks might be filtered if mode='enrolled'.
-        // If mode='available', processedTasks has all tasks.
-
-        // To be safe, we should probably calculate stats from the full list if possible,
-        // but here we only have processedTasks which might be filtered.
-        // However, onStatsUpdate is primarily used in UserDashboard where mode='enrolled',
-        // so processedTasks contains all enrolled tasks.
-        // In TasksPage (mode='available'), onStatsUpdate is likely not passed or ignored.
-
         const enrolledTasks = processedTasks.filter((t) => t.isEnrolled);
-
         const activeTasks = enrolledTasks.filter(
           (t) => t.progress < 100
         ).length;
@@ -180,8 +169,6 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
           (sum, t) => sum + t.earnedPoints,
           0
         );
-
-        // Overall progress across enrolled tasks
         const totalEnrolledSteps = enrolledTasks.reduce(
           (sum, t) => sum + t.steps.length,
           0
@@ -215,7 +202,7 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
     const result = await joinTask(taskId, userId);
     if (result.success) {
       toast.success('Successfully joined the quest!');
-      fetchUserTasks(); // Refresh data
+      fetchUserTasks(); 
     } else {
       toast.error(result.message);
     }
@@ -225,10 +212,22 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
     const result = await submitStep(stepId, userId);
     if (result.success) {
       toast.success('Step submitted for review!');
-      fetchUserTasks(); // Refresh data
+      fetchUserTasks();
     } else {
       toast.error(result.message);
     }
+  };
+
+  // Helper to format deadline
+  const getDeadline = (dateStr) => {
+    if (!dateStr) return 'N/A';
+    const date = new Date(dateStr);
+    date.setDate(date.getDate() + 30);
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
   };
 
   if (loading) {
@@ -273,7 +272,6 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
     );
   }
 
-  // Filter tasks based on selected filter and search
   const filteredTasks = tasks.filter((task) => {
     const matchesSearch =
       task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -292,7 +290,6 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
     }
   });
 
-  // Sort tasks if needed
   if (mode === 'available') {
     if (filter === 'latest') {
       filteredTasks.sort(
@@ -320,6 +317,15 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
 
   return (
     <div className="space-y-6">
+      {/* Modal */}
+      <TaskDetailsModal 
+        task={selectedTask} 
+        isOpen={!!selectedTask} 
+        onClose={() => setSelectedTask(null)}
+        onJoin={handleJoin}
+        isEnrolled={selectedTask?.isEnrolled}
+      />
+
       {/* Feedback */}
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
@@ -368,7 +374,7 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
         </div>
       </div>
 
-      {/* Result info */}
+      {/* Info */}
       {filteredTasks.length > 0 && (
         <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
           Showing {filteredTasks.length}{' '}
@@ -395,147 +401,182 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
           return (
             <div
               key={task.task_id}
-              className="bg-white rounded-xl border border-gray-200 overflow-hidden transition-shadow hover:shadow-md"
+              className="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-200 hover:shadow-md hover:border-gray-300 flex flex-col h-full"
             >
               {/* Task Header */}
-              <div
-                className="p-5 cursor-pointer hover:bg-gray-50 transition-colors"
-                onClick={() =>
-                  setExpandedTaskId(isExpanded ? null : task.task_id)
-                }
-              >
-                <div className="flex items-start justify-between gap-4">
+              <div className="p-5 flex-1 flex flex-col">
+                <div className="flex items-start justify-between gap-4 mb-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2 flex-wrap">
-                      <h3 className="text-lg font-semibold text-gray-900">
+                      <h3 className="text-lg font-bold text-[#13B5A0] leading-tight">
                         {task.title}
                       </h3>
                       {task.isEnrolled ? (
                         <span
-                          className={`px-2.5 py-0.5 rounded text-xs font-bold border ${
+                          className={`px-2.5 py-0.5 rounded text-[10px] uppercase font-bold tracking-wide border ${
                             task.progress === 100
                               ? 'bg-[#13B5A0] text-white border-[#13B5A0]'
-                              : 'bg-green-100 text-[#13B5A0] border-green-200'
+                              : 'bg-green-50 text-[#13B5A0] border-green-200'
                           }`}
                         >
                           {task.progress === 100 ? 'Completed' : 'Enrolled'}
                         </span>
-                      ) : (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleJoin(task.task_id);
-                          }}
-                          className="px-3 py-1 rounded text-xs font-bold bg-[#13B5A0] text-white hover:bg-[#13B5A0]"
-                        >
-                          Join Quest
-                        </button>
-                      )}
+                      ) : null}
                     </div>
-                    <p className="text-gray-700 text-sm mb-3 leading-relaxed">
+                    <p className="text-gray-600 text-sm line-clamp-2 leading-relaxed mb-4">
                       {task.description}
                     </p>
-                    <div className="flex items-center gap-3 text-xs text-gray-700">
-                      <span className="inline-flex items-center gap-1 bg-gray-100 text-gray-900 px-2.5 py-1 rounded border border-gray-200">
-                        <span className="font-bold">
-                          {task.earnedPoints}/{task.totalPoints} pts
-                        </span>
-                      </span>
-                    </div>
                   </div>
 
-                  <div className="flex flex-col items-center gap-3 ml-2">
+                  <div className="flex flex-col items-center gap-3 ml-1">
                     {task.isEnrolled && (
-                      <CircularProgress percentage={task.progress} />
+                      <CircularProgress percentage={task.progress} size={40} />
                     )}
+                  </div>
+                </div>
+
+                <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-100">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 text-xs font-medium text-gray-500">
+                    <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg">
+                        <svg className="w-3.5 h-3.5 text-[#13B5A0]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {task.earnedPoints}/{task.totalPoints} pts
+                        </div>
+                        <div className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg">
+                            <span className="text-gray-600">
+                                Due: {getDeadline(task.created_at)}
+                            </span>
+                        </div>
+                    </div>
+                    {task.manager && (
+                      <div className="hidden sm:flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg" title={`Manager: ${task.manager.name}`}>
+                        <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <span className="truncate max-w-[80px]">{task.manager.name}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2">
                     <button
-                      className="text-gray-500 hover:text-gray-900"
-                      aria-label={isExpanded ? 'Collapse task' : 'Expand task'}
+                      onClick={() => setSelectedTask(task)}
+                      className="text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition-colors"
                     >
-                      <svg
-                        viewBox="0 0 24 24"
-                        className={`h-6 w-6 transition-transform ${
-                          isExpanded ? 'rotate-180' : ''
-                        }`}
-                      >
-                        <path
-                          fill="currentColor"
-                          d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"
-                        />
-                      </svg>
+                      Details
                     </button>
+                    
+                    {!task.isEnrolled && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleJoin(task.task_id);
+                        }}
+                        className="text-xs font-semibold text-white bg-[#13B5A0] hover:bg-[#11a390] px-3 py-1.5 rounded-lg transition-colors shadow-sm"
+                      >
+                        Join
+                      </button>
+                    )}
+                    
+                    {task.isEnrolled && (
+                      <button
+                        onClick={() => setExpandedTaskId(isExpanded ? null : task.task_id)}
+                        className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 ${isExpanded ? 'bg-gray-200 text-gray-800' : 'bg-[#13B5A0]/10 text-[#13B5A0] hover:bg-[#13B5A0]/20'}`}
+                      >
+                        {isExpanded ? 'Hide Steps' : 'Show Steps'}
+                        <svg
+                          viewBox="0 0 24 24"
+                          className={`h-3 w-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                        >
+                          <path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" />
+                        </svg>
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
 
-              {/* Subtasks - Expanded View */}
-              {isExpanded && (
-                <div className="border-t border-gray-200 bg-gray-50 p-5">
+              {/* Subtasks */}
+              {isExpanded && task.isEnrolled && (
+                <div className="border-t border-gray-200 bg-gray-50/50 p-4 animate-in slide-in-from-top-2 duration-200">
                   {task.steps && task.steps.length > 0 ? (
                     <div className="space-y-3">
                       {task.steps.map((step, index) => (
                         <div
                           key={step.step_id}
-                          className={`p-4 rounded-lg border transition-colors ${
+                          className={`p-3.5 rounded-xl border transition-all ${
                             step.status === 'APPROVED'
-                              ? 'border-gray-300 bg-gray-100'
-                              : 'border-gray-200 bg-white'
+                              ? 'border-green-200 bg-green-50/50'
+                              : 'border-gray-200 bg-white shadow-sm'
                           }`}
                         >
                           <div className="flex items-start justify-between gap-3">
                             <div className="flex-1">
-                              <p
-                                className={`text-sm font-medium ${
-                                  step.status === 'APPROVED'
-                                    ? 'text-gray-500 line-through'
-                                    : 'text-gray-900'
-                                }`}
-                              >
-                                {index + 1}. {step.title}
-                              </p>
-                              <p className="text-xs text-gray-500 mt-1">
-                                {step.description}
-                              </p>
-                              <div className="mt-1 text-xs text-gray-600">
-                                <span className="inline-flex items-center gap-1 bg-gray-100 text-gray-800 px-2 py-0.5 rounded border border-gray-200">
-                                  {step.points_reward} pts
+                              <div className="flex items-center gap-2">
+                                <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
+                                  step.status === 'APPROVED' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                                }`}>
+                                  {index + 1}
+                                </span>
+                                <p
+                                  className={`text-sm font-semibold ${
+                                    step.status === 'APPROVED'
+                                      ? 'text-gray-500 line-through decoration-green-500/50'
+                                      : 'text-gray-900'
+                                  }`}
+                                >
+                                  {step.title}
+                                </p>
+                              </div>
+                              {step.description && (
+                                <p className="text-xs text-gray-500 mt-1 pl-7">
+                                  {step.description}
+                                </p>
+                              )}
+                              <div className="mt-2 pl-7 flex items-center gap-2">
+                                <span className="inline-flex items-center gap-1 bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-medium border border-gray-200">
+                                  +{step.points_reward} pts
                                 </span>
                               </div>
                             </div>
 
-                            {task.isEnrolled && (
-                              <div className="shrink-0">
-                                {step.status === 'NOT_STARTED' && (
-                                  <button
-                                    onClick={() => handleSubmit(step.step_id)}
-                                    className="px-2.5 py-1 rounded text-xs font-bold bg-indigo-600 text-white hover:bg-indigo-700"
-                                  >
-                                    Submit
-                                  </button>
-                                )}
-                                {step.status === 'PENDING' && (
-                                  <span className="px-2.5 py-1 rounded text-xs font-bold bg-yellow-100 text-yellow-800 border border-yellow-200">
-                                    Pending Review
-                                  </span>
-                                )}
-                                {step.status === 'APPROVED' && (
-                                  <span className="px-2.5 py-1 rounded text-xs font-bold bg-green-100 text-[#13B5A0] border border-green-200">
-                                    Approved
-                                  </span>
-                                )}
-                                {step.status === 'REJECTED' && (
-                                  <span className="px-2.5 py-1 rounded text-xs font-bold bg-red-100 text-red-800 border border-red-200">
-                                    Rejected
-                                  </span>
-                                )}
-                              </div>
-                            )}
+                            <div className="shrink-0 self-center">
+                              {step.status === 'NOT_STARTED' && (
+                                <button
+                                  onClick={() => handleSubmit(step.step_id)}
+                                  className="px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white hover:bg-indigo-700 transition-colors shadow-sm"
+                                >
+                                  Submit
+                                </button>
+                              )}
+                              {step.status === 'PENDING' && (
+                                <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-yellow-50 text-yellow-700 border border-yellow-100 flex items-center gap-1">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse"></span>
+                                  Reviewing
+                                </span>
+                              )}
+                              {step.status === 'APPROVED' && (
+                                <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-green-100 text-green-700 border border-green-200 flex items-center gap-1">
+                                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                  Done
+                                </span>
+                              )}
+                              {step.status === 'REJECTED' && (
+                                <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-red-50 text-red-700 border border-red-100">
+                                  Rejected
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-600">No steps available.</p>
+                    <p className="text-sm text-gray-500 text-center py-2">No steps available for this quest.</p>
                   )}
                 </div>
               )}
