@@ -25,9 +25,16 @@ export default function TaskParticipantsPage() {
   const [processingStepId, setProcessingStepId] = useState(null);
 
   useEffect(() => {
-    if (!loading && (!user || userRole !== 'manager')) {
+    if (
+      !loading &&
+      (!user || (userRole !== 'manager' && userRole !== 'admin'))
+    ) {
       router.push('/');
-    } else if (user && userRole === 'manager' && taskId) {
+    } else if (
+      user &&
+      (userRole === 'manager' || userRole === 'admin') &&
+      taskId
+    ) {
       fetchData();
     }
   }, [user, userRole, loading, router, taskId]);

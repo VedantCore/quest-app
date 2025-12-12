@@ -15,6 +15,8 @@ export async function createTask(taskData, steps) {
         description: taskData.description,
         created_by: taskData.createdBy,
         assigned_manager_id: taskData.assignedManagerId,
+        deadline: taskData.deadline,
+        level: taskData.level,
         is_active: true,
       })
       .select()
@@ -44,6 +46,111 @@ export async function createTask(taskData, steps) {
     return {
       success: false,
       message: 'Failed to create task: ' + error.message,
+    };
+  }
+}
+
+/**
+ * Admin updates an existing task
+ */
+export async function updateTask(taskId, taskData, steps) {
+  try {
+    // 1. Update Task
+    const { error: taskError } = await supabase
+      .from('tasks')
+      .update({
+        title: taskData.title,
+        description: taskData.description,
+        assigned_manager_id: taskData.assignedManagerId,
+        deadline: taskData.deadline,
+        level: taskData.level,
+      })
+      .eq('task_id', taskId);
+
+    if (taskError) throw taskError;
+
+    // 2. Handle Steps
+    if (steps && steps.length > 0) {
+      // Get existing step IDs to identify deletions
+      const { data: existingSteps } = await supabase
+        .from('task_steps')
+        .select('step_id')
+        .eq('task_id', taskId);
+
+      const currentStepIds = steps
+        .filter((s) => s.step_id)
+        .map((s) => s.step_id);
+
+      const stepsToDelete = existingSteps
+        ?.filter((s) => !currentStepIds.includes(s.step_id))
+        .map((s) => s.step_id);
+
+      // Delete removed steps
+      if (stepsToDelete && stepsToDelete.length > 0) {
+        await supabase.from('task_steps').delete().in('step_id', stepsToDelete);
+      }
+
+      // Upsert steps (update existing, insert new)
+      for (const step of steps) {
+        if (step.step_id) {
+          await supabase
+            .from('task_steps')
+            .update({
+              title: step.title,
+              description: step.description,
+              points_reward: parseInt(step.points_reward),
+            })
+            .eq('step_id', step.step_id);
+        } else {
+          await supabase.from('task_steps').insert({
+            task_id: taskId,
+            title: step.title,
+            description: step.description,
+            points_reward: parseInt(step.points_reward),
+          });
+        }
+      }
+    }
+
+    revalidatePath('/admin-dashboard');
+    return { success: true, message: 'Task updated successfully!' };
+  } catch (error) {
+    console.error('Error updating task:', error);
+    return {
+      success: false,
+      message: 'Failed to update task: ' + error.message,
+    };
+  }
+}
+
+/**
+ * Admin deletes a task
+ */
+export async function deleteTask(taskId) {
+  try {
+    // Delete task (cascade should handle related steps/enrollments if configured,
+    // otherwise we might need to delete them manually first.
+    // Assuming cascade delete is set up or we delete related records first)
+
+    // 1. Delete related records if no cascade (safer approach)
+    await supabase.from('task_steps').delete().eq('task_id', taskId);
+    await supabase.from('task_enrollments').delete().eq('task_id', taskId);
+
+    // 2. Delete the task
+    const { error } = await supabase
+      .from('tasks')
+      .delete()
+      .eq('task_id', taskId);
+
+    if (error) throw error;
+
+    revalidatePath('/admin-dashboard');
+    return { success: true, message: 'Task deleted successfully!' };
+  } catch (error) {
+    console.error('Error deleting task:', error);
+    return {
+      success: false,
+      message: 'Failed to delete task: ' + error.message,
     };
   }
 }
@@ -287,6 +394,20 @@ export async function getTaskDetails(taskId) {
 
     if (error) throw error;
 
+    // Fetch manager details manually to avoid ambiguous FK issues
+    if (data.assigned_manager_id) {
+      const { data: managerData } = await supabase
+        .from('users')
+        .select('name, email')
+        .eq('user_id', data.assigned_manager_id)
+        .single();
+
+      if (managerData) {
+        data.manager = managerData;
+      }
+    }
+
+    // Sort steps by creation or some order if needed
     if (data.task_steps) {
       data.task_steps.sort(
         (a, b) => new Date(a.created_at) - new Date(b.created_at)
