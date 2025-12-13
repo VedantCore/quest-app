@@ -110,10 +110,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
             ) : (
               <>
                 {userRole === 'user' || !userRole ? (
-                  <Link
-                    href="/user-dashboard?tab=tasks"
-                    className={navLinkStyle}
-                  >
+                  <Link href="/tasks" className={navLinkStyle}>
                     My Quest
                   </Link>
                 ) : (
@@ -349,7 +346,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
               <>
                 {userRole === 'user' || !userRole ? (
                   <Link
-                    href="/user-dashboard?tab=tasks"
+                    href="/tasks"
                     className="block px-4 py-3 text-base font-medium text-gray-600 hover:text-indigo-600 hover:bg-white rounded-xl transition-colors"
                   >
                     My Quest

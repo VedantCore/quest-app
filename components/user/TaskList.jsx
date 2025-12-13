@@ -1,9 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
-import { joinTask, submitStep } from '@/app/actions';
 import { useAuth } from '@/context/AuthContext'; //
-import TaskDetailsModal from './TaskDetailsModal';
 import toast from 'react-hot-toast';
 
 const CircularProgress = ({ percentage, size = 50, strokeWidth = 4 }) => {
@@ -48,10 +47,9 @@ const CircularProgress = ({ percentage, size = 50, strokeWidth = 4 }) => {
 
 export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
   const { userRole } = useAuth(); // Get user role
+  const router = useRouter();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [expandedTaskId, setExpandedTaskId] = useState(null);
-  const [selectedTask, setSelectedTask] = useState(null);
   const [filter, setFilter] = useState(mode === 'available' ? 'latest' : 'all');
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState(null);
@@ -200,26 +198,6 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
     }
   };
 
-  const handleJoin = async (taskId) => {
-    const result = await joinTask(taskId, userId);
-    if (result.success) {
-      toast.success('Successfully joined the quest!');
-      fetchUserTasks();
-    } else {
-      toast.error(result.message);
-    }
-  };
-
-  const handleSubmit = async (stepId) => {
-    const result = await submitStep(stepId, userId);
-    if (result.success) {
-      toast.success('Step submitted for review!');
-      fetchUserTasks();
-    } else {
-      toast.error(result.message);
-    }
-  };
-
   // Helper to format deadline
   const getDeadline = (dateStr) => {
     if (!dateStr) return 'N/A';
@@ -319,15 +297,6 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
 
   return (
     <div className="space-y-6">
-      {/* Modal */}
-      <TaskDetailsModal
-        task={selectedTask}
-        isOpen={!!selectedTask}
-        onClose={() => setSelectedTask(null)}
-        onJoin={handleJoin}
-        isEnrolled={selectedTask?.isEnrolled}
-      />
-
       {/* Feedback */}
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
@@ -398,9 +367,6 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
       {/* Task Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filteredTasks.map((task) => {
-          const isExpanded = expandedTaskId === task.task_id;
-          const isStaff = userRole === 'admin' || userRole === 'manager'; // Check if staff
-
           return (
             <div
               key={task.task_id}
@@ -411,7 +377,10 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2 flex-wrap">
-                      <h3 className="text-lg font-bold text-slate-900 leading-tight">
+                      <h3
+                        className="text-lg font-bold text-slate-900 leading-tight cursor-pointer hover:text-indigo-600 transition-colors"
+                        onClick={() => router.push(`/tasks/${task.task_id}`)}
+                      >
                         {task.title}
                       </h3>
                       {task.isEnrolled ? (
@@ -490,152 +459,14 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
 
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => setSelectedTask(task)}
+                      onClick={() => router.push(`/tasks/${task.task_id}`)}
                       className="text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition-colors"
                     >
                       Details
                     </button>
-
-                    {!task.isEnrolled &&
-                      !isStaff && ( // Only show if NOT enrolled AND NOT staff
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleJoin(task.task_id);
-                          }}
-                          className="text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-lg transition-colors shadow-sm"
-                        >
-                          Join
-                        </button>
-                      )}
-
-                    {task.isEnrolled && (
-                      <button
-                        onClick={() =>
-                          setExpandedTaskId(isExpanded ? null : task.task_id)
-                        }
-                        className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 ${
-                          isExpanded
-                            ? 'bg-gray-200 text-gray-800'
-                            : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'
-                        }`}
-                      >
-                        {isExpanded ? 'Hide Steps' : 'Show Steps'}
-                        <svg
-                          viewBox="0 0 24 24"
-                          className={`h-3 w-3 transition-transform ${
-                            isExpanded ? 'rotate-180' : ''
-                          }`}
-                        >
-                          <path
-                            fill="currentColor"
-                            d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"
-                          />
-                        </svg>
-                      </button>
-                    )}
                   </div>
                 </div>
               </div>
-
-              {/* Subtasks */}
-              {isExpanded && task.isEnrolled && (
-                <div className="border-t border-gray-200 bg-gray-50/50 p-4 animate-in slide-in-from-top-2 duration-200">
-                  {task.steps && task.steps.length > 0 ? (
-                    <div className="space-y-3">
-                      {task.steps.map((step, index) => (
-                        <div
-                          key={step.step_id}
-                          className={`p-3.5 rounded-xl border transition-all ${
-                            step.status === 'APPROVED'
-                              ? 'border-green-200 bg-green-50/50'
-                              : 'border-gray-200 bg-white shadow-sm'
-                          }`}
-                        >
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <span
-                                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
-                                    step.status === 'APPROVED'
-                                      ? 'bg-green-100 text-green-700'
-                                      : 'bg-gray-100 text-gray-500'
-                                  }`}
-                                >
-                                  {index + 1}
-                                </span>
-                                <p
-                                  className={`text-sm font-semibold ${
-                                    step.status === 'APPROVED'
-                                      ? 'text-gray-500 line-through decoration-green-500/50'
-                                      : 'text-gray-900'
-                                  }`}
-                                >
-                                  {step.title}
-                                </p>
-                              </div>
-                              {step.description && (
-                                <p className="text-xs text-gray-500 mt-1 pl-7">
-                                  {step.description}
-                                </p>
-                              )}
-                              <div className="mt-2 pl-7 flex items-center gap-2">
-                                <span className="inline-flex items-center gap-1 bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-medium border border-gray-200">
-                                  +{step.points_reward} pts
-                                </span>
-                              </div>
-                            </div>
-
-                            <div className="shrink-0 self-center">
-                              {step.status === 'NOT_STARTED' && (
-                                <button
-                                  onClick={() => handleSubmit(step.step_id)}
-                                  className="px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white hover:bg-indigo-700 transition-colors shadow-sm"
-                                >
-                                  Submit
-                                </button>
-                              )}
-                              {step.status === 'PENDING' && (
-                                <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-yellow-50 text-yellow-700 border border-yellow-100 flex items-center gap-1">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse"></span>
-                                  Reviewing
-                                </span>
-                              )}
-                              {step.status === 'APPROVED' && (
-                                <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-green-100 text-green-700 border border-green-200 flex items-center gap-1">
-                                  <svg
-                                    className="w-3 h-3"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={3}
-                                      d="M5 13l4 4L19 7"
-                                    />
-                                  </svg>
-                                  Done
-                                </span>
-                              )}
-                              {step.status === 'REJECTED' && (
-                                <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-red-50 text-red-700 border border-red-100">
-                                  Rejected
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-gray-500 text-center py-2">
-                      No steps available for this quest.
-                    </p>
-                  )}
-                </div>
-              )}
             </div>
           );
         })}
