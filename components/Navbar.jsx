@@ -111,7 +111,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
               <>
                 {userRole === 'user' || !userRole ? (
                   <Link href="/tasks" className={navLinkStyle}>
-                    My Quest
+                    All Quest
                   </Link>
                 ) : (
                   <Link
