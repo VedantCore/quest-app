@@ -249,7 +249,11 @@ export async function submitStep(stepId, userId) {
 /**
  * Manager approves a submission
  */
-export async function approveSubmission(submissionId, managerId) {
+export async function approveSubmission(
+  submissionId,
+  managerId,
+  feedback = ''
+) {
   try {
     const { error } = await supabase
       .from('step_submissions')
@@ -257,6 +261,7 @@ export async function approveSubmission(submissionId, managerId) {
         status: 'APPROVED',
         reviewed_by: managerId,
         reviewed_at: new Date().toISOString(),
+        feedback: feedback,
       })
       .eq('submission_id', submissionId);
 
@@ -270,6 +275,34 @@ export async function approveSubmission(submissionId, managerId) {
   } catch (error) {
     console.error('Error approving submission:', error);
     return { success: false, message: 'Failed to approve submission.' };
+  }
+}
+
+/**
+ * Manager rejects a submission
+ */
+export async function rejectSubmission(submissionId, managerId, feedback = '') {
+  try {
+    const { error } = await supabase
+      .from('step_submissions')
+      .update({
+        status: 'REJECTED',
+        reviewed_by: managerId,
+        reviewed_at: new Date().toISOString(),
+        feedback: feedback,
+      })
+      .eq('submission_id', submissionId);
+
+    if (error) throw error;
+
+    revalidatePath('/manager-dashboard');
+    return {
+      success: true,
+      message: 'Submission rejected.',
+    };
+  } catch (error) {
+    console.error('Error rejecting submission:', error);
+    return { success: false, message: 'Failed to reject submission.' };
   }
 }
 
@@ -326,33 +359,6 @@ export async function getPendingSubmissions(managerId) {
   } catch (error) {
     console.error('Error fetching submissions:', error);
     return { success: false, error: error.message };
-  }
-}
-
-/**
- * Manager rejects a submission
- */
-export async function rejectSubmission(submissionId, managerId) {
-  try {
-    const { error } = await supabase
-      .from('step_submissions')
-      .update({
-        status: 'REJECTED',
-        reviewed_by: managerId,
-        reviewed_at: new Date().toISOString(),
-      })
-      .eq('submission_id', submissionId);
-
-    if (error) throw error;
-
-    revalidatePath('/manager-dashboard');
-    return {
-      success: true,
-      message: 'Submission rejected.',
-    };
-  } catch (error) {
-    console.error('Error rejecting submission:', error);
-    return { success: false, message: 'Failed to reject submission.' };
   }
 }
 

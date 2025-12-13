@@ -75,6 +75,7 @@ export default function TaskDetailsPage() {
           ...step,
           status: submission ? submission.status : 'NOT_STARTED',
           submission_id: submission?.submission_id,
+          feedback: submission?.feedback,
         };
       });
 
@@ -331,6 +332,22 @@ export default function TaskDetailsPage() {
                       <p className="text-gray-600 leading-relaxed mb-4">
                         {step.description}
                       </p>
+
+                      {/* Feedback Display */}
+                      {step.feedback && (
+                        <div
+                          className={`mb-4 p-4 rounded-lg text-sm border ${
+                            step.status === 'REJECTED'
+                              ? 'bg-red-50 border-red-100 text-red-800'
+                              : 'bg-gray-50 border-gray-100 text-gray-700'
+                          }`}
+                        >
+                          <span className="font-bold block mb-1">
+                            Manager Feedback:
+                          </span>
+                          {step.feedback}
+                        </div>
+                      )}
 
                       {/* Action Buttons */}
                       {task.isEnrolled && step.status === 'NOT_STARTED' && (

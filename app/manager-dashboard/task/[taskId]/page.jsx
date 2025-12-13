@@ -23,6 +23,7 @@ export default function TaskParticipantsPage() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [processingStepId, setProcessingStepId] = useState(null);
+  const [feedbacks, setFeedbacks] = useState({});
 
   useEffect(() => {
     if (
@@ -74,20 +75,35 @@ export default function TaskParticipantsPage() {
     if (!submissionId) return;
     setProcessingStepId(submissionId);
 
+    const feedback = feedbacks[submissionId] || '';
+
     let result;
     if (action === 'approve') {
-      result = await approveSubmission(submissionId, user.uid);
+      result = await approveSubmission(submissionId, user.uid, feedback);
     } else {
-      result = await rejectSubmission(submissionId, user.uid);
+      result = await rejectSubmission(submissionId, user.uid, feedback);
     }
 
     if (result.success) {
       toast.success(result.message);
+      // Clear feedback for this submission
+      setFeedbacks((prev) => {
+        const newFeedbacks = { ...prev };
+        delete newFeedbacks[submissionId];
+        return newFeedbacks;
+      });
       await fetchData();
     } else {
       toast.error(result.message);
     }
     setProcessingStepId(null);
+  };
+
+  const handleFeedbackChange = (submissionId, value) => {
+    setFeedbacks((prev) => ({
+      ...prev,
+      [submissionId]: value,
+    }));
   };
 
   useEffect(() => {
@@ -265,60 +281,88 @@ export default function TaskParticipantsPage() {
                           </span>
                         </div>
 
-                        <div className="flex items-center justify-between border-t border-gray-100 pt-4 mt-2">
-                          <div className="flex items-center gap-3">
-                            <span
-                              className={`text-xs font-bold px-2.5 py-1 rounded-full border ${
-                                status === 'APPROVED'
-                                  ? 'bg-green-50 text-green-700 border-green-100'
-                                  : status === 'REJECTED'
-                                  ? 'bg-red-50 text-red-700 border-red-100'
-                                  : status === 'PENDING'
-                                  ? 'bg-yellow-50 text-yellow-800 border-yellow-100'
-                                  : 'bg-gray-100 text-gray-600 border-gray-200'
-                              }`}
-                            >
-                              {status.replace('_', ' ')}
-                            </span>
-                            {submission && (
-                              <span className="text-xs text-gray-400">
-                                {new Date(
-                                  submission.submitted_at
-                                ).toLocaleDateString()}
+                        <div className="flex flex-col gap-3 border-t border-gray-100 pt-4 mt-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <span
+                                className={`text-xs font-bold px-2.5 py-1 rounded-full border ${
+                                  status === 'APPROVED'
+                                    ? 'bg-green-50 text-green-700 border-green-100'
+                                    : status === 'REJECTED'
+                                    ? 'bg-red-50 text-red-700 border-red-100'
+                                    : status === 'PENDING'
+                                    ? 'bg-yellow-50 text-yellow-800 border-yellow-100'
+                                    : 'bg-gray-100 text-gray-600 border-gray-200'
+                                }`}
+                              >
+                                {status.replace('_', ' ')}
                               </span>
+                              {submission && (
+                                <span className="text-xs text-gray-400">
+                                  {new Date(
+                                    submission.submitted_at
+                                  ).toLocaleDateString()}
+                                </span>
+                              )}
+                            </div>
+
+                            {status === 'PENDING' && (
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() =>
+                                    handleAction(
+                                      submission.submission_id,
+                                      'reject'
+                                    )
+                                  }
+                                  disabled={
+                                    processingStepId ===
+                                    submission.submission_id
+                                  }
+                                  className="px-3 py-1.5 text-xs font-semibold text-red-600 border border-red-200 rounded-lg hover:bg-red-50 disabled:opacity-50"
+                                >
+                                  Reject
+                                </button>
+                                <button
+                                  onClick={() =>
+                                    handleAction(
+                                      submission.submission_id,
+                                      'approve'
+                                    )
+                                  }
+                                  disabled={
+                                    processingStepId ===
+                                    submission.submission_id
+                                  }
+                                  className="px-3 py-1.5 text-xs font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50 shadow-sm"
+                                >
+                                  Approve
+                                </button>
+                              </div>
                             )}
                           </div>
 
-                          {status === 'PENDING' && (
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() =>
-                                  handleAction(
-                                    submission.submission_id,
-                                    'reject'
-                                  )
-                                }
-                                disabled={
-                                  processingStepId === submission.submission_id
-                                }
-                                className="px-3 py-1.5 text-xs font-semibold text-red-600 border border-red-200 rounded-lg hover:bg-red-50 disabled:opacity-50"
-                              >
-                                Reject
-                              </button>
-                              <button
-                                onClick={() =>
-                                  handleAction(
-                                    submission.submission_id,
-                                    'approve'
-                                  )
-                                }
-                                disabled={
-                                  processingStepId === submission.submission_id
-                                }
-                                className="px-3 py-1.5 text-xs font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50 shadow-sm"
-                              >
-                                Approve
-                              </button>
+                          {status === 'PENDING' && submission && (
+                            <textarea
+                              placeholder="Add feedback (optional)..."
+                              value={feedbacks[submission.submission_id] || ''}
+                              onChange={(e) =>
+                                handleFeedbackChange(
+                                  submission.submission_id,
+                                  e.target.value
+                                )
+                              }
+                              className="w-full text-sm p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none"
+                              rows={2}
+                            />
+                          )}
+
+                          {submission?.feedback && (
+                            <div className="bg-gray-50 p-3 rounded-lg text-sm text-gray-600 mt-2">
+                              <span className="font-semibold text-gray-900">
+                                Feedback:
+                              </span>{' '}
+                              {submission.feedback}
                             </div>
                           )}
                         </div>
