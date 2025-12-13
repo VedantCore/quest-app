@@ -29,7 +29,15 @@ export default function RootLayout({ children }) {
 
         <div className="relative z-10">
           <AuthProvider>
-            <Toaster position="top-right" />
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                className: 'z-[9999]',
+                style: {
+                  zIndex: 9999,
+                },
+              }}
+            />
             {children}
           </AuthProvider>
         </div>

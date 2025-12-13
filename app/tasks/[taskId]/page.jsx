@@ -118,24 +118,29 @@ export default function TaskDetailsPage() {
 
   const handleSubmit = async (stepId) => {
     if (!user) return;
-    if (!confirm('Are you sure you want to submit this step for review?'))
-      return;
 
     setSubmittingStepId(stepId);
-    try {
+
+    const submitAction = async () => {
       const result = await submitStep(stepId, user.uid, 'Submitted for review');
-      if (result.success) {
-        toast.success('Step submitted successfully!');
-        fetchTask(); // Refresh data
-      } else {
-        toast.error(result.error || 'Failed to submit step');
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to submit step');
       }
-    } catch (error) {
-      console.error('Error submitting step:', error);
-      toast.error('An error occurred');
-    } finally {
-      setSubmittingStepId(null);
-    }
+      return result;
+    };
+
+    toast
+      .promise(submitAction(), {
+        loading: 'Submitting step...',
+        success: () => {
+          fetchTask(); // Refresh data
+          return 'Step submitted successfully!';
+        },
+        error: (err) => err.message || 'An error occurred',
+      })
+      .finally(() => {
+        setSubmittingStepId(null);
+      });
   };
 
   if (loading || isLoading) {

@@ -192,20 +192,50 @@ export async function joinTask(taskId, userId) {
  */
 export async function submitStep(stepId, userId) {
   try {
-    const { error } = await supabase.from('step_submissions').insert({
-      step_id: stepId,
-      user_id: userId,
-      status: 'PENDING',
-    });
+    // Check if submission exists
+    const { data: existingSubmission } = await supabase
+      .from('step_submissions')
+      .select('submission_id, status')
+      .eq('step_id', stepId)
+      .eq('user_id', userId)
+      .single();
 
-    if (error) {
-      if (error.code === '23505') {
+    if (existingSubmission) {
+      // If already approved, don't allow resubmission
+      if (existingSubmission.status === 'APPROVED') {
         return {
           success: false,
-          message: 'You have already submitted this step.',
+          message: 'This step is already approved.',
         };
       }
-      throw error;
+
+      // If pending, don't allow resubmission
+      if (existingSubmission.status === 'PENDING') {
+        return {
+          success: false,
+          message: 'This step is already pending review.',
+        };
+      }
+
+      // If REJECTED, update to PENDING
+      const { error } = await supabase
+        .from('step_submissions')
+        .update({
+          status: 'PENDING',
+          submitted_at: new Date().toISOString(),
+        })
+        .eq('submission_id', existingSubmission.submission_id);
+
+      if (error) throw error;
+    } else {
+      // Create new submission
+      const { error } = await supabase.from('step_submissions').insert({
+        step_id: stepId,
+        user_id: userId,
+        status: 'PENDING',
+      });
+
+      if (error) throw error;
     }
 
     revalidatePath('/user-dashboard');
