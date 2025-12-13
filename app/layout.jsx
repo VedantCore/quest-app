@@ -22,7 +22,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-[#faf8eb] relative font-sans text-[#13B5A0]`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-white relative font-sans text-slate-800`}
       >
         {/* Grid Background */}
         <div className="absolute inset-0 bg-grid-pattern opacity-[0.6] pointer-events-none z-0" />

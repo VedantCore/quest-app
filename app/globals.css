@@ -1,18 +1,19 @@
 @import 'tailwindcss';
 
 :root {
-  --background: #faf8eb;
-  --foreground: #13b5a0;
-  --primary: #13b5a0;
+  --background: #ffffff;
+  --foreground: #1e293b;
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
   --primary-ink: #ffffff;
   --surface: #ffffff;
-  --muted-surface: #f0fdf4; /* green-50 - keeping for now or should I change? */
-  --border: #bbf7d0; /* green-200 */
-  --text: #13b5a0;
-  --text-muted: #0f9080; /* darker shade of 13B5A0 */
-  --success: #16a34a; /* green-600 */
-  --warning: #ca8a04; /* amber-600 */
-  --danger: #dc2626; /* red-600 */
+  --muted-surface: #f8fafc;
+  --border: #e2e8f0;
+  --text: #1e293b;
+  --text-muted: #64748b;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
 }
 
 @theme inline {
@@ -32,7 +33,14 @@ body {
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  transition: all 0.2s ease-in-out;
+}
+
+.card:hover {
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  transform: translateY(-2px);
 }
 
 .muted {
@@ -42,4 +50,18 @@ body {
 .btn-primary {
   background: var(--primary);
   color: var(--primary-ink);
+  transition: all 0.2s;
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgb(79 70 229 / 0.2),
+    0 2px 4px -1px rgb(79 70 229 / 0.1);
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }

@@ -51,7 +51,7 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedTaskId, setExpandedTaskId] = useState(null);
-  const [selectedTask, setSelectedTask] = useState(null); 
+  const [selectedTask, setSelectedTask] = useState(null);
   const [filter, setFilter] = useState(mode === 'available' ? 'latest' : 'all');
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState(null);
@@ -204,7 +204,7 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
     const result = await joinTask(taskId, userId);
     if (result.success) {
       toast.success('Successfully joined the quest!');
-      fetchUserTasks(); 
+      fetchUserTasks();
     } else {
       toast.error(result.message);
     }
@@ -320,9 +320,9 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
   return (
     <div className="space-y-6">
       {/* Modal */}
-      <TaskDetailsModal 
-        task={selectedTask} 
-        isOpen={!!selectedTask} 
+      <TaskDetailsModal
+        task={selectedTask}
+        isOpen={!!selectedTask}
         onClose={() => setSelectedTask(null)}
         onJoin={handleJoin}
         isEnrolled={selectedTask?.isEnrolled}
@@ -411,15 +411,15 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2 flex-wrap">
-                      <h3 className="text-lg font-bold text-[#13B5A0] leading-tight">
+                      <h3 className="text-lg font-bold text-slate-900 leading-tight">
                         {task.title}
                       </h3>
                       {task.isEnrolled ? (
                         <span
                           className={`px-2.5 py-0.5 rounded text-[10px] uppercase font-bold tracking-wide border ${
                             task.progress === 100
-                              ? 'bg-[#13B5A0] text-white border-[#13B5A0]'
-                              : 'bg-green-50 text-[#13B5A0] border-green-200'
+                              ? 'bg-emerald-600 text-white border-emerald-600'
+                              : 'bg-indigo-50 text-indigo-600 border-indigo-200'
                           }`}
                         >
                           {task.progress === 100 ? 'Completed' : 'Enrolled'}
@@ -441,24 +441,49 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
                 <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-100">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-3 text-xs font-medium text-gray-500">
                     <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg">
-                        <svg className="w-3.5 h-3.5 text-[#13B5A0]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      <div className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg">
+                        <svg
+                          className="w-3.5 h-3.5 text-indigo-600"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
                         </svg>
                         {task.earnedPoints}/{task.totalPoints} pts
-                        </div>
-                        <div className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg">
-                            <span className="text-gray-600">
-                                Due: {getDeadline(task.created_at)}
-                            </span>
-                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg">
+                        <span className="text-gray-600">
+                          Due: {getDeadline(task.created_at)}
+                        </span>
+                      </div>
                     </div>
                     {task.manager && (
-                      <div className="hidden sm:flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg" title={`Manager: ${task.manager.name}`}>
-                        <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      <div
+                        className="hidden sm:flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg"
+                        title={`Manager: ${task.manager.name}`}
+                      >
+                        <svg
+                          className="w-3.5 h-3.5 text-gray-400"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                          />
                         </svg>
-                        <span className="truncate max-w-[80px]">{task.manager.name}</span>
+                        <span className="truncate max-w-[80px]">
+                          {task.manager.name}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -470,30 +495,42 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
                     >
                       Details
                     </button>
-                    
-                    {!task.isEnrolled && !isStaff && ( // Only show if NOT enrolled AND NOT staff
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleJoin(task.task_id);
-                        }}
-                        className="text-xs font-semibold text-white bg-[#13B5A0] hover:bg-[#11a390] px-3 py-1.5 rounded-lg transition-colors shadow-sm"
-                      >
-                        Join
-                      </button>
-                    )}
-                    
+
+                    {!task.isEnrolled &&
+                      !isStaff && ( // Only show if NOT enrolled AND NOT staff
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleJoin(task.task_id);
+                          }}
+                          className="text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-lg transition-colors shadow-sm"
+                        >
+                          Join
+                        </button>
+                      )}
+
                     {task.isEnrolled && (
                       <button
-                        onClick={() => setExpandedTaskId(isExpanded ? null : task.task_id)}
-                        className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 ${isExpanded ? 'bg-gray-200 text-gray-800' : 'bg-[#13B5A0]/10 text-[#13B5A0] hover:bg-[#13B5A0]/20'}`}
+                        onClick={() =>
+                          setExpandedTaskId(isExpanded ? null : task.task_id)
+                        }
+                        className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 ${
+                          isExpanded
+                            ? 'bg-gray-200 text-gray-800'
+                            : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'
+                        }`}
                       >
                         {isExpanded ? 'Hide Steps' : 'Show Steps'}
                         <svg
                           viewBox="0 0 24 24"
-                          className={`h-3 w-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                          className={`h-3 w-3 transition-transform ${
+                            isExpanded ? 'rotate-180' : ''
+                          }`}
                         >
-                          <path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" />
+                          <path
+                            fill="currentColor"
+                            d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"
+                          />
                         </svg>
                       </button>
                     )}
@@ -518,9 +555,13 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
                           <div className="flex items-start justify-between gap-3">
                             <div className="flex-1">
                               <div className="flex items-center gap-2">
-                                <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
-                                  step.status === 'APPROVED' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
-                                }`}>
+                                <span
+                                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
+                                    step.status === 'APPROVED'
+                                      ? 'bg-green-100 text-green-700'
+                                      : 'bg-gray-100 text-gray-500'
+                                  }`}
+                                >
                                   {index + 1}
                                 </span>
                                 <p
@@ -562,8 +603,18 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
                               )}
                               {step.status === 'APPROVED' && (
                                 <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-green-100 text-green-700 border border-green-200 flex items-center gap-1">
-                                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                  <svg
+                                    className="w-3 h-3"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={3}
+                                      d="M5 13l4 4L19 7"
+                                    />
                                   </svg>
                                   Done
                                 </span>
@@ -579,7 +630,9 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-500 text-center py-2">No steps available for this quest.</p>
+                    <p className="text-sm text-gray-500 text-center py-2">
+                      No steps available for this quest.
+                    </p>
                   )}
                 </div>
               )}

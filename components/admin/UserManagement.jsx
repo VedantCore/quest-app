@@ -125,7 +125,7 @@ export default function UserManagement() {
           <svg
             className={`w-2.5 h-2.5 ${
               isActive && direction === 'asc'
-                ? 'text-[#13B5A0]'
+                ? 'text-indigo-600'
                 : 'text-gray-300 group-hover:text-gray-400'
             }`}
             fill="currentColor"
@@ -136,7 +136,7 @@ export default function UserManagement() {
           <svg
             className={`w-2.5 h-2.5 -mt-0.5 ${
               isActive && direction === 'desc'
-                ? 'text-[#13B5A0]'
+                ? 'text-indigo-600'
                 : 'text-gray-300 group-hover:text-gray-400'
             }`}
             fill="currentColor"
@@ -242,7 +242,7 @@ export default function UserManagement() {
             <div className="text-sm font-medium text-gray-500 mb-1 flex items-center gap-2">
               {stat.icon} {stat.label}
             </div>
-            <div className="text-2xl font-bold text-[#13B5A0]">
+            <div className="text-2xl font-bold text-indigo-600">
               {stat.value}
             </div>
           </div>
@@ -314,10 +314,10 @@ export default function UserManagement() {
                   >
                     <td className="px-6 py-4 whitespace-nowrap min-w-[200px]">
                       <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-[#13B5A0] flex items-center justify-center text-white text-sm font-medium">
+                        <div className="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-sm font-medium">
                           {user.name?.charAt(0).toUpperCase() || 'U'}
                         </div>
-                        <div className="text-sm font-medium text-[#13B5A0]">
+                        <div className="text-sm font-medium text-gray-900">
                           {user.name || 'No name'}
                         </div>
                       </div>
@@ -333,9 +333,9 @@ export default function UserManagement() {
                         }
                         className={`px-3 py-1 text-xs font-medium rounded-full border cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1 ${
                           user.role === 'admin'
-                            ? 'bg-[#13B5A0] text-white border-[#13B5A0]'
+                            ? 'bg-purple-100 text-purple-700 border-purple-200'
                             : user.role === 'manager'
-                            ? 'bg-[#13B5A0] text-white border-[#13B5A0]'
+                            ? 'bg-indigo-100 text-indigo-700 border-indigo-200'
                             : 'bg-gray-100 text-gray-700 border-gray-200'
                         }`}
                       >
@@ -350,7 +350,7 @@ export default function UserManagement() {
                         </option>
                       </select>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#13B5A0]">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
                       {user.total_points || 0} pts
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

@@ -41,20 +41,20 @@ export default function TaskDetailsPage() {
   if (loading || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#13B5A0]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
       </div>
     );
   }
 
   if (!task) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-white">
         <Navbar />
         <div className="max-w-7xl mx-auto px-6 py-12 text-center">
           <h2 className="text-2xl font-bold text-gray-700">Task not found</h2>
           <button
             onClick={() => router.back()}
-            className="mt-4 text-[#13B5A0] hover:underline"
+            className="mt-4 text-indigo-600 hover:underline"
           >
             Go back
           </button>
@@ -64,7 +64,7 @@ export default function TaskDetailsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans">
+    <div className="min-h-screen bg-white font-sans">
       <Navbar />
 
       <div className="max-w-5xl mx-auto px-6 py-12">
@@ -87,7 +87,7 @@ export default function TaskDetailsPage() {
                 </span>
                 <div className="flex items-center gap-1">
                   <span className="font-medium">Level:</span>
-                  <span className="text-[#13B5A0]">
+                  <span className="text-indigo-600">
                     {'★'.repeat(task.level) + '☆'.repeat(5 - task.level)}
                   </span>
                 </div>
@@ -130,7 +130,7 @@ export default function TaskDetailsPage() {
                   className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#13B5A0]/10 flex items-center justify-center text-[#13B5A0] font-bold text-lg">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold text-lg">
                       {index + 1}
                     </div>
                     <div className="flex-grow">

@@ -119,10 +119,10 @@ export default function ManagerList() {
                   >
                     <td className="px-6 py-4 whitespace-nowrap min-w-[200px]">
                       <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-[#13B5A0] flex items-center justify-center text-white text-sm font-medium">
+                        <div className="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-sm font-medium">
                           {manager.name?.charAt(0).toUpperCase() || 'M'}
                         </div>
-                        <div className="text-sm font-medium text-[#13B5A0]">
+                        <div className="text-sm font-medium text-gray-900">
                           {manager.name || 'No name'}
                         </div>
                       </div>
@@ -138,7 +138,7 @@ export default function ManagerList() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <button
                         onClick={() => handleViewTasks(manager)}
-                        className="text-[#13B5A0] hover:text-[#0f9080] font-medium transition-colors"
+                        className="text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
                       >
                         View Tasks
                       </button>
@@ -187,7 +187,7 @@ export default function ManagerList() {
             <div className="p-6 overflow-y-auto custom-scrollbar">
               {loadingTasks ? (
                 <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#13B5A0] mb-3"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-3"></div>
                   <p>Loading tasks...</p>
                 </div>
               ) : managerTasks.length === 0 ? (
@@ -217,10 +217,10 @@ export default function ManagerList() {
                       onClick={() =>
                         window.open(`/tasks/${task.task_id}`, '_blank')
                       }
-                      className="group bg-white border border-gray-200 rounded-xl p-4 hover:border-[#13B5A0] hover:shadow-md transition-all duration-200 cursor-pointer"
+                      className="group bg-white border border-gray-200 rounded-xl p-4 hover:border-indigo-600 hover:shadow-md transition-all duration-200 cursor-pointer"
                     >
                       <div className="flex justify-between items-start mb-3">
-                        <h4 className="font-bold text-gray-900 group-hover:text-[#13B5A0] transition-colors">
+                        <h4 className="font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">
                           {task.title}
                         </h4>
                         <span
@@ -241,7 +241,7 @@ export default function ManagerList() {
                           <span className="font-medium text-gray-700">
                             Level:
                           </span>
-                          <span className="text-[#13B5A0]">
+                          <span className="text-indigo-600">
                             {'★'.repeat(task.level) +
                               '☆'.repeat(5 - task.level)}
                           </span>

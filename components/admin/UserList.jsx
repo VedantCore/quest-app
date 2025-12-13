@@ -168,7 +168,7 @@ export default function UserList() {
           <svg
             className={`w-2.5 h-2.5 ${
               isActive && direction === 'asc'
-                ? 'text-[#13B5A0]'
+                ? 'text-indigo-600'
                 : 'text-gray-300 group-hover:text-gray-400'
             }`}
             fill="currentColor"
@@ -179,7 +179,7 @@ export default function UserList() {
           <svg
             className={`w-2.5 h-2.5 -mt-0.5 ${
               isActive && direction === 'desc'
-                ? 'text-[#13B5A0]'
+                ? 'text-indigo-600'
                 : 'text-gray-300 group-hover:text-gray-400'
             }`}
             fill="currentColor"
@@ -249,10 +249,10 @@ export default function UserList() {
                   >
                     <td className="px-6 py-4 whitespace-nowrap min-w-[200px]">
                       <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-[#13B5A0] flex items-center justify-center text-white text-sm font-medium">
+                        <div className="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-sm font-medium">
                           {user.name?.charAt(0).toUpperCase() || 'U'}
                         </div>
-                        <div className="text-sm font-medium text-[#13B5A0]">
+                        <div className="text-sm font-medium text-gray-900">
                           {user.name || 'No name'}
                         </div>
                       </div>
@@ -260,7 +260,7 @@ export default function UserList() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                       {user.email}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#13B5A0]">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
                       {user.total_points || 0} pts
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -271,7 +271,7 @@ export default function UserList() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <button
                         onClick={() => handleViewTasks(user)}
-                        className="text-[#13B5A0] hover:text-[#0f9080] font-medium transition-colors"
+                        className="text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
                       >
                         View Tasks
                       </button>
@@ -320,7 +320,7 @@ export default function UserList() {
             <div className="p-6 overflow-y-auto custom-scrollbar">
               {loadingTasks ? (
                 <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#13B5A0] mb-3"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-3"></div>
                   <p>Loading tasks...</p>
                 </div>
               ) : userTasks.length === 0 ? (
@@ -350,10 +350,10 @@ export default function UserList() {
                       onClick={() =>
                         window.open(`/tasks/${task.task_id}`, '_blank')
                       }
-                      className="group bg-white border border-gray-200 rounded-xl p-4 hover:border-[#13B5A0] hover:shadow-md transition-all duration-200 cursor-pointer"
+                      className="group bg-white border border-gray-200 rounded-xl p-4 hover:border-indigo-600 hover:shadow-md transition-all duration-200 cursor-pointer"
                     >
                       <div className="flex justify-between items-start mb-3">
-                        <h4 className="font-bold text-gray-900 group-hover:text-[#13B5A0] transition-colors">
+                        <h4 className="font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">
                           {task.title}
                         </h4>
                         <span
@@ -374,7 +374,7 @@ export default function UserList() {
                           <span className="font-medium text-gray-700">
                             Level:
                           </span>
-                          <span className="text-[#13B5A0]">
+                          <span className="text-indigo-600">
                             {'★'.repeat(task.level) +
                               '☆'.repeat(5 - task.level)}
                           </span>
@@ -395,7 +395,7 @@ export default function UserList() {
                           <span className="font-medium text-gray-700">
                             Points:
                           </span>
-                          <span className="text-[#13B5A0] font-bold">
+                          <span className="text-indigo-600 font-bold">
                             {task.earned_points} / {task.total_points}
                           </span>
                         </div>
