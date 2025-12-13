@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { joinTask, submitStep } from '@/app/actions';
+import { useAuth } from '@/context/AuthContext'; //
 import TaskDetailsModal from './TaskDetailsModal';
 import toast from 'react-hot-toast';
 
@@ -46,10 +47,11 @@ const CircularProgress = ({ percentage, size = 50, strokeWidth = 4 }) => {
 };
 
 export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
+  const { userRole } = useAuth(); // Get user role
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedTaskId, setExpandedTaskId] = useState(null);
-  const [selectedTask, setSelectedTask] = useState(null); // For Modal
+  const [selectedTask, setSelectedTask] = useState(null); 
   const [filter, setFilter] = useState(mode === 'available' ? 'latest' : 'all');
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState(null);
@@ -397,6 +399,7 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filteredTasks.map((task) => {
           const isExpanded = expandedTaskId === task.task_id;
+          const isStaff = userRole === 'admin' || userRole === 'manager'; // Check if staff
 
           return (
             <div
@@ -468,7 +471,7 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
                       Details
                     </button>
                     
-                    {!task.isEnrolled && (
+                    {!task.isEnrolled && !isStaff && ( // Only show if NOT enrolled AND NOT staff
                       <button
                         onClick={(e) => {
                           e.stopPropagation();

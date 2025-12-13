@@ -76,9 +76,14 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }) {
 
       // Redirect based on role
       const role = existingUser?.role || 'user';
-      if (role === 'admin') router.push('/admin-dashboard');
-      else if (role === 'manager') router.push('/manager-dashboard');
-      else router.push('/tasks');
+      if (role === 'admin') {
+        router.push('/admin-dashboard');
+      } else if (role === 'manager') {
+        router.push('/manager-dashboard');
+      } else {
+        // CHANGED: Redirect to User Dashboard instead of /tasks
+        router.push('/user-dashboard');
+      }
     } catch (err) {
       toast.error(err.message);
     }
@@ -139,9 +144,14 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }) {
 
       // Redirect based on role
       const role = existingUser?.role || 'user';
-      if (role === 'admin') router.push('/admin-dashboard');
-      else if (role === 'manager') router.push('/manager-dashboard');
-      else router.push('/tasks');
+      if (role === 'admin') {
+        router.push('/admin-dashboard');
+      } else if (role === 'manager') {
+        router.push('/manager-dashboard');
+      } else {
+        // CHANGED: Redirect to User Dashboard instead of /tasks
+        router.push('/user-dashboard');
+      }
     } catch (err) {
       toast.error(err.message);
     }

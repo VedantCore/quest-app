@@ -1,8 +1,10 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { getTaskParticipants } from '@/app/actions';
+import { useAuth } from '@/context/AuthContext'; //
 
 export default function TaskDetailsModal({ task, isOpen, onClose, onJoin, isEnrolled }) {
+  const { userRole } = useAuth(); // Get user role
   const [participants, setParticipants] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -27,6 +29,8 @@ export default function TaskDetailsModal({ task, isOpen, onClose, onJoin, isEnro
   };
 
   if (!isOpen || !task) return null;
+
+  const isStaff = userRole === 'admin' || userRole === 'manager'; // Check if staff
 
   // Calculate deadline (Created + 30 days logic)
   const getDeadline = (dateStr) => {
@@ -179,7 +183,7 @@ export default function TaskDetailsModal({ task, isOpen, onClose, onJoin, isEnro
           >
             Close
           </button>
-          {!isEnrolled && (
+          {!isEnrolled && !isStaff && ( // Check if NOT staff
             <button
               onClick={() => {
                 onJoin(task.task_id);
