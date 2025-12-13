@@ -314,9 +314,17 @@ export default function UserManagement() {
                   >
                     <td className="px-6 py-4 whitespace-nowrap min-w-[200px]">
                       <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-sm font-medium">
-                          {user.name?.charAt(0).toUpperCase() || 'U'}
-                        </div>
+                        {user.avatar_url ? (
+                          <img
+                            src={user.avatar_url}
+                            alt={user.name}
+                            className="h-9 w-9 rounded-full object-cover border border-gray-200"
+                          />
+                        ) : (
+                          <div className="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-sm font-medium">
+                            {user.name?.charAt(0).toUpperCase() || 'U'}
+                          </div>
+                        )}
                         <div className="text-sm font-medium text-gray-900">
                           {user.name || 'No name'}
                         </div>

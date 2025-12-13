@@ -157,13 +157,15 @@ export default function TaskParticipantsPage() {
                   <div className="flex-shrink-0">
                     {participant.avatar_url ? (
                       <img
-                        className="h-10 w-10 rounded-full border border-gray-200"
+                        className="h-10 w-10 rounded-full border border-gray-200 object-cover"
                         src={participant.avatar_url}
                         alt=""
                       />
                     ) : (
                       <div className="h-10 w-10 rounded-full bg-[#171717] flex items-center justify-center text-white font-bold text-sm">
-                        {participant.email[0].toUpperCase()}
+                        {(participant.name || participant.email || '?')
+                          .charAt(0)
+                          .toUpperCase()}
                       </div>
                     )}
                   </div>

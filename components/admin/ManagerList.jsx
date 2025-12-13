@@ -119,9 +119,17 @@ export default function ManagerList() {
                   >
                     <td className="px-6 py-4 whitespace-nowrap min-w-[200px]">
                       <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-sm font-medium">
-                          {manager.name?.charAt(0).toUpperCase() || 'M'}
-                        </div>
+                        {manager.avatar_url ? (
+                          <img
+                            src={manager.avatar_url}
+                            alt={manager.name}
+                            className="h-9 w-9 rounded-full object-cover border border-gray-200"
+                          />
+                        ) : (
+                          <div className="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-sm font-medium">
+                            {manager.name?.charAt(0).toUpperCase() || 'M'}
+                          </div>
+                        )}
                         <div className="text-sm font-medium text-gray-900">
                           {manager.name || 'No name'}
                         </div>
