@@ -11,6 +11,10 @@ export default function UserList() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [userTasks, setUserTasks] = useState([]);
   const [loadingTasks, setLoadingTasks] = useState(false);
+  const [sortConfig, setSortConfig] = useState({
+    key: 'created_at',
+    direction: 'desc',
+  });
 
   useEffect(() => {
     fetchUsers();
@@ -45,7 +49,8 @@ export default function UserList() {
           joined_at,
           tasks (
             *,
-            task_steps (points_reward)
+            task_steps (points_reward),
+            manager:users!assigned_manager_id (name)
           )
         `
         )
@@ -118,6 +123,75 @@ export default function UserList() {
     );
   });
 
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedUsers = [...filteredUsers].sort((a, b) => {
+    let aValue = a[sortConfig.key];
+    let bValue = b[sortConfig.key];
+
+    // Handle null/undefined values
+    if (aValue === null || aValue === undefined) aValue = '';
+    if (bValue === null || bValue === undefined) bValue = '';
+
+    // Special handling for numbers (points)
+    if (sortConfig.key === 'total_points') {
+      aValue = Number(aValue) || 0;
+      bValue = Number(bValue) || 0;
+    }
+
+    if (aValue < bValue) {
+      return sortConfig.direction === 'asc' ? -1 : 1;
+    }
+    if (aValue > bValue) {
+      return sortConfig.direction === 'asc' ? 1 : -1;
+    }
+    return 0;
+  });
+
+  const renderSortableHeader = (label, key) => {
+    const isActive = sortConfig.key === key;
+    const direction = sortConfig.direction;
+
+    return (
+      <div
+        className="flex items-center gap-1 cursor-pointer group"
+        onClick={() => handleSort(key)}
+      >
+        <span>{label}</span>
+        <div className="flex flex-col">
+          <svg
+            className={`w-2.5 h-2.5 ${
+              isActive && direction === 'asc'
+                ? 'text-[#13B5A0]'
+                : 'text-gray-300 group-hover:text-gray-400'
+            }`}
+            fill="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path d="M7 14l5-5 5 5H7z" />
+          </svg>
+          <svg
+            className={`w-2.5 h-2.5 -mt-0.5 ${
+              isActive && direction === 'desc'
+                ? 'text-[#13B5A0]'
+                : 'text-gray-300 group-hover:text-gray-400'
+            }`}
+            fill="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path d="M7 10l5 5 5-5H7z" />
+          </svg>
+        </div>
+      </div>
+    );
+  };
+
   if (loading)
     return (
       <div className="text-center py-12 text-gray-500">Loading users...</div>
@@ -141,13 +215,16 @@ export default function UserList() {
             <thead className="bg-gray-50/50">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  User
+                  {renderSortableHeader('User', 'name')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Email
+                  {renderSortableHeader('Email', 'email')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Joined
+                  {renderSortableHeader('Points', 'total_points')}
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  {renderSortableHeader('Joined', 'created_at')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   Actions
@@ -155,17 +232,17 @@ export default function UserList() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-100">
-              {filteredUsers.length === 0 ? (
+              {sortedUsers.length === 0 ? (
                 <tr>
                   <td
-                    colSpan="4"
+                    colSpan="5"
                     className="px-6 py-12 text-center text-gray-500"
                   >
                     No users found.
                   </td>
                 </tr>
               ) : (
-                filteredUsers.map((user) => (
+                sortedUsers.map((user) => (
                   <tr
                     key={user.user_id}
                     className="hover:bg-gray-50/50 transition-colors"
@@ -182,6 +259,9 @@ export default function UserList() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                       {user.email}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#13B5A0]">
+                      {user.total_points || 0} pts
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {user.created_at
@@ -317,6 +397,15 @@ export default function UserList() {
                           </span>
                           <span className="text-[#13B5A0] font-bold">
                             {task.earned_points} / {task.total_points}
+                          </span>
+                        </div>
+                        <div className="w-px h-3 bg-gray-300"></div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-medium text-gray-700">
+                            Manager:
+                          </span>
+                          <span className="text-gray-900">
+                            {task.manager?.name || 'Unassigned'}
                           </span>
                         </div>
                       </div>
