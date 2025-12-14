@@ -370,17 +370,15 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
           return (
             <div
               key={task.task_id}
-              className="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-200 hover:shadow-md hover:border-gray-300 flex flex-col h-full"
+              onClick={() => router.push(`/tasks/${task.task_id}`)}
+              className="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-200 hover:shadow-md hover:border-gray-300 flex flex-col h-full cursor-pointer group"
             >
               {/* Task Header */}
               <div className="p-5 flex-1 flex flex-col">
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2 flex-wrap">
-                      <h3
-                        className="text-lg font-bold text-slate-900 leading-tight cursor-pointer hover:text-indigo-600 transition-colors"
-                        onClick={() => router.push(`/tasks/${task.task_id}`)}
-                      >
+                      <h3 className="text-lg font-bold text-slate-900 leading-tight group-hover:text-indigo-600 transition-colors">
                         {task.title}
                       </h3>
                       {task.isEnrolled ? (
@@ -458,10 +456,7 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => router.push(`/tasks/${task.task_id}`)}
-                      className="text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition-colors"
-                    >
+                    <button className="text-xs font-semibold text-gray-600 bg-gray-100 group-hover:bg-gray-200 px-3 py-1.5 rounded-lg transition-colors">
                       Details
                     </button>
                   </div>
