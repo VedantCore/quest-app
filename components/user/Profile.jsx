@@ -16,6 +16,7 @@ export default function Profile({ userId, onStatsUpdate }) {
   const [totalPoints, setTotalPoints] = useState(0);
   const [historyFilter, setHistoryFilter] = useState('all');
   const [uploading, setUploading] = useState(false);
+  const [expandedTasks, setExpandedTasks] = useState({});
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -37,7 +38,7 @@ export default function Profile({ userId, onStatsUpdate }) {
       const { data: historyData, error: historyError } = await supabase
         .from('user_point_history')
         .select(
-          `history_id, points_earned, earned_at, step:task_steps (title, task:tasks (title))`
+          `history_id, points_earned, earned_at, step:task_steps (title, task:tasks (title, task_id))`
         )
         .eq('user_id', userId)
         .order('earned_at', { ascending: false });
@@ -172,6 +173,32 @@ export default function Profile({ userId, onStatsUpdate }) {
   };
 
   const filteredHistory = filterHistory();
+
+  // Group history by task
+  const groupedHistory = filteredHistory.reduce((acc, item) => {
+    const taskId = item.step?.task?.task_id || 'general';
+    const taskTitle = item.step?.task?.title || 'General Awards';
+
+    if (!acc[taskId]) {
+      acc[taskId] = {
+        taskId,
+        title: taskTitle,
+        totalPoints: 0,
+        items: [],
+      };
+    }
+
+    acc[taskId].items.push(item);
+    acc[taskId].totalPoints += item.points_earned;
+    return acc;
+  }, {});
+
+  const toggleTask = (taskId) => {
+    setExpandedTasks((prev) => ({
+      ...prev,
+      [taskId]: !prev[taskId],
+    }));
+  };
 
   return (
     <div className="space-y-8">
@@ -493,8 +520,8 @@ export default function Profile({ userId, onStatsUpdate }) {
             ))}
           </div>
         </div>
-        <div className="divide-y divide-gray-100 max-h-[400px] overflow-y-auto">
-          {filteredHistory.length === 0 ? (
+        <div className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
+          {Object.keys(groupedHistory).length === 0 ? (
             <div className="p-12 text-center">
               <div className="flex justify-center mb-3">
                 <svg
@@ -516,15 +543,51 @@ export default function Profile({ userId, onStatsUpdate }) {
               </p>
             </div>
           ) : (
-            filteredHistory.map((item) => (
+            Object.values(groupedHistory).map((group) => (
               <div
-                key={item.history_id}
-                className="px-6 py-4 hover:bg-gray-50 transition-colors flex items-center justify-between"
+                key={group.taskId}
+                className="border-b border-gray-100 last:border-0"
               >
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600">
+                <div
+                  onClick={() => toggleTask(group.taskId)}
+                  className="px-6 py-4 hover:bg-gray-50 transition-colors flex items-center justify-between cursor-pointer"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-slate-900 text-sm">
+                        {group.title}
+                      </h4>
+                      <p className="text-xs text-gray-500">
+                        {group.items.length} step
+                        {group.items.length !== 1 ? 's' : ''} completed
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full text-sm border border-indigo-100">
+                      +{group.totalPoints} pts
+                    </div>
                     <svg
-                      className="w-5 h-5"
+                      className={`w-5 h-5 text-gray-400 transition-transform ${
+                        expandedTasks[group.taskId]
+                          ? 'transform rotate-180'
+                          : ''
+                      }`}
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -533,25 +596,38 @@ export default function Profile({ userId, onStatsUpdate }) {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M13 10V3L4 14h7v7l9-11h-7z"
+                        d="M19 9l-7 7-7-7"
                       />
                     </svg>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-slate-900 text-sm">
-                      {item.step?.title || 'Task Completed'}
-                    </h4>
-                    <p className="text-xs text-gray-500">
-                      {item.step?.task
-                        ? `From: ${item.step.task.title}`
-                        : 'General Award'}{' '}
-                      • {formatDate(item.earned_at)}
-                    </p>
+                </div>
+
+                {/* Expanded Steps */}
+                {expandedTasks[group.taskId] && (
+                  <div className="bg-gray-50 px-6 py-2 border-t border-gray-100">
+                    {group.items.map((item) => (
+                      <div
+                        key={item.history_id}
+                        className="py-3 flex items-center justify-between border-b border-gray-200 last:border-0"
+                      >
+                        <div className="flex items-center gap-3 pl-14">
+                          <div className="w-2 h-2 rounded-full bg-gray-300"></div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-700">
+                              {item.step?.title || 'Task Completed'}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {formatDate(item.earned_at)}
+                            </p>
+                          </div>
+                        </div>
+                        <span className="text-sm font-semibold text-gray-600">
+                          +{item.points_earned}
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                </div>
-                <div className="font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full text-sm border border-indigo-100">
-                  +{item.points_earned} pts
-                </div>
+                )}
               </div>
             ))
           )}
