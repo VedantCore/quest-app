@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { getManagerTasks, getAllTasks } from '@/app/actions';
+import { getManagerTasks, getAllTasks, getUserCompanies } from '@/app/actions';
 import toast from 'react-hot-toast';
 import Navbar from '@/components/Navbar';
 import ManagerTaskDetailsModal from '@/components/manager/ManagerTaskDetailsModal';
@@ -15,6 +15,8 @@ export default function ManagerDashboard() {
   const [myTasks, setMyTasks] = useState([]);
   const [allTasks, setAllTasks] = useState([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
+  const [companies, setCompanies] = useState([]);
+  const [selectedCompany, setSelectedCompany] = useState(null);
 
   // State for Tabs
   const [activeTab, setActiveTab] = useState('my-tasks');
@@ -26,16 +28,33 @@ export default function ManagerDashboard() {
     if (!loading && (!user || userRole !== 'manager')) {
       router.push('/');
     } else if (user && userRole === 'manager') {
-      fetchData();
+      fetchCompanies();
     }
   }, [user, userRole, loading, router]);
+
+  useEffect(() => {
+    if (user && userRole === 'manager') {
+      fetchData();
+    }
+  }, [user, userRole, selectedCompany]);
+
+  const fetchCompanies = async () => {
+    try {
+      const result = await getUserCompanies(user.uid);
+      if (result.success) {
+        setCompanies(result.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching companies:', error);
+    }
+  };
 
   const fetchData = async () => {
     setIsLoadingData(true);
     try {
       const [myTasksRes, allTasksRes] = await Promise.all([
-        getManagerTasks(user.uid),
-        getAllTasks(),
+        getManagerTasks(user.uid, selectedCompany),
+        getAllTasks(selectedCompany),
       ]);
 
       if (myTasksRes.success) setMyTasks(myTasksRes.data || []);
@@ -91,9 +110,30 @@ export default function ManagerDashboard() {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Manager Dashboard
           </h1>
-          <p className="text-sm text-gray-500 mb-8">
+          <p className="text-sm text-gray-500 mb-4">
             Welcome back, {user.displayName || user.email}.
           </p>
+
+          {/* Company Filter */}
+          {companies.length > 0 && (
+            <div className="mb-6 flex items-center gap-2">
+              <label className="text-sm font-medium text-gray-700">
+                Filter by Company:
+              </label>
+              <select
+                value={selectedCompany || ''}
+                onChange={(e) => setSelectedCompany(e.target.value || null)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent text-sm"
+              >
+                <option value="">All Companies</option>
+                {companies.map((company) => (
+                  <option key={company.company_id} value={company.company_id}>
+                    {company.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Tab Navigation */}
           <div className="flex space-x-8 border-b border-gray-200">

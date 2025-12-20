@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { updateProfile } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
+import { getUserCompanies } from '../../app/actions';
 import toast from 'react-hot-toast';
 import { uploadAvatar } from '../../app/upload-actions';
 import Image from 'next/image';
@@ -12,6 +13,7 @@ export default function Profile({ userId, onStatsUpdate }) {
   const { user: authUser } = useAuth();
   const [userInfo, setUserInfo] = useState(null);
   const [pointsHistory, setPointsHistory] = useState([]);
+  const [userCompanies, setUserCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalPoints, setTotalPoints] = useState(0);
   const [historyFilter, setHistoryFilter] = useState('all');
@@ -21,7 +23,24 @@ export default function Profile({ userId, onStatsUpdate }) {
 
   useEffect(() => {
     fetchUserProfile();
+    fetchUserCompanies();
   }, [userId]);
+
+  const fetchUserCompanies = async () => {
+    try {
+      const result = await getUserCompanies(userId);
+      console.log('getUserCompanies result:', result);
+      if (result.success) {
+        const companies = result.data || [];
+        console.log('Setting user companies:', companies);
+        setUserCompanies(companies);
+      } else {
+        console.error('Failed to get companies:', result.error);
+      }
+    } catch (error) {
+      console.error('Error fetching user companies:', error);
+    }
+  };
 
   const fetchUserProfile = async () => {
     try {
@@ -323,6 +342,29 @@ export default function Profile({ userId, onStatsUpdate }) {
                   <p className="text-slate-900 font-medium border-b border-gray-100 pb-2">
                     {formatDate(userInfo.created_at)}
                   </p>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                    Assigned Companies
+                  </label>
+                  <div className="border-b border-gray-100 pb-2">
+                    {userCompanies.length === 0 ? (
+                      <p className="text-gray-400 font-medium italic">
+                        No companies assigned
+                      </p>
+                    ) : (
+                      <div className="flex flex-wrap gap-2">
+                        {userCompanies.map((company) => (
+                          <span
+                            key={company.company_id}
+                            className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-200"
+                          >
+                            {company.name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 {isOwnProfile && (
                   <>

@@ -1,6 +1,7 @@
 'use server';
 
 import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 import { adminAuth } from '@/lib/firebase-admin';
 import { revalidatePath } from 'next/cache';
 
@@ -16,6 +17,7 @@ export async function createTask(taskData, steps) {
         description: taskData.description,
         created_by: taskData.createdBy,
         assigned_manager_id: taskData.assignedManagerId,
+        company_id: taskData.companyId,
         deadline: taskData.deadline,
         level: taskData.level,
         is_active: true,
@@ -63,6 +65,7 @@ export async function updateTask(taskId, taskData, steps) {
         title: taskData.title,
         description: taskData.description,
         assigned_manager_id: taskData.assignedManagerId,
+        company_id: taskData.companyId,
         deadline: taskData.deadline,
         level: taskData.level,
       })
@@ -363,20 +366,28 @@ export async function getPendingSubmissions(managerId) {
 }
 
 /**
- * Get tasks assigned to a specific manager
+ * Get tasks assigned to a specific manager (filtered by their companies)
  */
-export async function getManagerTasks(managerId) {
+export async function getManagerTasks(managerId, companyId = null) {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('tasks')
       .select(
         `
         *,
-        task_steps (*)
+        task_steps (*),
+        companies (company_id, name)
       `
       )
-      .eq('assigned_manager_id', managerId)
-      .order('created_at', { ascending: false });
+      .eq('assigned_manager_id', managerId);
+
+    if (companyId) {
+      query = query.eq('company_id', companyId);
+    }
+
+    const { data, error } = await query.order('created_at', {
+      ascending: false,
+    });
 
     if (error) throw error;
 
@@ -388,20 +399,26 @@ export async function getManagerTasks(managerId) {
 }
 
 /**
- * Get all available tasks (Updated to include steps and manager details)
+ * Get all available tasks (Updated to include steps, manager details, and company)
  */
-export async function getAllTasks() {
+export async function getAllTasks(companyId = null) {
   try {
-    const { data, error } = await supabase
-      .from('tasks')
-      .select(
-        `
+    let query = supabase.from('tasks').select(
+      `
         *,
         task_steps (*),
-        manager:users!tasks_assigned_manager_id_fkey (name, email, avatar_url)
+        manager:users!tasks_assigned_manager_id_fkey (name, email, avatar_url),
+        companies (company_id, name)
       `
-      )
-      .order('created_at', { ascending: false });
+    );
+
+    if (companyId) {
+      query = query.eq('company_id', companyId);
+    }
+
+    const { data, error } = await query.order('created_at', {
+      ascending: false,
+    });
 
     if (error) throw error;
 
@@ -423,7 +440,8 @@ export async function getTaskDetails(taskId) {
         `
         *,
         task_steps (*),
-        manager:users!tasks_assigned_manager_id_fkey (name, email, avatar_url)
+        manager:users!tasks_assigned_manager_id_fkey (name, email, avatar_url),
+        companies (company_id, name)
       `
       )
       .eq('task_id', taskId)
@@ -539,6 +557,71 @@ export async function getTaskParticipants(taskId) {
     return { success: true, data: participants };
   } catch (error) {
     console.error('Error fetching task participants:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Get user's companies for filtering
+ */
+export async function getUserCompanies(userId) {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('user_companies')
+      .select(
+        `
+        company_id,
+        companies (
+          company_id,
+          name,
+          description
+        )
+      `
+      )
+      .eq('user_id', userId);
+
+    if (error) throw error;
+
+    return { success: true, data: data.map((uc) => uc.companies) };
+  } catch (error) {
+    console.error('Error fetching user companies:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Get user's tasks filtered by company
+ */
+export async function getUserTasksByCompany(userId, companyId = null) {
+  try {
+    let query = supabase
+      .from('task_enrollments')
+      .select(
+        `
+        *,
+        tasks (
+          *,
+          task_steps (*),
+          companies (company_id, name)
+        )
+      `
+      )
+      .eq('user_id', userId);
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    let tasks = data.map((enrollment) => enrollment.tasks).filter(Boolean);
+
+    // Filter by company if specified
+    if (companyId) {
+      tasks = tasks.filter((task) => task.company_id === companyId);
+    }
+
+    return { success: true, data: tasks };
+  } catch (error) {
+    console.error('Error fetching user tasks by company:', error);
     return { success: false, error: error.message };
   }
 }

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { createTask, updateTask, deleteTask } from '@/app/actions';
+import { getCompaniesAction } from '@/app/company-actions';
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -9,6 +10,7 @@ export default function TaskManagement() {
   const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [managers, setManagers] = useState([]);
+  const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -20,6 +22,7 @@ export default function TaskManagement() {
     title: '',
     description: '',
     assignedManagerId: '',
+    companyId: '',
     deadline: '',
     level: 1,
   });
@@ -38,12 +41,14 @@ export default function TaskManagement() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const { data: tasksData, error: tasksError } = await supabase
-        .from('tasks')
-        .select(
-          `
+      const [tasksResult, managersResult, companiesResult] = await Promise.all([
+        supabase
+          .from('tasks')
+          .select(
+            `
           *,
           task_steps (*),
+          companies (company_id, name),
           task_enrollments (
             user_id,
             joined_at,
@@ -54,20 +59,20 @@ export default function TaskManagement() {
             )
           )
         `
-        )
-        .order('created_at', { ascending: false });
+          )
+          .order('created_at', { ascending: false }),
+        supabase.from('users').select('user_id, name').eq('role', 'manager'),
+        user ? getCompaniesAction(await user.getIdToken()) : { success: false },
+      ]);
 
-      if (tasksError) throw tasksError;
+      if (tasksResult.error) throw tasksResult.error;
+      if (managersResult.error) throw managersResult.error;
 
-      const { data: managersData, error: managersError } = await supabase
-        .from('users')
-        .select('user_id, name')
-        .eq('role', 'manager');
-
-      if (managersError) throw managersError;
-
-      setTasks(tasksData || []);
-      setManagers(managersData || []);
+      setTasks(tasksResult.data || []);
+      setManagers(managersResult.data || []);
+      if (companiesResult.success) {
+        setCompanies(companiesResult.data || []);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -139,6 +144,7 @@ export default function TaskManagement() {
       title: '',
       description: '',
       assignedManagerId: '',
+      companyId: '',
       deadline: '',
       level: 1,
     });
@@ -150,6 +156,7 @@ export default function TaskManagement() {
       title: task.title,
       description: task.description,
       assignedManagerId: task.assigned_manager_id || '',
+      companyId: task.company_id || '',
       deadline: task.deadline || '',
       level: task.level || 1,
     });
@@ -834,6 +841,32 @@ export default function TaskManagement() {
                     {[1, 2, 3, 4, 5].map((lvl) => (
                       <option key={lvl} value={lvl}>
                         {lvl} {'★'.repeat(lvl) + '☆'.repeat(5 - lvl)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Company *
+                  </label>
+                  <select
+                    required
+                    value={formData.companyId}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        companyId: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-gray-400 transition-all"
+                  >
+                    <option value="">Select a company</option>
+                    {companies.map((company) => (
+                      <option
+                        key={company.company_id}
+                        value={company.company_id}
+                      >
+                        {company.name}
                       </option>
                     ))}
                   </select>

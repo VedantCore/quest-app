@@ -8,18 +8,32 @@ import ManagerList from '@/components/admin/ManagerList';
 import UserList from '@/components/admin/UserList';
 import Stats from '@/components/admin/Stats';
 import InviteManagement from '@/components/admin/InviteManagement';
+import CompanyManagement from '@/components/admin/CompanyManagement';
 import Navbar from '@/components/Navbar';
+import { supabase } from '@/lib/supabase';
 
 export default function AdminDashboard() {
   const { user, userRole, loading } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('tasks');
+  const [allUsers, setAllUsers] = useState([]);
 
   useEffect(() => {
     if (!loading && (!user || userRole !== 'admin')) {
       router.push('/');
     }
   }, [user, userRole, loading, router]);
+
+  useEffect(() => {
+    // Fetch all users for company management
+    const fetchUsers = async () => {
+      const { data } = await supabase.from('users').select('*').order('name');
+      if (data) setAllUsers(data);
+    };
+    if (user && userRole === 'admin') {
+      fetchUsers();
+    }
+  }, [user, userRole]);
 
   if (loading) {
     return (
@@ -49,6 +63,25 @@ export default function AdminDashboard() {
             strokeLinejoin="round"
             strokeWidth={2}
             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+          />
+        </svg>
+      ),
+    },
+    {
+      id: 'companies',
+      label: 'Companies',
+      icon: (
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
           />
         </svg>
       ),
@@ -159,7 +192,7 @@ export default function AdminDashboard() {
         <div className="max-w-7xl mx-auto px-6 py-8">
           <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
           <p className="mt-2 text-sm text-gray-500">
-            Manage tasks, users, and system settings.
+            Manage tasks, companies, users, and system settings.
           </p>
         </div>
       </div>
@@ -190,6 +223,9 @@ export default function AdminDashboard() {
 
         <div className="min-h-[400px]">
           {activeTab === 'tasks' && <TaskManagement />}
+          {activeTab === 'companies' && (
+            <CompanyManagement allUsers={allUsers} />
+          )}
           {activeTab === 'users' && <UserManagement />}
           {activeTab === 'managers' && <ManagerList />}
           {activeTab === 'user-list' && <UserList />}

@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
-import { useAuth } from '@/context/AuthContext'; //
+import { useAuth } from '@/context/AuthContext';
+import { getUserCompanies } from '@/app/actions';
 import toast from 'react-hot-toast';
 
 const CircularProgress = ({ percentage, size = 50, strokeWidth = 4 }) => {
@@ -46,37 +47,81 @@ const CircularProgress = ({ percentage, size = 50, strokeWidth = 4 }) => {
 };
 
 export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
-  const { userRole } = useAuth(); // Get user role
+  const { userRole } = useAuth();
   const router = useRouter();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState(mode === 'available' ? 'latest' : 'all');
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState(null);
+  const [companies, setCompanies] = useState([]);
+  const [selectedCompany, setSelectedCompany] = useState(null);
+  const [companiesLoaded, setCompaniesLoaded] = useState(false);
 
   useEffect(() => {
-    fetchUserTasks();
-  }, [userId, mode]);
+    fetchUserCompanies();
+  }, [userId]);
+
+  useEffect(() => {
+    if (companiesLoaded) {
+      fetchUserTasks();
+    }
+  }, [userId, mode, selectedCompany, companiesLoaded]);
+
+  const fetchUserCompanies = async () => {
+    try {
+      const result = await getUserCompanies(userId);
+      if (result.success) {
+        setCompanies(result.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching companies:', error);
+    } finally {
+      setCompaniesLoaded(true);
+    }
+  };
 
   const fetchUserTasks = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // 1. Fetch all tasks with steps AND manager info
-      const { data: allTasks, error: tasksError } = await supabase
+      // Get user's company IDs from state
+      const userCompanyIds = companies.map((c) => c.company_id);
+
+      // 1. Fetch tasks with steps, manager info, AND company info
+      let tasksQuery = supabase
         .from('tasks')
         .select(
           `
           *,
           task_steps (*),
-          manager:users!tasks_assigned_manager_id_fkey (name, email, avatar_url)
+          manager:users!tasks_assigned_manager_id_fkey (name, email, avatar_url),
+          companies (company_id, name)
         `
         )
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
+        .eq('is_active', true);
 
-      if (tasksError) throw tasksError;
+      // Filter by user's companies or selected company
+      if (selectedCompany) {
+        tasksQuery = tasksQuery.eq('company_id', selectedCompany);
+      } else if (userCompanyIds.length > 0) {
+        // Only show tasks from user's assigned companies
+        tasksQuery = tasksQuery.in('company_id', userCompanyIds);
+      } else {
+        // If user has no companies, show NO tasks (or only legacy tasks without company)
+        tasksQuery = tasksQuery.is('company_id', null);
+      }
+
+      const { data: allTasks, error: tasksError } = await tasksQuery.order(
+        'created_at',
+        { ascending: false }
+      );
+
+      if (tasksError) {
+        console.error('Task query error:', tasksError);
+        throw tasksError;
+      }
 
       // 2. Fetch user enrollments
       const { data: enrollments, error: enrollmentsError } = await supabase
@@ -306,41 +351,65 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
 
       {/* Controls */}
       <div className="rounded-xl border border-gray-200 bg-white p-4">
-        <div className="flex flex-col md:flex-row gap-3 md:items-center">
-          <div className="flex-1 relative">
-            <input
-              type="text"
-              placeholder="Search by title or description"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-              aria-label="Search tasks"
-            />
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 24 24"
-              className="absolute left-2.5 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400"
-            >
-              <path
-                fill="currentColor"
-                d="M10 2a8 8 0 105.293 14.293l4.707 4.707 1.414-1.414-4.707-4.707A8 8 0 0010 2zm0 2a6 6 0 110 12A6 6 0 0110 4z"
-              />
-            </svg>
-          </div>
-          <div className="flex gap-2">
-            {filterOptions.map((opt) => (
-              <button
-                key={opt.key}
-                onClick={() => setFilter(opt.key)}
-                className={`px-3.5 py-2 rounded-lg text-sm font-medium border transition-colors ${
-                  filter === opt.key
-                    ? 'bg-gray-900 text-white border-gray-900'
-                    : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-50'
-                }`}
+        <div className="flex flex-col gap-3">
+          {/* Company Filter */}
+          {companies.length > 0 && (
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium text-gray-700">
+                Company:
+              </label>
+              <select
+                value={selectedCompany || ''}
+                onChange={(e) => setSelectedCompany(e.target.value || null)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm"
               >
-                {opt.label}
-              </button>
-            ))}
+                <option value="">All Companies</option>
+                {companies.map((company) => (
+                  <option key={company.company_id} value={company.company_id}>
+                    {company.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Search and Filters */}
+          <div className="flex flex-col md:flex-row gap-3 md:items-center">
+            <div className="flex-1 relative">
+              <input
+                type="text"
+                placeholder="Search by title or description"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                aria-label="Search tasks"
+              />
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400"
+              >
+                <path
+                  fill="currentColor"
+                  d="M10 2a8 8 0 105.293 14.293l4.707 4.707 1.414-1.414-4.707-4.707A8 8 0 0010 2zm0 2a6 6 0 110 12A6 6 0 0110 4z"
+                />
+              </svg>
+            </div>
+            <div className="flex gap-2">
+              {filterOptions.map((opt) => (
+                <button
+                  key={opt.key}
+                  onClick={() => setFilter(opt.key)}
+                  className={`px-3.5 py-2 rounded-lg text-sm font-medium border transition-colors ${
+                    filter === opt.key
+                      ? 'bg-gray-900 text-white border-gray-900'
+                      : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
