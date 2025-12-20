@@ -5,6 +5,7 @@ import { getTaskParticipants } from '@/app/actions';
 export default function ManagerTaskDetailsModal({ task, isOpen, onClose }) {
   const [participants, setParticipants] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showSteps, setShowSteps] = useState(true);
 
   useEffect(() => {
     if (isOpen && task?.task_id) {
@@ -126,42 +127,77 @@ export default function ManagerTaskDetailsModal({ task, isOpen, onClose }) {
 
           {/* Steps */}
           <div>
-            <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">
-              Quest Steps
-            </h4>
-            <div className="space-y-2">
-              {task.task_steps?.length > 0 ? (
-                task.task_steps.map((step, idx) => (
-                  <div
-                    key={step.step_id}
-                    className="bg-white p-3 rounded-lg border border-gray-200 flex justify-between items-center"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-100 text-xs font-bold text-gray-500">
-                        {idx + 1}
-                      </span>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">
-                          {step.title}
-                        </p>
-                        {step.description && (
-                          <p className="text-xs text-gray-500">
-                            {step.description}
+            <button
+              onClick={() => setShowSteps(!showSteps)}
+              className="w-full flex items-center justify-between mb-3 text-sm font-bold text-gray-900 uppercase tracking-wide hover:text-indigo-600 transition-colors"
+            >
+              <span className="flex items-center gap-2">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+                  />
+                </svg>
+                Quest Steps ({task.task_steps?.length || 0})
+              </span>
+              <svg
+                className={`w-5 h-5 transition-transform ${
+                  showSteps ? 'rotate-180' : ''
+                }`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
+            {showSteps && (
+              <div className="space-y-2 animate-in slide-in-from-top-2 duration-200">
+                {task.task_steps?.length > 0 ? (
+                  task.task_steps.map((step, idx) => (
+                    <div
+                      key={step.step_id}
+                      className="bg-white p-3 rounded-lg border border-gray-200 flex justify-between items-center hover:border-indigo-200 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-100 text-xs font-bold text-gray-500">
+                          {idx + 1}
+                        </span>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">
+                            {step.title}
                           </p>
-                        )}
+                          {step.description && (
+                            <p className="text-xs text-gray-500">
+                              {step.description}
+                            </p>
+                          )}
+                        </div>
                       </div>
+                      <span className="text-xs font-bold bg-indigo-50 text-indigo-600 px-2 py-1 rounded border border-indigo-100 whitespace-nowrap">
+                        {step.points_reward} pts
+                      </span>
                     </div>
-                    <span className="text-xs font-bold bg-indigo-50 text-indigo-600 px-2 py-1 rounded border border-indigo-100 whitespace-nowrap">
-                      {step.points_reward} pts
-                    </span>
+                  ))
+                ) : (
+                  <div className="text-sm text-gray-500 italic py-2">
+                    No steps defined for this quest.
                   </div>
-                ))
-              ) : (
-                <div className="text-sm text-gray-500 italic">
-                  No steps defined for this quest.
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Participants Preview */}

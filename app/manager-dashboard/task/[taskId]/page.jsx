@@ -24,6 +24,7 @@ export default function TaskParticipantsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [processingStepId, setProcessingStepId] = useState(null);
   const [feedbacks, setFeedbacks] = useState({});
+  const [showSteps, setShowSteps] = useState(false);
 
   useEffect(() => {
     if (
@@ -147,7 +148,167 @@ export default function TaskParticipantsPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+        {/* Task Overview Section */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-2">
+              <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">
+                Description
+              </h3>
+              <p className="text-gray-700 leading-relaxed">
+                {task.description || 'No description provided.'}
+              </p>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-2">
+                  Details
+                </h3>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <svg
+                      className="w-4 h-4 text-gray-500"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                    <span className="text-gray-600">Deadline:</span>
+                    <span className="font-medium text-gray-900">
+                      {new Date(
+                        new Date(task.created_at).setDate(
+                          new Date(task.created_at).getDate() + 30
+                        )
+                      ).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <svg
+                      className="w-4 h-4 text-gray-500"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                    <span className="text-gray-600">Level:</span>
+                    <span className="font-medium text-gray-900">
+                      {task.level || 'N/A'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <span
+                      className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                        task.is_active
+                          ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                          : 'bg-red-50 text-red-700 border border-red-200'
+                      }`}
+                    >
+                      {task.is_active ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Task Steps Section */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          <button
+            onClick={() => setShowSteps(!showSteps)}
+            className="w-full px-6 py-4 flex items-center justify-between bg-gray-50/50 hover:bg-gray-100 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <svg
+                className="w-5 h-5 text-gray-700"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+                />
+              </svg>
+              <h2 className="text-lg font-bold text-[#171717]">
+                Quest Steps{' '}
+                <span className="text-gray-500 font-normal ml-2">
+                  ({task.task_steps?.length || 0})
+                </span>
+              </h2>
+            </div>
+            <svg
+              className={`w-5 h-5 text-gray-500 transition-transform ${
+                showSteps ? 'rotate-180' : ''
+              }`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+
+          {showSteps && (
+            <div className="p-6 space-y-3 animate-in slide-in-from-top-2 duration-200">
+              {task.task_steps?.length > 0 ? (
+                task.task_steps.map((step, idx) => (
+                  <div
+                    key={step.step_id}
+                    className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-indigo-300 transition-colors"
+                  >
+                    <span className="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-sm">
+                      {idx + 1}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-900 mb-1">
+                        {step.title}
+                      </p>
+                      {step.description && (
+                        <p className="text-sm text-gray-600">
+                          {step.description}
+                        </p>
+                      )}
+                    </div>
+                    <span className="flex-shrink-0 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg font-bold text-sm border border-indigo-200">
+                      {step.points_reward} pts
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-gray-500 italic text-center py-4">
+                  No steps defined for this quest.
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Enrolled Users Section */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200 bg-gray-50/50">
             <h2 className="text-lg font-bold text-[#171717]">
