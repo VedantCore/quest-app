@@ -75,7 +75,12 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }) {
       onClose();
       router.push('/');
     } catch (err) {
-      toast.error(err.message);
+      console.error(err);
+      if (err.code === 'auth/email-already-in-use') {
+        toast.error('This email is already registered. Please log in instead.');
+      } else {
+        toast.error(err.message);
+      }
     }
   };
 

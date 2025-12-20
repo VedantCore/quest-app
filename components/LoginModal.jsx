@@ -317,12 +317,15 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }) {
 
         <p className="mt-6 text-center text-sm text-gray-500">
           Don't have an account?{' '}
+          {/* Public signup disabled
           <button
             onClick={onSwitchToSignup}
             className="text-indigo-600 hover:underline font-semibold"
           >
             Sign up
           </button>
+          */}
+          <span className="text-gray-400">Invite only</span>
         </p>
       </div>
     </div>

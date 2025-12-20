@@ -307,9 +307,11 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                   >
                     Log in
                   </button>
+                  {/* Public signup disabled - Invite only
                   <button onClick={onOpenSignup} className={primaryButtonStyle}>
                     Get started
                   </button>
+                  */}
                 </div>
               )}
             </>
@@ -373,12 +375,14 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                 >
                   Log in
                 </button>
+                {/* Public signup disabled - Invite only
                 <button
                   onClick={onOpenSignup}
                   className="w-full text-center px-4 py-3 text-base font-bold text-white bg-indigo-600 rounded-xl shadow-lg active:scale-95"
                 >
                   Get started
                 </button>
+                */}
               </div>
             )}
           </div>
