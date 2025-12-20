@@ -218,33 +218,13 @@ export default function CompanyManagement({ allUsers }) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <h2 className="text-2xl font-bold text-gray-900">
-            Company Management
-          </h2>
-          {unassignedUsers.length > 0 && (
-            <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm font-medium rounded-full">
-              {unassignedUsers.length} user
-              {unassignedUsers.length !== 1 ? 's' : ''} unassigned
-            </span>
-          )}
-        </div>
-        <div className="flex gap-2">
-          {unassignedUsers.length > 0 && (
-            <button
-              onClick={() => setShowUnassignedModal(true)}
-              className="bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700"
-            >
-              Assign Unassigned Users
-            </button>
-          )}
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
-          >
-            Create Company
-          </button>
-        </div>
+        <h2 className="text-2xl font-bold text-gray-900">Company Management</h2>
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 font-medium transition-colors shadow-sm hover:shadow-md"
+        >
+          Create Company
+        </button>
       </div>
 
       {companies.length === 0 ? (
@@ -258,24 +238,24 @@ export default function CompanyManagement({ allUsers }) {
           {companies.map((company) => (
             <div
               key={company.company_id}
-              className="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition-shadow"
+              className="border border-gray-200 rounded-xl p-5 bg-white shadow-sm hover:shadow-lg hover:border-indigo-300 transition-all duration-200"
             >
-              <h3 className="font-semibold text-lg text-gray-900">
+              <h3 className="font-bold text-lg text-gray-900 mb-2">
                 {company.name}
               </h3>
-              <p className="text-sm text-gray-600 mt-1">
-                {company.description || 'No description'}
+              <p className="text-sm text-gray-600 min-h-[40px]">
+                {company.description || 'No description provided'}
               </p>
               <div className="mt-4 flex gap-2">
                 <button
                   onClick={() => handleViewCompanyUsers(company)}
-                  className="text-sm bg-blue-50 text-blue-600 px-3 py-1 rounded hover:bg-blue-100"
+                  className="flex-1 text-sm font-medium bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
                 >
                   View Users
                 </button>
                 <button
                   onClick={() => handleDeleteCompany(company.company_id)}
-                  className="text-sm bg-red-50 text-red-600 px-3 py-1 rounded hover:bg-red-100"
+                  className="text-sm font-medium bg-red-50 text-red-600 px-4 py-2 rounded-lg hover:bg-red-100 transition-colors border border-red-200"
                 >
                   Delete
                 </button>
@@ -287,7 +267,7 @@ export default function CompanyManagement({ allUsers }) {
 
       {/* Create Company Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-30 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <h3 className="text-xl font-bold mb-4">Create New Company</h3>
             <form onSubmit={handleCreateCompany} className="space-y-4">
@@ -336,7 +316,7 @@ export default function CompanyManagement({ allUsers }) {
 
       {/* Company Users Modal */}
       {selectedCompany && !showAssignModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-30 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-bold">
@@ -394,7 +374,7 @@ export default function CompanyManagement({ allUsers }) {
 
       {/* Unassigned Users Modal */}
       {showUnassignedModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-30 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-bold">
@@ -462,7 +442,7 @@ export default function CompanyManagement({ allUsers }) {
 
       {/* Assign Users Modal */}
       {showAssignModal && selectedCompany && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-30 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-bold">

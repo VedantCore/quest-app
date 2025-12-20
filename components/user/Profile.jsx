@@ -344,12 +344,12 @@ export default function Profile({ userId, onStatsUpdate }) {
                   </p>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
                     Assigned Companies
                   </label>
-                  <div className="border-b border-gray-100 pb-2">
+                  <div className="border-b border-gray-100 pb-3">
                     {userCompanies.length === 0 ? (
-                      <p className="text-gray-400 font-medium italic">
+                      <p className="text-gray-400 font-medium italic text-sm">
                         No companies assigned
                       </p>
                     ) : (
@@ -357,7 +357,7 @@ export default function Profile({ userId, onStatsUpdate }) {
                         {userCompanies.map((company) => (
                           <span
                             key={company.company_id}
-                            className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-200"
+                            className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-sm hover:shadow-md transition-shadow"
                           >
                             {company.name}
                           </span>
