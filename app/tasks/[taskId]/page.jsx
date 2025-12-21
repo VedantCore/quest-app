@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 
 export default function TaskDetailsPage() {
   const { taskId } = useParams();
-  const { user, loading } = useAuth();
+  const { user, userRole, loading } = useAuth();
   const router = useRouter();
   const [task, setTask] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -239,7 +239,7 @@ export default function TaskDetailsPage() {
               </div>
             </div>
 
-            {!task.isEnrolled && (
+            {!task.isEnrolled && userRole === 'user' && (
               <button
                 onClick={handleJoin}
                 className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-md hover:shadow-lg active:scale-95"
