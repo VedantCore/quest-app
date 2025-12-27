@@ -253,11 +253,11 @@ export default function CompanyManagement({ allUsers }) {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleViewCompanyUsers(company);
+                    router.push(`/admin-dashboard/company/${company.company_id}`);
                   }}
                   className="flex-1 text-sm font-medium bg-white border border-indigo-200 text-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-50 transition-colors shadow-sm"
                 >
-                  View Users
+                  View Company
                 </button>
                 <button
                   onClick={(e) => {
