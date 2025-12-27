@@ -2,12 +2,14 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/lib/supabase';
 import TaskManagement from '@/components/admin/TaskManagement';
 import ManagerList from '@/components/admin/ManagerList';
 import UserList from '@/components/admin/UserList';
 import Stats from '@/components/admin/Stats';
 import Navbar from '@/components/Navbar';
-import { getCompaniesAction } from '@/app/company-actions';
+import { getCompaniesAction, getCompanyUsersAction, bulkAssignUsersToCompanyAction } from '@/app/company-actions';
+import toast from 'react-hot-toast';
 
 export default function CompanyDetailPage({ params }) {
   const { user, userRole, loading } = useAuth();
@@ -16,6 +18,13 @@ export default function CompanyDetailPage({ params }) {
   const [company, setCompany] = useState(null);
   const [loadingCompany, setLoadingCompany] = useState(true);
   const { id: companyId } = use(params);
+  
+  // User assignment state
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [allUsers, setAllUsers] = useState([]);
+  const [companyUsers, setCompanyUsers] = useState([]);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
 
   useEffect(() => {
     if (!loading && (!user || userRole !== 'admin')) {
@@ -46,6 +55,74 @@ export default function CompanyDetailPage({ params }) {
       fetchCompany();
     }
   }, [user, userRole, companyId]);
+
+  // Fetch all users and company users when modal opens
+  const handleOpenAssignModal = async () => {
+    setShowAssignModal(true);
+    setLoadingUsers(true);
+    
+    try {
+      const token = await user.getIdToken();
+      
+      // Fetch all users
+      const { data: usersData, error: usersError } = await supabase
+        .from('users')
+        .select('*')
+        .order('name');
+      
+      if (usersError) throw usersError;
+      setAllUsers(usersData || []);
+      
+      // Fetch current company users
+      const result = await getCompanyUsersAction(token, companyId);
+      if (result.success) {
+        setCompanyUsers(result.data);
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast.error('Failed to load users');
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  const handleBulkAssign = async (e) => {
+    e.preventDefault();
+    if (selectedUsers.length === 0) {
+      toast.error('Please select at least one user');
+      return;
+    }
+
+    try {
+      const token = await user.getIdToken();
+      const result = await bulkAssignUsersToCompanyAction(
+        token,
+        selectedUsers,
+        companyId
+      );
+
+      if (result.success) {
+        toast.success(`Assigned ${selectedUsers.length} user(s) to ${company.name}`);
+        setShowAssignModal(false);
+        setSelectedUsers([]);
+        // Refresh the page to show new users
+        window.location.reload();
+      } else {
+        toast.error(result.error);
+      }
+    } catch (error) {
+      console.error('Error assigning users:', error);
+      toast.error('Failed to assign users');
+    }
+  };
+
+  const toggleUserSelection = (userId) => {
+    setSelectedUsers((prev) =>
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
+        : [...prev, userId]
+    );
+  };
 
   if (loading || loadingCompany) {
     return (
@@ -167,10 +244,33 @@ export default function CompanyDetailPage({ params }) {
             </svg>
             <span className="text-gray-900 font-medium">{company.name}</span>
           </nav>
-          <h1 className="text-3xl font-bold text-gray-900">{company.name}</h1>
-          <p className="mt-2 text-sm text-gray-500">
-            {company.description || 'No description provided'}
-          </p>
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">{company.name}</h1>
+              <p className="mt-2 text-sm text-gray-500">
+                {company.description || 'No description provided'}
+              </p>
+            </div>
+            <button
+              onClick={handleOpenAssignModal}
+              className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 font-medium transition-colors shadow-sm hover:shadow-md flex items-center gap-2"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              Assign Users
+            </button>
+          </div>
         </div>
       </div>
 
@@ -207,6 +307,84 @@ export default function CompanyDetailPage({ params }) {
           {activeTab === 'stats' && <Stats companyId={companyId} />}
         </div>
       </div>
+
+      {/* Assign Users Modal */}
+      {showAssignModal && (
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold">Assign Users to {company.name}</h3>
+              <button
+                onClick={() => {
+                  setShowAssignModal(false);
+                  setSelectedUsers([]);
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+
+            {loadingUsers ? (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+              </div>
+            ) : (
+              <form onSubmit={handleBulkAssign}>
+                <div className="space-y-2 mb-4 max-h-96 overflow-y-auto">
+                  {allUsers.map((u) => {
+                    const alreadyAssigned = companyUsers.some((cu) => cu.users?.user_id === u.user_id);
+                    return (
+                      <label
+                        key={u.user_id}
+                        className={`flex items-center p-3 border rounded-md cursor-pointer hover:bg-gray-50 ${
+                          alreadyAssigned ? 'opacity-50' : ''
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedUsers.includes(u.user_id)}
+                          onChange={() => toggleUserSelection(u.user_id)}
+                          disabled={alreadyAssigned}
+                          className="mr-3"
+                        />
+                        <div>
+                          <p className="font-medium">{u.name}</p>
+                          <p className="text-sm text-gray-600">{u.email}</p>
+                          <span className="text-xs px-2 py-1 bg-gray-100 rounded">{u.role}</span>
+                          {alreadyAssigned && (
+                            <span className="ml-2 text-xs text-green-600">Already assigned</span>
+                          )}
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
+
+                <div className="flex gap-2 justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAssignModal(false);
+                      setSelectedUsers([]);
+                    }}
+                    className="px-4 py-2 border rounded-md hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                    disabled={selectedUsers.length === 0}
+                  >
+                    Assign {selectedUsers.length} User(s)
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
