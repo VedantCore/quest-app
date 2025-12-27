@@ -66,9 +66,32 @@ export default function TaskManagement({ companyId, companyName }) {
         taskQuery = taskQuery.eq('company_id', companyId);
       }
 
+      // Fetch managers - filter by company if companyId is provided
+      let managersQuery;
+      if (companyId) {
+        // Fetch only managers assigned to this company
+        managersQuery = supabase
+          .from('user_companies')
+          .select(`
+            user_id,
+            users!user_companies_user_id_fkey (
+              user_id,
+              name,
+              role
+            )
+          `)
+          .eq('company_id', companyId);
+      } else {
+        // Fetch all managers globally
+        managersQuery = supabase
+          .from('users')
+          .select('user_id, name')
+          .eq('role', 'manager');
+      }
+
       const [tasksResult, managersResult, companiesResult] = await Promise.all([
         taskQuery,
-        supabase.from('users').select('user_id, name').eq('role', 'manager'),
+        managersQuery,
         user ? getCompaniesAction(await user.getIdToken()) : { success: false },
       ]);
 
@@ -76,7 +99,17 @@ export default function TaskManagement({ companyId, companyName }) {
       if (managersResult.error) throw managersResult.error;
 
       setTasks(tasksResult.data || []);
-      setManagers(managersResult.data || []);
+      
+      // Process managers data - handle different structures
+      let managersData = managersResult.data || [];
+      if (companyId && managersData.length > 0 && managersData[0].users) {
+        // Transform company-filtered data: extract users and filter for managers
+        managersData = managersData
+          .map(item => item.users)
+          .filter(u => u && u.role === 'manager');
+      }
+      setManagers(managersData);
+      
       if (companiesResult.success) {
         setCompanies(companiesResult.data || []);
       }
