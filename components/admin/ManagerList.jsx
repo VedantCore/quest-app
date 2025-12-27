@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
-export default function ManagerList() {
+export default function ManagerList({ companyId }) {
   const router = useRouter();
   const [managers, setManagers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,11 +22,51 @@ export default function ManagerList() {
 
   const fetchManagers = async () => {
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('role', 'manager')
-        .order('created_at', { ascending: false });
+      let data, error;
+      
+      // Debug: Check auth state
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      console.log('[ManagerList] Current auth user:', authUser);
+      console.log('[ManagerList] Fetching managers, companyId:', companyId);
+      
+      if (companyId) {
+        // Fetch managers for this company via join
+        const result = await supabase
+          .from('user_companies')
+          .select(`
+            user_id,
+            users!user_companies_user_id_fkey (
+              user_id,
+              name,
+              email,
+              role,
+              avatar_url,
+              created_at,
+              total_points
+            )
+          `)
+          .eq('company_id', companyId);
+          
+        console.log('[ManagerList] Company query result:', result);
+        
+        if (result.error) throw result.error;
+        // Flatten and filter for managers only
+        data = result.data
+          .map(item => item.users)
+          .filter(u => u && u.role === 'manager');
+        
+        console.log('[ManagerList] Filtered managers:', data);
+      } else {
+        const result = await supabase
+          .from('users')
+          .select('*')
+          .eq('role', 'manager')
+          .order('created_at', { ascending: false });
+        
+        console.log('[ManagerList] Global query result:', result);
+        data = result.data;
+        error = result.error;
+      }
 
       if (error) throw error;
       setManagers(data || []);

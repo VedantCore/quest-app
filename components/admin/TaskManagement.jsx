@@ -6,7 +6,7 @@ import { getCompaniesAction } from '@/app/company-actions';
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
 
-export default function TaskManagement() {
+export default function TaskManagement({ companyId, companyName }) {
   const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [managers, setManagers] = useState([]);
@@ -22,7 +22,7 @@ export default function TaskManagement() {
     title: '',
     description: '',
     assignedManagerId: '',
-    companyId: '',
+    companyId: companyId || '',
     deadline: '',
     level: 1,
   });
@@ -41,11 +41,11 @@ export default function TaskManagement() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [tasksResult, managersResult, companiesResult] = await Promise.all([
-        supabase
-          .from('tasks')
-          .select(
-            `
+      
+      let taskQuery = supabase
+        .from('tasks')
+        .select(
+          `
           *,
           task_steps (*),
           companies (company_id, name),
@@ -59,8 +59,15 @@ export default function TaskManagement() {
             )
           )
         `
-          )
-          .order('created_at', { ascending: false }),
+        )
+        .order('created_at', { ascending: false });
+
+      if (companyId) {
+        taskQuery = taskQuery.eq('company_id', companyId);
+      }
+
+      const [tasksResult, managersResult, companiesResult] = await Promise.all([
+        taskQuery,
         supabase.from('users').select('user_id, name').eq('role', 'manager'),
         user ? getCompaniesAction(await user.getIdToken()) : { success: false },
       ]);
@@ -144,7 +151,7 @@ export default function TaskManagement() {
       title: '',
       description: '',
       assignedManagerId: '',
-      companyId: '',
+      companyId: companyId || '',
       deadline: '',
       level: 1,
     });
@@ -291,7 +298,9 @@ export default function TaskManagement() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold text-gray-900">Quests</h2>
+        <h2 className="text-xl font-bold text-gray-900">
+          {companyName ? `Quests for ${companyName}` : 'All Quests'}
+        </h2>
         <button
           onClick={() => setShowCreateModal(true)}
           className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl hover:bg-indigo-700 transition shadow-sm font-medium text-sm"

@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 
-export default function Stats() {
+export default function Stats({ companyId }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeGraph, setActiveGraph] = useState('leaderboard');
@@ -15,14 +15,37 @@ export default function Stats() {
 
   useEffect(() => {
     fetchStats();
-  }, []);
+  }, [companyId]);
 
   const fetchStats = async () => {
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('name, total_points, role, created_at')
-        .order('total_points', { ascending: false });
+      let data, error;
+
+      if (companyId) {
+        // Fetch users belonging to this company for stats via join
+        const result = await supabase
+          .from('user_companies')
+          .select(`
+            user_id,
+            users!user_companies_user_id_fkey (
+              name,
+              total_points,
+              role,
+              created_at
+            )
+          `)
+          .eq('company_id', companyId);
+        
+        if (result.error) throw result.error;
+        data = result.data.map(item => item.users).filter(u => u);
+      } else {
+        const result = await supabase
+          .from('users')
+          .select('name, total_points, role, created_at')
+          .order('total_points', { ascending: false });
+        data = result.data;
+        error = result.error;
+      }
 
       if (error) throw error;
 

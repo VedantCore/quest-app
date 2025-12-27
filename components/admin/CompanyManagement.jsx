@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
 import {
@@ -14,6 +15,7 @@ import {
 } from '@/app/company-actions';
 
 export default function CompanyManagement({ allUsers }) {
+  const router = useRouter();
   const { user } = useAuth();
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -238,9 +240,10 @@ export default function CompanyManagement({ allUsers }) {
           {companies.map((company) => (
             <div
               key={company.company_id}
-              className="border border-gray-200 rounded-xl p-5 bg-white shadow-sm hover:shadow-lg hover:border-indigo-300 transition-all duration-200"
+              onClick={() => router.push(`/admin-dashboard/company/${company.company_id}`)}
+              className="border border-gray-200 rounded-xl p-5 bg-white shadow-sm hover:shadow-lg hover:border-indigo-300 transition-all duration-200 cursor-pointer group"
             >
-              <h3 className="font-bold text-lg text-gray-900 mb-2">
+              <h3 className="font-bold text-lg text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors">
                 {company.name}
               </h3>
               <p className="text-sm text-gray-600 min-h-[40px]">
@@ -248,13 +251,19 @@ export default function CompanyManagement({ allUsers }) {
               </p>
               <div className="mt-4 flex gap-2">
                 <button
-                  onClick={() => handleViewCompanyUsers(company)}
-                  className="flex-1 text-sm font-medium bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleViewCompanyUsers(company);
+                  }}
+                  className="flex-1 text-sm font-medium bg-white border border-indigo-200 text-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-50 transition-colors shadow-sm"
                 >
                   View Users
                 </button>
                 <button
-                  onClick={() => handleDeleteCompany(company.company_id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteCompany(company.company_id);
+                  }}
                   className="text-sm font-medium bg-red-50 text-red-600 px-4 py-2 rounded-lg hover:bg-red-100 transition-colors border border-red-200"
                 >
                   Delete

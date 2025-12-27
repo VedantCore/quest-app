@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
-export default function UserList() {
+export default function UserList({ companyId }) {
   const router = useRouter();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,11 +26,48 @@ export default function UserList() {
 
   const fetchUsers = async () => {
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('role', 'user')
-        .order('created_at', { ascending: false });
+      let data, error;
+      
+      console.log('[UserList] Fetching users, companyId:', companyId);
+      
+      if (companyId) {
+        // Fetch users for this company via join
+        const result = await supabase
+          .from('user_companies')
+          .select(`
+            user_id,
+            users!user_companies_user_id_fkey (
+              user_id,
+              name,
+              email,
+              role,
+              avatar_url,
+              created_at,
+              total_points
+            )
+          `)
+          .eq('company_id', companyId);
+          
+        console.log('[UserList] Company query result:', result);
+        
+        if (result.error) throw result.error;
+        // Flatten and filter for regular users only
+        data = result.data
+          .map(item => item.users)
+          .filter(u => u && u.role === 'user');
+        
+        console.log('[UserList] Filtered users:', data);
+      } else {
+        const { data: usersData, error: usersError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('role', 'user')
+          .order('created_at', { ascending: false });
+        
+        console.log('[UserList] Global query result:', usersData);
+        data = usersData;
+        error = usersError;
+      }
 
       if (error) throw error;
       setUsers(data || []);
