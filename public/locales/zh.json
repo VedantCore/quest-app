@@ -1,24 +1,24 @@
 {
   "nav": {
     "quest": "任务",
-    "features": "功能",
-    "pricing": "定价",
+    "features": "特点",
+    "pricing": "价格",
     "about": "关于",
     "allQuest": "所有任务",
-    "dashboard": "控制面板",
+    "dashboard": "仪表板",
     "myAccount": "我的账户",
     "myQuests": "我的任务",
-    "adminDashboard": "管理员面板",
-    "managerDashboard": "经理面板",
+    "adminDashboard": "管理员仪表板",
+    "managerDashboard": "经理仪表板",
     "logout": "登出"
   },
   "login": {
     "title": "登录",
-    "subtitle": "输入您的电子邮件以登录您的账户",
+    "subtitle": "在下面输入您的电子邮件以登录您的账户",
     "email": "电子邮件",
     "password": "密码",
     "loginButton": "登录",
-    "loggingIn": "登录中...",
+    "loggingIn": "正在登录...",
     "orContinueWith": "或继续使用",
     "loginWithGoogle": "使用 Google 登录",
     "termsText": "点击登录即表示您同意我们的服务条款和隐私政策。",
@@ -27,17 +27,17 @@
     "errorSync": "身份验证成功但同步失败"
   },
   "home": {
-    "tagline1": "この指とまれ",
-    "tagline2": "共感した人が集まる。",
-    "tagline3": "共感した人だけで実行する。",
-    "tagline4": "共感が、そのまま成果になる。",
-    "tagline5": "エントリー式プロジェクトシステム。",
+    "tagline1": "这个手指停下来",
+    "tagline2": "有共鸣的人聚集在一起。",
+    "tagline3": "只有有共鸣的人才能执行。",
+    "tagline4": "共鸣本身就成为成果。",
+    "tagline5": "入场式项目系统。",
     "copyright": "© 2025 Quest App Inc."
   },
   "admin": {
-    "title": "管理员面板",
+    "title": "管理员仪表板",
     "tabs": {
-      "overview": "概览",
+      "overview": "概述",
       "users": "用户",
       "tasks": "任务",
       "managers": "经理",
@@ -62,17 +62,49 @@
       "pointsDistribution": "积分分布",
       "userGrowth": "用户增长趋势",
       "roleDistribution": "用户角色分布",
-      "activeVsInactive": "活跃与非活跃用户",
+      "activeVsInactive": "活跃与不活跃用户",
       "noUsersFound": "未找到用户。",
-      "notEnoughData": "数据不足，无法显示增长图表。",
+      "notEnoughData": "增长图表数据不足。",
       "totalUsersChart": "总用户数",
       "active": "活跃",
-      "inactive": "非活跃",
+      "inactive": "不活跃",
       "pts": "分"
     }
   },
+  "userDashboard": {
+    "title": "我的账户",
+    "welcome": "欢迎",
+    "explorer": "探索者",
+    "subtitle": "管理您的账户设置和个人资料。",
+    "trackProgress": "跟踪您的进度并寻找新任务。",
+    "activeQuests": "活跃任务",
+    "completed": "已完成",
+    "totalPoints": "总积分",
+    "progress": "进度",
+    "tabs": {
+      "tasks": "我的任务",
+      "profile": "个人资料"
+    }
+  },
+  "tasks": {
+    "title": "探索任务",
+    "subtitle": "寻找新任务加入并赚取积分！",
+    "loading": "正在加载任务...",
+    "available": "可用任务",
+    "myTasks": "我的任务",
+    "noTasks": "目前没有可用的任务。",
+    "start": "开始",
+    "continue": "继续",
+    "view": "查看",
+    "points": "积分",
+    "steps": "步骤",
+    "step": "步骤",
+    "completed": "已完成",
+    "inProgress": "进行中",
+    "notStarted": "未开始"
+  },
   "user": {
-    "dashboard": "用户面板",
+    "dashboard": "用户仪表板",
     "profile": {
       "accountInfo": "账户信息",
       "email": "电子邮件地址",
@@ -113,8 +145,21 @@
     "export": "导出",
     "import": "导入",
     "refresh": "刷新",
-    "loadingStatistics": "加载统计数据...",
-    "loadingProfile": "加载个人资料...",
-    "profileNotFound": "未找到个人资料"
+    "loadingStatistics": "正在加载统计信息...",
+    "loadingProfile": "正在加载个人资料...",
+    "profileNotFound": "未找到个人资料",
+    "name": "姓名",
+    "email": "电子邮件",
+    "role": "角色",
+    "actions": "操作",
+    "add": "添加",
+    "create": "创建",
+    "update": "更新",
+    "remove": "移除",
+    "confirm": "确认",
+    "success": "成功",
+    "error": "错误",
+    "warning": "警告",
+    "info": "信息"
   }
 }

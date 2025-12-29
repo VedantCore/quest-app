@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { useLocale } from '@/context/LocaleContext';
 import UserManagement from '@/components/admin/UserManagement';
 import InviteManagement from '@/components/admin/InviteManagement';
 import CompanyManagement from '@/components/admin/CompanyManagement';
@@ -10,6 +11,7 @@ import { supabase } from '@/lib/supabase';
 
 export default function AdminDashboard() {
   const { user, userRole, loading } = useAuth();
+  const { t } = useLocale();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('companies');
   const [allUsers, setAllUsers] = useState([]);
@@ -46,7 +48,7 @@ export default function AdminDashboard() {
   const tabs = [
     {
       id: 'companies',
-      label: 'Companies',
+      label: t('admin.tabs.companies'),
       icon: (
         <svg
           className="w-5 h-5"
@@ -65,7 +67,7 @@ export default function AdminDashboard() {
     },
     {
       id: 'users',
-      label: 'Users',
+      label: t('admin.tabs.users'),
       icon: (
         <svg
           className="w-5 h-5"
@@ -84,7 +86,7 @@ export default function AdminDashboard() {
     },
     {
       id: 'invites',
-      label: 'Invites',
+      label: t('admin.tabs.invites'),
       icon: (
         <svg
           className="w-5 h-5"
@@ -110,7 +112,9 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-8">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {t('admin.title')}
+          </h1>
           <p className="mt-2 text-sm text-gray-500">
             Manage tasks, companies, users, and system settings.
           </p>

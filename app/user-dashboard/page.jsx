@@ -2,12 +2,14 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
+import { useLocale } from '../../context/LocaleContext';
 import Navbar from '../../components/Navbar';
 import TaskList from '../../components/user/TaskList';
 import Profile from '../../components/user/Profile';
 
 function DashboardContent() {
   const { user, userRole, loading } = useAuth();
+  const { t } = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -49,13 +51,15 @@ function DashboardContent() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
             {isStaff
-              ? 'My Account'
-              : `Welcome, ${user.displayName || 'Explorer'}`}
+              ? t('userDashboard.title')
+              : `${t('userDashboard.welcome')}, ${
+                  user.displayName || t('userDashboard.explorer')
+                }`}
           </h1>
           <p className="text-gray-600">
             {isStaff
-              ? 'Manage your account settings and profile.'
-              : 'Track your progress and find new quests.'}
+              ? t('userDashboard.subtitle')
+              : t('userDashboard.trackProgress')}
           </p>
         </div>
 
@@ -64,7 +68,7 @@ function DashboardContent() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
               <p className="text-xs text-gray-500 font-bold uppercase">
-                Active Quests
+                {t('userDashboard.activeQuests')}
               </p>
               <p className="text-2xl font-bold text-indigo-600">
                 {stats.activeTasks}
@@ -72,7 +76,7 @@ function DashboardContent() {
             </div>
             <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
               <p className="text-xs text-gray-500 font-bold uppercase">
-                Completed
+                {t('userDashboard.completed')}
               </p>
               <p className="text-2xl font-bold text-gray-900">
                 {stats.completedTasks}
@@ -80,7 +84,7 @@ function DashboardContent() {
             </div>
             <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
               <p className="text-xs text-gray-500 font-bold uppercase">
-                Total Points
+                {t('userDashboard.totalPoints')}
               </p>
               <p className="text-2xl font-bold text-purple-600">
                 {stats.totalPoints}
@@ -88,7 +92,7 @@ function DashboardContent() {
             </div>
             <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
               <p className="text-xs text-gray-500 font-bold uppercase">
-                Progress
+                {t('userDashboard.progress')}
               </p>
               <p className="text-2xl font-bold text-orange-500">
                 {stats.overallProgress}%

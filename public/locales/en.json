@@ -71,6 +71,38 @@
       "pts": "pts"
     }
   },
+  "userDashboard": {
+    "title": "My Account",
+    "welcome": "Welcome",
+    "explorer": "Explorer",
+    "subtitle": "Manage your account settings and profile.",
+    "trackProgress": "Track your progress and find new quests.",
+    "activeQuests": "Active Quests",
+    "completed": "Completed",
+    "totalPoints": "Total Points",
+    "progress": "Progress",
+    "tabs": {
+      "tasks": "My Tasks",
+      "profile": "Profile"
+    }
+  },
+  "tasks": {
+    "title": "Explore Tasks",
+    "subtitle": "Find new quests to join and earn points!",
+    "loading": "Loading tasks...",
+    "available": "Available Tasks",
+    "myTasks": "My Tasks",
+    "noTasks": "No tasks available at the moment.",
+    "start": "Start",
+    "continue": "Continue",
+    "view": "View",
+    "points": "points",
+    "steps": "steps",
+    "step": "step",
+    "completed": "Completed",
+    "inProgress": "In Progress",
+    "notStarted": "Not Started"
+  },
   "user": {
     "dashboard": "User Dashboard",
     "profile": {
@@ -115,6 +147,19 @@
     "refresh": "Refresh",
     "loadingStatistics": "Loading statistics...",
     "loadingProfile": "Loading profile...",
-    "profileNotFound": "Profile Not Found"
+    "profileNotFound": "Profile Not Found",
+    "name": "Name",
+    "email": "Email",
+    "role": "Role",
+    "actions": "Actions",
+    "add": "Add",
+    "create": "Create",
+    "update": "Update",
+    "remove": "Remove",
+    "confirm": "Confirm",
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Info"
   }
 }
