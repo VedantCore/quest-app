@@ -86,7 +86,15 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
 
           {/* Brand Logo */}
           <Link
-            href="/"
+            href={
+              user
+                ? userRole === 'admin'
+                  ? '/admin-dashboard'
+                  : userRole === 'manager'
+                  ? '/manager-dashboard'
+                  : '/user-dashboard'
+                : '/'
+            }
             className="text-xl font-bold tracking-tight text-indigo-600 flex items-center gap-2 group active:scale-95 transition-transform duration-200"
           >
             <div className="h-7 w-7 rounded-lg bg-indigo-600 shadow-sm group-hover:shadow transition-all"></div>
