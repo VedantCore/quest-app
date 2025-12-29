@@ -12,10 +12,12 @@ export default function Stats({ companyId }) {
     totalUsers: 0,
     activeUsers: 0,
   });
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
   useEffect(() => {
     fetchStats();
-  }, [companyId]);
+  }, [companyId, dateFrom, dateTo]);
 
   const fetchStats = async () => {
     try {
@@ -25,23 +27,26 @@ export default function Stats({ companyId }) {
         // Fetch users belonging to this company for stats via join
         const result = await supabase
           .from('user_companies')
-          .select(`
+          .select(
+            `
             user_id,
             users!user_companies_user_id_fkey (
+              user_id,
               name,
               total_points,
               role,
               created_at
             )
-          `)
+          `
+          )
           .eq('company_id', companyId);
-        
+
         if (result.error) throw result.error;
-        data = result.data.map(item => item.users).filter(u => u);
+        data = result.data.map((item) => item.users).filter((u) => u);
       } else {
         const result = await supabase
           .from('users')
-          .select('name, total_points, role, created_at')
+          .select('user_id, name, total_points, role, created_at')
           .order('total_points', { ascending: false });
         data = result.data;
         error = result.error;
@@ -50,18 +55,64 @@ export default function Stats({ companyId }) {
       if (error) throw error;
 
       const allUsers = data || [];
+
+      // If date filters are set, fetch points from history within date range
+      let userPointsInRange = {};
+      if (dateFrom || dateTo) {
+        const userIds = allUsers.map((u) => u.user_id).filter(Boolean);
+        if (userIds.length > 0) {
+          let historyQuery = supabase
+            .from('user_point_history')
+            .select('user_id, points_earned')
+            .in('user_id', userIds);
+
+          if (dateFrom) {
+            historyQuery = historyQuery.gte('earned_at', dateFrom);
+          }
+          if (dateTo) {
+            // Add one day to include the end date
+            const endDate = new Date(dateTo);
+            endDate.setDate(endDate.getDate() + 1);
+            historyQuery = historyQuery.lt(
+              'earned_at',
+              endDate.toISOString().split('T')[0]
+            );
+          }
+
+          const { data: historyData } = await historyQuery;
+
+          if (historyData) {
+            historyData.forEach((record) => {
+              userPointsInRange[record.user_id] =
+                (userPointsInRange[record.user_id] || 0) + record.points_earned;
+            });
+          }
+        }
+      }
+
+      // Apply date-filtered points if date range is set
+      const usersWithFilteredPoints = allUsers.map((user) => ({
+        ...user,
+        filtered_points:
+          dateFrom || dateTo
+            ? userPointsInRange[user.user_id] || 0
+            : user.total_points,
+      }));
+
       // Filter for stats calculation (usually we care about 'user' role for points)
-      const standardUsers = allUsers.filter((u) => u.role === 'user');
+      const standardUsers = usersWithFilteredPoints.filter(
+        (u) => u.role === 'user'
+      );
 
       const totalPoints = standardUsers.reduce(
-        (sum, user) => sum + (user.total_points || 0),
+        (sum, user) => sum + (user.filtered_points || 0),
         0
       );
       const activeUsers = standardUsers.filter(
-        (u) => u.total_points > 0
+        (u) => u.filtered_points > 0
       ).length;
 
-      setUsers(allUsers);
+      setUsers(usersWithFilteredPoints);
       setStats({
         totalPoints,
         avgPoints:
@@ -91,9 +142,9 @@ export default function Stats({ companyId }) {
   // 1. Leaderboard (All Users)
   const leaderboardData = users
     .filter((u) => u.role === 'user')
-    .sort((a, b) => (b.total_points || 0) - (a.total_points || 0));
+    .sort((a, b) => (b.filtered_points || 0) - (a.filtered_points || 0));
   const maxLeaderboardPoints = Math.max(
-    ...leaderboardData.map((u) => u.total_points || 0),
+    ...leaderboardData.map((u) => u.filtered_points || 0),
     100
   );
 
@@ -108,7 +159,7 @@ export default function Stats({ companyId }) {
   users
     .filter((u) => u.role === 'user')
     .forEach((u) => {
-      const p = u.total_points || 0;
+      const p = u.filtered_points || 0;
       if (p === 0) distributionBuckets['0']++;
       else if (p <= 100) distributionBuckets['1-100']++;
       else if (p <= 500) distributionBuckets['101-500']++;
@@ -141,10 +192,10 @@ export default function Stats({ companyId }) {
 
   // 5. Active vs Inactive (Users only)
   const activeCount = users.filter(
-    (u) => u.role === 'user' && u.total_points > 0
+    (u) => u.role === 'user' && u.filtered_points > 0
   ).length;
   const inactiveCount = users.filter(
-    (u) => u.role === 'user' && (!u.total_points || u.total_points === 0)
+    (u) => u.role === 'user' && (!u.filtered_points || u.filtered_points === 0)
   ).length;
   const totalUserRole = activeCount + inactiveCount;
 
@@ -176,6 +227,54 @@ export default function Stats({ companyId }) {
 
   return (
     <div className="space-y-8">
+      {/* Date Range Filters */}
+      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+        <h3 className="text-sm font-semibold text-gray-700 mb-4">
+          Filter by Date Range
+        </h3>
+        <div className="flex flex-wrap gap-4 items-end">
+          <div className="flex-1 min-w-[200px]">
+            <label className="block text-xs font-medium text-gray-500 mb-2">
+              From Date
+            </label>
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+          <div className="flex-1 min-w-[200px]">
+            <label className="block text-xs font-medium text-gray-500 mb-2">
+              To Date
+            </label>
+            <input
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+          <button
+            onClick={() => {
+              setDateFrom('');
+              setDateTo('');
+            }}
+            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+          >
+            Clear Filters
+          </button>
+        </div>
+        {(dateFrom || dateTo) && (
+          <p className="text-xs text-indigo-600 mt-3">
+            Showing points earned{' '}
+            {dateFrom && `from ${new Date(dateFrom).toLocaleDateString()}`}
+            {dateFrom && dateTo && ' '}
+            {dateTo && `to ${new Date(dateTo).toLocaleDateString()}`}
+          </p>
+        )}
+      </div>
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
@@ -242,7 +341,7 @@ export default function Stats({ companyId }) {
                           {index + 1}. {user.name || 'Anonymous'}
                         </span>
                         <span className="font-bold text-indigo-600">
-                          {user.total_points || 0} pts
+                          {user.filtered_points || 0} pts
                         </span>
                       </div>
                       <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">

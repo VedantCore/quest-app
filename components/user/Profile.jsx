@@ -19,6 +19,8 @@ export default function Profile({ userId, onStatsUpdate }) {
   const [historyFilter, setHistoryFilter] = useState('all');
   const [uploading, setUploading] = useState(false);
   const [expandedTasks, setExpandedTasks] = useState({});
+  const [customDateFrom, setCustomDateFrom] = useState('');
+  const [customDateTo, setCustomDateTo] = useState('');
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -175,6 +177,23 @@ export default function Profile({ userId, onStatsUpdate }) {
 
     return pointsHistory.filter((item) => {
       const earnedDate = new Date(item.earned_at);
+
+      // Custom date range filter
+      if (historyFilter === 'custom') {
+        let inRange = true;
+        if (customDateFrom) {
+          const fromDate = new Date(customDateFrom);
+          fromDate.setHours(0, 0, 0, 0);
+          inRange = inRange && earnedDate >= fromDate;
+        }
+        if (customDateTo) {
+          const toDate = new Date(customDateTo);
+          toDate.setHours(23, 59, 59, 999);
+          inRange = inRange && earnedDate <= toDate;
+        }
+        return inRange;
+      }
+
       if (historyFilter === 'thisWeek') return earnedDate >= weekAgo;
       if (historyFilter === 'thisMonth') return earnedDate >= monthAgo;
       return true;
@@ -487,27 +506,68 @@ export default function Profile({ userId, onStatsUpdate }) {
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-5 border-b border-gray-100 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <h3 className="text-lg font-bold text-slate-900">Points History</h3>
-          <div className="flex gap-2">
-            {['all', 'thisWeek', 'thisMonth'].map((filter) => (
-              <button
-                key={filter}
-                onClick={() => setHistoryFilter(filter)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  historyFilter === filter
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                {filter === 'all'
-                  ? 'All Time'
-                  : filter === 'thisWeek'
-                  ? 'This Week'
-                  : 'This Month'}
-              </button>
-            ))}
+        <div className="px-6 py-5 border-b border-gray-100">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+            <h3 className="text-lg font-bold text-slate-900">Points History</h3>
+            <div className="flex gap-2 flex-wrap">
+              {['all', 'thisWeek', 'thisMonth', 'custom'].map((filter) => (
+                <button
+                  key={filter}
+                  onClick={() => setHistoryFilter(filter)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    historyFilter === filter
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {filter === 'all'
+                    ? 'All Time'
+                    : filter === 'thisWeek'
+                    ? 'This Week'
+                    : filter === 'thisMonth'
+                    ? 'This Month'
+                    : 'Custom Range'}
+                </button>
+              ))}
+            </div>
           </div>
+
+          {/* Custom Date Range Inputs */}
+          {historyFilter === 'custom' && (
+            <div className="flex flex-wrap gap-3 items-end pt-3 border-t border-gray-100">
+              <div className="flex-1 min-w-[150px]">
+                <label className="block text-xs font-medium text-gray-500 mb-1">
+                  From Date
+                </label>
+                <input
+                  type="date"
+                  value={customDateFrom}
+                  onChange={(e) => setCustomDateFrom(e.target.value)}
+                  className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+              <div className="flex-1 min-w-[150px]">
+                <label className="block text-xs font-medium text-gray-500 mb-1">
+                  To Date
+                </label>
+                <input
+                  type="date"
+                  value={customDateTo}
+                  onChange={(e) => setCustomDateTo(e.target.value)}
+                  className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+              <button
+                onClick={() => {
+                  setCustomDateFrom('');
+                  setCustomDateTo('');
+                }}
+                className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-200 transition-colors"
+              >
+                Clear
+              </button>
+            </div>
+          )}
         </div>
         <div className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
           {Object.keys(groupedHistory).length === 0 ? (
