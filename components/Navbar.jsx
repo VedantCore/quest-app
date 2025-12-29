@@ -3,12 +3,15 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '../context/AuthContext';
+import { useLocale } from '../context/LocaleContext';
 import { signOut } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { useRouter } from 'next/navigation';
+import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Navbar({ onOpenLogin, onOpenSignup }) {
   const { user, userRole, loading } = useAuth();
+  const { t } = useLocale();
   const router = useRouter();
 
   // State for dropdowns
@@ -98,7 +101,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
             className="text-xl font-bold tracking-tight text-indigo-600 flex items-center gap-2 group active:scale-95 transition-transform duration-200"
           >
             <div className="h-7 w-7 rounded-lg bg-indigo-600 shadow-sm group-hover:shadow transition-all"></div>
-            Quest
+            {t('nav.quest')}
           </Link>
 
           {/* Desktop Navigation */}
@@ -106,20 +109,20 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
             {!user ? (
               <>
                 <Link href="/#features" className={navLinkStyle}>
-                  Features
+                  {t('nav.features')}
                 </Link>
                 <Link href="/#pricing" className={navLinkStyle}>
-                  Pricing
+                  {t('nav.pricing')}
                 </Link>
                 <Link href="/#about" className={navLinkStyle}>
-                  About
+                  {t('nav.about')}
                 </Link>
               </>
             ) : (
               <>
                 {userRole === 'user' || !userRole ? (
                   <Link href="/tasks" className={navLinkStyle}>
-                    All Quest
+                    {t('nav.allQuest')}
                   </Link>
                 ) : (
                   <Link
@@ -130,7 +133,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                     }
                     className={navLinkStyle}
                   >
-                    Dashboard
+                    {t('nav.dashboard')}
                   </Link>
                 )}
               </>
@@ -141,6 +144,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
         <div className="flex items-center gap-3 sm:gap-4">
           {!loading && (
             <>
+              <LanguageSwitcher />
               {user ? (
                 <div className="relative" ref={profileDropdownRef}>
                   <button
@@ -203,7 +207,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                               />
                             </svg>
                           </span>
-                          My Account
+                          {t('nav.myAccount')}
                         </Link>
                         {(userRole === 'user' || !userRole) && (
                           <Link
@@ -226,7 +230,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                                 />
                               </svg>
                             </span>
-                            My Quests
+                            {t('nav.myQuests')}
                           </Link>
                         )}{' '}
                         {userRole === 'admin' && (
@@ -250,7 +254,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                                 />
                               </svg>
                             </span>
-                            Admin Dashboard
+                            {t('nav.adminDashboard')}
                           </Link>
                         )}
                         {userRole === 'manager' && (
@@ -274,7 +278,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                                 />
                               </svg>
                             </span>
-                            Manager Dashboard
+                            {t('nav.managerDashboard')}
                           </Link>
                         )}
                       </div>
@@ -301,7 +305,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                               d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
                             />
                           </svg>
-                          Sign Out
+                          {t('nav.logout')}
                         </button>
                       </div>
                     </div>

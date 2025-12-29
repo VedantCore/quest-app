@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from 'next/font/google';
 import { AuthProvider } from '../context/AuthContext';
+import { LocaleProvider } from '../context/LocaleContext';
 import { Toaster } from 'react-hot-toast';
 import './globals.css';
 
@@ -28,18 +29,20 @@ export default function RootLayout({ children }) {
         <div className="absolute inset-0 bg-grid-pattern opacity-[0.6] pointer-events-none z-0" />
 
         <div className="relative z-10">
-          <AuthProvider>
-            <Toaster
-              position="top-right"
-              toastOptions={{
-                className: 'z-[9999]',
-                style: {
-                  zIndex: 9999,
-                },
-              }}
-            />
-            {children}
-          </AuthProvider>
+          <LocaleProvider initialLocale="en">
+            <AuthProvider>
+              <Toaster
+                position="top-right"
+                toastOptions={{
+                  className: 'z-[9999]',
+                  style: {
+                    zIndex: 9999,
+                  },
+                }}
+              />
+              {children}
+            </AuthProvider>
+          </LocaleProvider>
         </div>
       </body>
     </html>

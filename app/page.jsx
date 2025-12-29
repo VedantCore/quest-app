@@ -4,6 +4,7 @@ import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../lib/firebase';
 import { supabase } from '../lib/supabase';
 import { useRouter } from 'next/navigation';
+import { useLocale } from '../context/LocaleContext';
 import toast from 'react-hot-toast';
 
 export default function Home() {
@@ -12,6 +13,7 @@ export default function Home() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { t } = useLocale();
   const router = useRouter();
 
   const handleLogin = async (e) => {
@@ -53,11 +55,9 @@ export default function Home() {
 
       if (supabaseError) {
         console.error('❌ Supabase sync error:', supabaseError);
-        toast.error(
-          `Auth successful but sync failed: ${supabaseError.message}`
-        );
+        toast.error(`${t('login.errorSync')}: ${supabaseError.message}`);
       } else {
-        toast.success('Logged in successfully!');
+        toast.success(t('login.successMessage'));
       }
 
       // Redirect based on role
@@ -139,25 +139,23 @@ export default function Home() {
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-12">
             <div className="h-8 w-8 rounded bg-white"></div>
-            <span className="text-2xl font-bold">Quest</span>
+            <span className="text-2xl font-bold">{t('nav.quest')}</span>
           </div>
 
           <h1 className="text-4xl lg:text-5xl font-bold mb-8 leading-tight">
-            この指とまれ
+            {t('home.tagline1')}
           </h1>
 
           <div className="space-y-4 text-lg lg:text-xl text-indigo-100 font-medium leading-relaxed">
-            <p>共感した人が集まる。</p>
-            <p>共感した人だけで実行する。</p>
-            <p>共感が、そのまま成果になる。</p>
-            <p className="pt-4 text-white font-bold">
-              エントリー式プロジェクトシステム。
-            </p>
+            <p>{t('home.tagline2')}</p>
+            <p>{t('home.tagline3')}</p>
+            <p>{t('home.tagline4')}</p>
+            <p className="pt-4 text-white font-bold">{t('home.tagline5')}</p>
           </div>
         </div>
 
         <div className="absolute bottom-8 left-12 text-xs text-indigo-300">
-          © 2025 Quest App Inc.
+          {t('home.copyright')}
         </div>
       </div>
 
@@ -165,10 +163,10 @@ export default function Home() {
       <div className="w-full md:w-1/2 bg-white flex items-center justify-center p-8">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center md:text-left">
-            <h2 className="text-3xl font-bold text-slate-900">Login</h2>
-            <p className="mt-2 text-slate-600">
-              Enter your email below to login to your account
-            </p>
+            <h2 className="text-3xl font-bold text-slate-900">
+              {t('login.title')}
+            </h2>
+            <p className="mt-2 text-slate-600">{t('login.subtitle')}</p>
           </div>
 
           {error && (
@@ -183,7 +181,7 @@ export default function Home() {
                 htmlFor="email"
                 className="block text-sm font-medium text-slate-700 mb-1"
               >
-                Email
+                {t('login.email')}
               </label>
               <input
                 id="email"
@@ -201,7 +199,7 @@ export default function Home() {
                 htmlFor="password"
                 className="block text-sm font-medium text-slate-700 mb-1"
               >
-                Password
+                {t('login.password')}
               </label>
               <div className="relative">
                 <input
@@ -261,7 +259,7 @@ export default function Home() {
               disabled={loading}
               className="w-full py-3.5 px-4 bg-indigo-900 text-white font-semibold rounded-lg hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all shadow-md hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {loading ? 'Logging in...' : 'Login'}
+              {loading ? t('login.loggingIn') : t('login.loginButton')}
             </button>
           </form>
 
@@ -271,7 +269,7 @@ export default function Home() {
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-4 bg-white text-slate-500 uppercase tracking-wider font-medium text-xs">
-                Or continue with
+                {t('login.orContinueWith')}
               </span>
             </div>
           </div>
@@ -298,15 +296,14 @@ export default function Home() {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-            Login with Google
+            {t('login.loginWithGoogle')}
           </button>
 
           <p className="text-center text-sm text-slate-500 pt-4">
-            By clicking login, you agree to our Terms of Service and Privacy
-            Policy.
+            {t('login.termsText')}
             <br />
             <span className="inline-block mt-2 px-3 py-1 bg-slate-100 rounded-full text-slate-500 font-medium text-xs">
-              Invite Only
+              {t('login.inviteOnly')}
             </span>
           </p>
         </div>
