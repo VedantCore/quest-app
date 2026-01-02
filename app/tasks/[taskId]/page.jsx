@@ -88,7 +88,9 @@ export default function TaskDetailsPage() {
         totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
 
       // Check if task is expired
-      const isExpired = taskData.deadline ? new Date() > new Date(taskData.deadline) : false;
+      const isExpired = taskData.deadline
+        ? new Date() > new Date(taskData.deadline)
+        : false;
 
       setTask({
         ...taskData,
@@ -215,7 +217,11 @@ export default function TaskDetailsPage() {
                       : 'bg-gray-100 text-gray-700 border-gray-200'
                   }`}
                 >
-                  {task.isExpired ? 'Expired' : task.is_active ? 'Active' : 'Inactive'}
+                  {task.isExpired
+                    ? 'Expired'
+                    : task.is_active
+                    ? 'Active'
+                    : 'Inactive'}
                 </span>
                 {task.isEnrolled && (
                   <span className="px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
@@ -230,7 +236,11 @@ export default function TaskDetailsPage() {
                 </div>
                 <div className="flex items-center gap-1">
                   <span className="font-medium">Deadline:</span>
-                  <span className={task.isExpired ? 'text-red-600 font-semibold' : ''}>
+                  <span
+                    className={
+                      task.isExpired ? 'text-red-600 font-semibold' : ''
+                    }
+                  >
                     {task.deadline
                       ? new Date(task.deadline).toLocaleDateString()
                       : 'No deadline'}

@@ -41,7 +41,7 @@ export default function TaskManagement({ companyId, companyName }) {
   const fetchData = async () => {
     try {
       setLoading(true);
-      
+
       let taskQuery = supabase
         .from('tasks')
         .select(
@@ -72,14 +72,16 @@ export default function TaskManagement({ companyId, companyName }) {
         // Fetch only managers assigned to this company
         managersQuery = supabase
           .from('user_companies')
-          .select(`
+          .select(
+            `
             user_id,
             users!user_companies_user_id_fkey (
               user_id,
               name,
               role
             )
-          `)
+          `
+          )
           .eq('company_id', companyId);
       } else {
         // Fetch all managers globally
@@ -99,17 +101,17 @@ export default function TaskManagement({ companyId, companyName }) {
       if (managersResult.error) throw managersResult.error;
 
       setTasks(tasksResult.data || []);
-      
+
       // Process managers data - handle different structures
       let managersData = managersResult.data || [];
       if (companyId && managersData.length > 0 && managersData[0].users) {
         // Transform company-filtered data: extract users and filter for managers
         managersData = managersData
-          .map(item => item.users)
-          .filter(u => u && u.role === 'manager');
+          .map((item) => item.users)
+          .filter((u) => u && u.role === 'manager');
       }
       setManagers(managersData);
-      
+
       if (companiesResult.success) {
         setCompanies(companiesResult.data || []);
       }
@@ -297,12 +299,21 @@ export default function TaskManagement({ companyId, companyName }) {
 
   const getTaskStatus = (task) => {
     if (!task.is_active) {
-      return { text: 'Inactive', color: 'bg-red-50 text-red-700 border-red-100' };
+      return {
+        text: 'Inactive',
+        color: 'bg-red-50 text-red-700 border-red-100',
+      };
     }
     if (isTaskExpired(task.deadline)) {
-      return { text: 'Expired', color: 'bg-orange-50 text-orange-700 border-orange-200' };
+      return {
+        text: 'Expired',
+        color: 'bg-orange-50 text-orange-700 border-orange-200',
+      };
     }
-    return { text: 'Active', color: 'bg-green-100 text-green-700 border-green-200' };
+    return {
+      text: 'Active',
+      color: 'bg-green-100 text-green-700 border-green-200',
+    };
   };
 
   const renderStars = (level) => {

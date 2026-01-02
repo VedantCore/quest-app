@@ -192,7 +192,7 @@ export async function joinTask(taskId, userId) {
     if (task.deadline) {
       const deadline = new Date(task.deadline);
       const now = new Date();
-      
+
       if (now > deadline) {
         return {
           success: false,

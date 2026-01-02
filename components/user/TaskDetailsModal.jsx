@@ -39,7 +39,9 @@ export default function TaskDetailsModal({
   const isStaff = userRole === 'admin' || userRole === 'manager'; // Check if staff
 
   // Check if task is expired
-  const isExpired = task.deadline ? new Date() > new Date(task.deadline) : false;
+  const isExpired = task.deadline
+    ? new Date() > new Date(task.deadline)
+    : false;
 
   // Calculate deadline (Created + 30 days logic)
   const getDeadline = (dateStr) => {
@@ -68,12 +70,19 @@ export default function TaskDetailsModal({
                 {task.task_steps?.length || 0} Steps
               </span>
               {task.deadline && (
-                <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${
-                  isExpired 
-                    ? 'bg-red-50 text-red-600 border-red-200' 
-                    : 'bg-indigo-50 text-indigo-600 border-indigo-100'
-                }`}>
-                  {isExpired ? '⚠️ Expired' : `Deadline: ${new Date(task.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`}
+                <span
+                  className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${
+                    isExpired
+                      ? 'bg-red-50 text-red-600 border-red-200'
+                      : 'bg-indigo-50 text-indigo-600 border-indigo-100'
+                  }`}
+                >
+                  {isExpired
+                    ? '⚠️ Expired'
+                    : `Deadline: ${new Date(task.deadline).toLocaleDateString(
+                        'en-US',
+                        { month: 'short', day: 'numeric', year: 'numeric' }
+                      )}`}
                 </span>
               )}
             </div>
