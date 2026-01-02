@@ -87,9 +87,13 @@ export default function TaskDetailsPage() {
       const progress =
         totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
 
+      // Check if task is expired
+      const isExpired = taskData.deadline ? new Date() > new Date(taskData.deadline) : false;
+
       setTask({
         ...taskData,
         isEnrolled,
+        isExpired,
         steps: stepsWithStatus, // Use the processed steps
         progress,
       });
@@ -204,12 +208,14 @@ export default function TaskDetailsPage() {
               <div className="flex items-center gap-4 text-sm text-gray-500 flex-wrap">
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-bold border ${
-                    task.is_active
+                    task.isExpired
+                      ? 'bg-red-50 text-red-700 border-red-200'
+                      : task.is_active
                       ? 'bg-green-50 text-green-700 border-green-200'
                       : 'bg-gray-100 text-gray-700 border-gray-200'
                   }`}
                 >
-                  {task.is_active ? 'Active' : 'Inactive'}
+                  {task.isExpired ? 'Expired' : task.is_active ? 'Active' : 'Inactive'}
                 </span>
                 {task.isEnrolled && (
                   <span className="px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
@@ -224,7 +230,7 @@ export default function TaskDetailsPage() {
                 </div>
                 <div className="flex items-center gap-1">
                   <span className="font-medium">Deadline:</span>
-                  <span>
+                  <span className={task.isExpired ? 'text-red-600 font-semibold' : ''}>
                     {task.deadline
                       ? new Date(task.deadline).toLocaleDateString()
                       : 'No deadline'}
@@ -239,13 +245,18 @@ export default function TaskDetailsPage() {
               </div>
             </div>
 
-            {!task.isEnrolled && userRole === 'user' && (
+            {!task.isEnrolled && userRole === 'user' && !task.isExpired && (
               <button
                 onClick={handleJoin}
                 className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-md hover:shadow-lg active:scale-95"
               >
                 Join Quest
               </button>
+            )}
+            {!task.isEnrolled && userRole === 'user' && task.isExpired && (
+              <div className="px-6 py-3 bg-red-50 text-red-700 font-bold rounded-xl border-2 border-red-200">
+                Quest Expired
+              </div>
             )}
           </div>
 

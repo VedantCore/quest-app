@@ -182,9 +182,13 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
           .filter((s) => s.status === 'APPROVED')
           .reduce((sum, s) => sum + (s.points_reward || 0), 0);
 
+        // Check if task is expired
+        const isExpired = task.deadline ? new Date() > new Date(task.deadline) : false;
+
         return {
           ...task,
           isEnrolled,
+          isExpired,
           steps: stepsWithStatus,
           progress,
           totalPoints,
@@ -256,7 +260,6 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
   const getDeadline = (dateStr) => {
     if (!dateStr) return 'N/A';
     const date = new Date(dateStr);
-    date.setDate(date.getDate() + 30);
     return date.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
@@ -502,6 +505,10 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
                                               >
                                               {task.progress === 100 ? 'Completed' : 'Enrolled'}
                                               </span>
+                                          ) : task.isExpired ? (
+                                              <span className="px-2.5 py-0.5 rounded text-[10px] uppercase font-bold tracking-wide border bg-red-50 text-red-600 border-red-200">
+                                              Expired
+                                              </span>
                                           ) : null}
                                           </div>
                                           <p className="text-gray-600 text-sm line-clamp-2 leading-relaxed mb-4">
@@ -536,8 +543,8 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
                                               {task.earnedPoints}/{task.totalPoints} pts
                                           </div>
                                           <div className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg">
-                                              <span className="text-gray-600">
-                                              Due: {getDeadline(task.created_at)}
+                                              <span className={task.isExpired ? 'text-red-600 font-semibold' : 'text-gray-600'}>
+                                              {task.deadline ? `Due: ${getDeadline(task.deadline)}` : 'No deadline'}
                                               </span>
                                           </div>
                                           </div>

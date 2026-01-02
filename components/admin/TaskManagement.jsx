@@ -288,6 +288,23 @@ export default function TaskManagement({ companyId, companyName }) {
     });
   };
 
+  const isTaskExpired = (deadlineStr) => {
+    if (!deadlineStr) return false;
+    const deadline = new Date(deadlineStr);
+    const now = new Date();
+    return now > deadline;
+  };
+
+  const getTaskStatus = (task) => {
+    if (!task.is_active) {
+      return { text: 'Inactive', color: 'bg-red-50 text-red-700 border-red-100' };
+    }
+    if (isTaskExpired(task.deadline)) {
+      return { text: 'Expired', color: 'bg-orange-50 text-orange-700 border-orange-200' };
+    }
+    return { text: 'Active', color: 'bg-green-100 text-green-700 border-green-200' };
+  };
+
   const renderStars = (level) => {
     return (
       <div className="flex gap-0.5" title={`Difficulty ${level || 1}`}>
@@ -391,6 +408,8 @@ export default function TaskManagement({ companyId, companyName }) {
                       0
                     ) || 0;
 
+                  const taskStatus = getTaskStatus(task);
+
                   return (
                     <tr
                       key={task.task_id}
@@ -424,13 +443,9 @@ export default function TaskManagement({ companyId, companyName }) {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`px-2.5 py-1 text-xs font-medium rounded-full ${
-                            task.is_active
-                              ? 'bg-green-100 text-green-700 border border-green-200'
-                              : 'bg-red-50 text-red-700 border border-red-100'
-                          }`}
+                          className={`px-2.5 py-1 text-xs font-medium rounded-full border ${taskStatus.color}`}
                         >
-                          {task.is_active ? 'Active' : 'Inactive'}
+                          {taskStatus.text}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

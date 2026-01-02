@@ -38,6 +38,9 @@ export default function TaskDetailsModal({
 
   const isStaff = userRole === 'admin' || userRole === 'manager'; // Check if staff
 
+  // Check if task is expired
+  const isExpired = task.deadline ? new Date() > new Date(task.deadline) : false;
+
   // Calculate deadline (Created + 30 days logic)
   const getDeadline = (dateStr) => {
     if (!dateStr) return 'N/A';
@@ -64,9 +67,15 @@ export default function TaskDetailsModal({
               <span className="bg-indigo-50 text-indigo-600 px-2.5 py-0.5 rounded-full text-xs font-bold border border-indigo-100">
                 {task.task_steps?.length || 0} Steps
               </span>
-              <span className="bg-indigo-50 text-indigo-600 px-2.5 py-0.5 rounded-full text-xs font-bold border border-indigo-100">
-                Deadline: {getDeadline(task.created_at)}
-              </span>
+              {task.deadline && (
+                <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${
+                  isExpired 
+                    ? 'bg-red-50 text-red-600 border-red-200' 
+                    : 'bg-indigo-50 text-indigo-600 border-indigo-100'
+                }`}>
+                  {isExpired ? '⚠️ Expired' : `Deadline: ${new Date(task.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`}
+                </span>
+              )}
             </div>
           </div>
           <button
@@ -226,18 +235,22 @@ export default function TaskDetailsModal({
           >
             Close
           </button>
-          {!isEnrolled &&
-            !isStaff && ( // Check if NOT staff
-              <button
-                onClick={() => {
-                  onJoin(task.task_id);
-                  onClose();
-                }}
-                className="px-6 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 shadow-sm hover:shadow-md transition-all transform hover:-translate-y-0.5"
-              >
-                Join Quest
-              </button>
-            )}
+          {!isEnrolled && !isStaff && !isExpired && (
+            <button
+              onClick={() => {
+                onJoin(task.task_id);
+                onClose();
+              }}
+              className="px-6 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 shadow-sm hover:shadow-md transition-all transform hover:-translate-y-0.5"
+            >
+              Join Quest
+            </button>
+          )}
+          {!isEnrolled && !isStaff && isExpired && (
+            <div className="px-4 py-2.5 text-sm font-medium text-red-600 bg-red-50 rounded-xl border border-red-200">
+              Quest Expired
+            </div>
+          )}
         </div>
       </div>
     </div>

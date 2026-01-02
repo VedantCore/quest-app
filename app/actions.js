@@ -164,6 +164,43 @@ export async function deleteTask(taskId) {
  */
 export async function joinTask(taskId, userId) {
   try {
+    // First, check if the task exists and get its deadline
+    const { data: task, error: taskError } = await supabase
+      .from('tasks')
+      .select('task_id, deadline, is_active')
+      .eq('task_id', taskId)
+      .single();
+
+    if (taskError) throw taskError;
+
+    if (!task) {
+      return {
+        success: false,
+        message: 'Task not found.',
+      };
+    }
+
+    // Check if task is inactive
+    if (!task.is_active) {
+      return {
+        success: false,
+        message: 'This task is no longer active.',
+      };
+    }
+
+    // Check if deadline has passed
+    if (task.deadline) {
+      const deadline = new Date(task.deadline);
+      const now = new Date();
+      
+      if (now > deadline) {
+        return {
+          success: false,
+          message: 'This task has expired. The deadline has passed.',
+        };
+      }
+    }
+
     const { data, error } = await supabase
       .from('task_enrollments')
       .insert({
