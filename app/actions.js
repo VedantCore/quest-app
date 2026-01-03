@@ -201,23 +201,37 @@ export async function joinTask(taskId, userId) {
       }
     }
 
+    // Check if user already has an IN_PROGRESS enrollment for this task
+    const { data: activeEnrollment, error: enrollmentError } = await supabase
+      .from('task_enrollments')
+      .select('enrollment_id')
+      .eq('task_id', taskId)
+      .eq('user_id', userId)
+      .eq('status', 'IN_PROGRESS')
+      .single();
+
+    if (enrollmentError && enrollmentError.code !== 'PGRST116') {
+      throw enrollmentError;
+    }
+
+    if (activeEnrollment) {
+      return {
+        success: false,
+        message: 'You are already working on this quest.',
+      };
+    }
+
+    // User can join - insert new enrollment with IN_PROGRESS status
     const { data, error } = await supabase
       .from('task_enrollments')
       .insert({
         task_id: taskId,
         user_id: userId,
+        status: 'IN_PROGRESS',
       })
       .select();
 
-    if (error) {
-      if (error.code === '23505') {
-        return {
-          success: false,
-          message: 'You have already joined this task.',
-        };
-      }
-      throw error;
-    }
+    if (error) throw error;
 
     revalidatePath('/user-dashboard');
     return { success: true, message: 'Successfully joined task!' };
@@ -232,12 +246,38 @@ export async function joinTask(taskId, userId) {
  */
 export async function submitStep(stepId, userId) {
   try {
-    // Check if submission exists
+    // First, get the task_id for this step
+    const { data: step, error: stepError } = await supabase
+      .from('task_steps')
+      .select('task_id')
+      .eq('step_id', stepId)
+      .single();
+
+    if (stepError) throw stepError;
+
+    // Find the user's current active enrollment for this task
+    const { data: activeEnrollment, error: enrollmentError } = await supabase
+      .from('task_enrollments')
+      .select('enrollment_id, joined_at')
+      .eq('task_id', step.task_id)
+      .eq('user_id', userId)
+      .eq('status', 'IN_PROGRESS')
+      .single();
+
+    if (enrollmentError || !activeEnrollment) {
+      return {
+        success: false,
+        message: 'You must be enrolled in this quest to submit steps.',
+      };
+    }
+
+    // Check if submission exists for this step after the current enrollment date
     const { data: existingSubmission } = await supabase
       .from('step_submissions')
-      .select('submission_id, status')
+      .select('submission_id, status, submitted_at')
       .eq('step_id', stepId)
       .eq('user_id', userId)
+      .gte('submitted_at', activeEnrollment.joined_at)
       .single();
 
     if (existingSubmission) {
@@ -295,6 +335,51 @@ export async function approveSubmission(
   feedback = ''
 ) {
   try {
+    // Get submission details to find user and step
+    const { data: submission, error: submissionError } = await supabase
+      .from('step_submissions')
+      .select('step_id, user_id, submitted_at')
+      .eq('submission_id', submissionId)
+      .single();
+
+    if (submissionError) throw submissionError;
+
+    // Get the task_id and step info
+    const { data: step, error: stepError } = await supabase
+      .from('task_steps')
+      .select('task_id, points_reward')
+      .eq('step_id', submission.step_id)
+      .single();
+
+    if (stepError) throw stepError;
+
+    // Find the user's current active enrollment
+    const { data: activeEnrollment, error: enrollmentError } = await supabase
+      .from('task_enrollments')
+      .select('enrollment_id, joined_at')
+      .eq('task_id', step.task_id)
+      .eq('user_id', submission.user_id)
+      .eq('status', 'IN_PROGRESS')
+      .single();
+
+    if (enrollmentError || !activeEnrollment) {
+      return {
+        success: false,
+        message: 'User must have an active enrollment to approve submissions.',
+      };
+    }
+
+    // Verify this submission belongs to the current run
+    if (
+      new Date(submission.submitted_at) < new Date(activeEnrollment.joined_at)
+    ) {
+      return {
+        success: false,
+        message: 'This submission is from a previous quest run.',
+      };
+    }
+
+    // Approve the submission
     const { error } = await supabase
       .from('step_submissions')
       .update({
@@ -306,6 +391,45 @@ export async function approveSubmission(
       .eq('submission_id', submissionId);
 
     if (error) throw error;
+
+    // Get total number of steps for this task
+    const { count: totalSteps, error: stepsCountError } = await supabase
+      .from('task_steps')
+      .select('*', { count: 'exact', head: true })
+      .eq('task_id', step.task_id);
+
+    if (stepsCountError) throw stepsCountError;
+
+    // Get all step IDs for this task
+    const { data: taskSteps, error: taskStepsError } = await supabase
+      .from('task_steps')
+      .select('step_id')
+      .eq('task_id', step.task_id);
+
+    if (taskStepsError) throw taskStepsError;
+
+    const stepIds = taskSteps.map((s) => s.step_id);
+
+    // Count approved submissions for this user after their enrollment date
+    const { count: approvedSteps, error: approvedCountError } = await supabase
+      .from('step_submissions')
+      .select('submission_id', { count: 'exact', head: true })
+      .eq('user_id', submission.user_id)
+      .eq('status', 'APPROVED')
+      .gte('submitted_at', activeEnrollment.joined_at)
+      .in('step_id', stepIds);
+
+    if (approvedCountError) throw approvedCountError;
+
+    // If all steps are completed, mark enrollment as COMPLETED
+    if (approvedSteps >= totalSteps) {
+      const { error: updateEnrollmentError } = await supabase
+        .from('task_enrollments')
+        .update({ status: 'COMPLETED' })
+        .eq('enrollment_id', activeEnrollment.enrollment_id);
+
+      if (updateEnrollmentError) throw updateEnrollmentError;
+    }
 
     revalidatePath('/manager-dashboard');
     return {
