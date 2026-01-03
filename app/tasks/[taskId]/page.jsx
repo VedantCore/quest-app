@@ -41,24 +41,26 @@ export default function TaskDetailsPage() {
 
       if (taskError) throw taskError;
 
-      // 2. Fetch enrollment
+      // 2. Fetch active enrollment (IN_PROGRESS only)
       const { data: enrollment, error: enrollmentError } = await supabase
         .from('task_enrollments')
-        .select('task_id')
+        .select('task_id, joined_at')
         .eq('task_id', taskId)
         .eq('user_id', user.uid)
-        .single();
+        .eq('status', 'IN_PROGRESS')
+        .maybeSingle();
 
       // Ignore error if no enrollment found (it just means not enrolled)
       const isEnrolled = !!enrollment;
 
-      // 3. Fetch submissions if enrolled
+      // 3. Fetch submissions if enrolled (only from current run)
       let submissions = [];
       if (isEnrolled) {
         const { data: subs, error: subsError } = await supabase
           .from('step_submissions')
           .select('*')
           .eq('user_id', user.uid)
+          .gte('submitted_at', enrollment.joined_at)
           .in(
             'step_id',
             taskData.task_steps.map((s) => s.step_id)
@@ -129,7 +131,7 @@ export default function TaskDetailsPage() {
     setSubmittingStepId(stepId);
 
     const submitAction = async () => {
-      const result = await submitStep(stepId, user.uid, 'Submitted for review');
+      const result = await submitStep(stepId, user.uid);
       if (!result.success) {
         throw new Error(result.message || 'Failed to submit step');
       }
