@@ -612,5 +612,31 @@
     "submit": "Apakah Anda yakin ingin mengirim langkah ini?",
     "approve": "Apakah Anda yakin ingin menyetujui pengajuan ini?",
     "reject": "Apakah Anda yakin ingin menolak pengajuan ini?"
+  },
+  "taskPage": {
+    "errorLoading": "Error loading task",
+    "joinSuccess": "Joined quest successfully!",
+    "joinFailed": "Failed to join quest",
+    "errorOccurred": "An error occurred",
+    "submittingStep": "Submitting step...",
+    "stepSubmitted": "Step submitted successfully!",
+    "taskNotFound": "Task not found",
+    "goBack": "Go back",
+    "backToTasks": "Back to Tasks",
+    "active": "Active",
+    "inactive": "Inactive",
+    "level": "Level",
+    "yourProgress": "Your Progress",
+    "questSteps": "Quest Steps",
+    "points": "Points",
+    "reviewing": "Reviewing",
+    "completed": "Completed",
+    "rejected": "Rejected",
+    "managerFeedback": "Manager Feedback:",
+    "submitting": "Submitting...",
+    "submitForReview": "Submit for Review",
+    "resubmit": "Resubmit",
+    "noSteps": "No steps defined for this quest."
   }
 }
+
