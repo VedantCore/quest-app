@@ -4,8 +4,10 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { deleteUser } from '@/app/actions';
 import { toast } from 'react-hot-toast';
+import { useLocale } from '../../context/LocaleContext';
 
 export default function UserManagement() {
+  const { t } = useLocale();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -50,30 +52,26 @@ export default function UserManagement() {
       fetchUsers();
     } catch (error) {
       console.error('Error updating role:', error);
-      alert('Error updating role: ' + error.message);
+      alert(t('userManagement.roleChangeFailed'));
     }
   };
 
   const handleDeleteUser = async (user) => {
-    if (
-      !confirm(
-        `Are you sure you want to delete user ${user.name}? This action cannot be undone.`
-      )
-    ) {
+    if (!confirm(t('userManagement.deleteConfirm', { name: user.name }))) {
       return;
     }
 
     try {
       const result = await deleteUser(user.user_id);
       if (result.success) {
-        toast.success('User deleted successfully');
+        toast.success(t('userManagement.deleteSuccess'));
         fetchUsers();
       } else {
-        toast.error('Failed to delete user: ' + result.error);
+        toast.error(t('userManagement.deleteFailed'));
       }
     } catch (error) {
       console.error('Error deleting user:', error);
-      toast.error('An error occurred while deleting the user');
+      toast.error(t('common.serverError'));
     }
   };
 
@@ -266,7 +264,7 @@ export default function UserManagement() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input
             type="text"
-            placeholder="Search by name or email..."
+            placeholder={t('userManagement.search')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-gray-400"
@@ -276,10 +274,10 @@ export default function UserManagement() {
             onChange={(e) => setFilterRole(e.target.value)}
             className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-gray-400"
           >
-            <option value="all">All Roles</option>
-            <option value="admin">Admin</option>
-            <option value="manager">Manager</option>
-            <option value="user">User</option>
+            <option value="all">{t('common.all')}</option>
+            <option value="admin">{t('common.admin')}</option>
+            <option value="manager">{t('common.manager')}</option>
+            <option value="user">{t('common.user')}</option>
           </select>
         </div>
       </div>
@@ -290,22 +288,22 @@ export default function UserManagement() {
             <thead className="bg-gray-50/50">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  {renderSortableHeader('User', 'name')}
+                  {renderSortableHeader(t('common.name'), 'name')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  {renderSortableHeader('Email', 'email')}
+                  {renderSortableHeader(t('common.email'), 'email')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  {renderSortableHeader('Role', 'role')}
+                  {renderSortableHeader(t('common.role'), 'role')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  {renderSortableHeader('Points', 'total_points')}
+                  {renderSortableHeader(t('common.points'), 'total_points')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  {renderSortableHeader('Joined', 'created_at')}
+                  {renderSortableHeader(t('common.joined'), 'created_at')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Actions
+                  {t('common.actions')}
                 </th>
               </tr>
             </thead>
@@ -316,7 +314,7 @@ export default function UserManagement() {
                     colSpan="6"
                     className="px-6 py-12 text-center text-gray-500"
                   >
-                    No users found.
+                    {t('userManagement.noUsers')}
                   </td>
                 </tr>
               ) : (
@@ -364,13 +362,13 @@ export default function UserManagement() {
                         }`}
                       >
                         <option value="user" className="text-black bg-white">
-                          User
+                          {t('common.user')}
                         </option>
                         <option value="manager" className="text-black bg-white">
-                          Manager
+                          {t('common.manager')}
                         </option>
                         <option value="admin" className="text-black bg-white">
-                          Admin
+                          {t('common.admin')}
                         </option>
                       </select>
                     </td>
@@ -386,7 +384,7 @@ export default function UserManagement() {
                       <button
                         onClick={() => handleDeleteUser(user)}
                         className="text-gray-400 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-lg"
-                        title="Delete User"
+                        title={t('userManagement.deleteUser')}
                       >
                         <svg
                           className="w-5 h-5"

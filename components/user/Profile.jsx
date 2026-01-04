@@ -8,9 +8,11 @@ import { getUserCompanies } from '../../app/actions';
 import toast from 'react-hot-toast';
 import { uploadAvatar } from '../../app/upload-actions';
 import Image from 'next/image';
+import { useLocale } from '../../context/LocaleContext';
 
 export default function Profile({ userId, onStatsUpdate }) {
   const { user: authUser } = useAuth();
+  const { t, locale } = useLocale();
   const [userInfo, setUserInfo] = useState(null);
   const [pointsHistory, setPointsHistory] = useState([]);
   const [userCompanies, setUserCompanies] = useState([]);
@@ -92,13 +94,13 @@ export default function Profile({ userId, onStatsUpdate }) {
 
     // Basic validation
     if (!file.type.startsWith('image/')) {
-      toast.error('Please upload an image file');
+      toast.error(t('user.profile.uploadImageError'));
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
       // 5MB limit
-      toast.error('Image size should be less than 5MB');
+      toast.error(t('user.profile.imageSizeError'));
       return;
     }
 
@@ -128,10 +130,10 @@ export default function Profile({ userId, onStatsUpdate }) {
       }
       // Update local state
       setUserInfo((prev) => ({ ...prev, avatar_url: result.url }));
-      toast.success('Profile picture updated!');
+      toast.success(t('user.profile.pictureUpdated'));
     } catch (error) {
       console.error('Error updating avatar:', error);
-      toast.error('Failed to update profile picture');
+      toast.error(t('user.profile.pictureUpdateFailed'));
     } finally {
       setUploading(false);
       // Reset input
@@ -142,12 +144,21 @@ export default function Profile({ userId, onStatsUpdate }) {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
+    if (!dateString) return t('user.profile.notSet');
+    const localeMap = {
+      en: 'en-US',
+      id: 'id-ID',
+      ja: 'ja-JP',
+      zh: 'zh-CN',
+    };
+    return new Date(dateString).toLocaleDateString(
+      localeMap[locale] || 'en-US',
+      {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      }
+    );
   };
 
   const providerId = authUser?.providerData?.[0]?.providerId;
@@ -165,7 +176,9 @@ export default function Profile({ userId, onStatsUpdate }) {
   if (!userInfo) {
     return (
       <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
-        <h3 className="text-lg font-bold text-slate-900">Profile Not Found</h3>
+        <h3 className="text-lg font-bold text-slate-900">
+          {t('common.profileNotFound')}
+        </h3>
       </div>
     );
   }
@@ -205,7 +218,7 @@ export default function Profile({ userId, onStatsUpdate }) {
   // Group history by task
   const groupedHistory = filteredHistory.reduce((acc, item) => {
     const taskId = item.step?.task?.task_id || 'general';
-    const taskTitle = item.step?.task?.title || 'General Awards';
+    const taskTitle = item.step?.task?.title || t('user.profile.generalAwards');
 
     if (!acc[taskId]) {
       acc[taskId] = {
@@ -234,7 +247,7 @@ export default function Profile({ userId, onStatsUpdate }) {
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
           <h3 className="text-lg font-bold text-slate-900">
-            Account Information
+            {t('user.profile.accountInfo')}
           </h3>
         </div>
 
@@ -332,7 +345,7 @@ export default function Profile({ userId, onStatsUpdate }) {
                 {userInfo.name}
               </h2>
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 mt-2 border border-gray-200">
-                {userInfo.role.charAt(0).toUpperCase() + userInfo.role.slice(1)}
+                {t('common.' + userInfo.role)}
               </span>
             </div>
 
@@ -340,7 +353,7 @@ export default function Profile({ userId, onStatsUpdate }) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
-                    Email Address
+                    {t('user.profile.email')}
                   </label>
                   <p className="text-slate-900 font-medium border-b border-gray-100 pb-2">
                     {userInfo.email}
@@ -348,15 +361,15 @@ export default function Profile({ userId, onStatsUpdate }) {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
-                    Date of Birth
+                    {t('user.profile.dob')}
                   </label>
                   <p className="text-gray-400 font-medium border-b border-gray-100 pb-2 italic">
-                    Not set
+                    {t('user.profile.notSet')}
                   </p>
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
-                    Member Since
+                    {t('user.profile.memberSince')}
                   </label>
                   <p className="text-slate-900 font-medium border-b border-gray-100 pb-2">
                     {formatDate(userInfo.created_at)}
@@ -364,12 +377,12 @@ export default function Profile({ userId, onStatsUpdate }) {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                    Assigned Companies
+                    {t('user.profile.assignedCompanies')}
                   </label>
                   <div className="border-b border-gray-100 pb-3">
                     {userCompanies.length === 0 ? (
                       <p className="text-gray-400 font-medium italic text-sm">
-                        No companies assigned
+                        {t('user.profile.noCompanies')}
                       </p>
                     ) : (
                       <div className="flex flex-wrap gap-2">
@@ -389,21 +402,21 @@ export default function Profile({ userId, onStatsUpdate }) {
                   <>
                     <div>
                       <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
-                        Sign-in Method
+                        {t('user.profile.signInMethod')}
                       </label>
                       <div className="flex items-center gap-2 border-b border-gray-100 pb-2">
                         {isGoogleAuth ? (
                           <>
                             <span className="font-medium text-slate-900">
-                              Google Account
+                              {t('user.profile.googleAccount')}
                             </span>
                             <span className="text-xs bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded border border-indigo-100">
-                              Secure
+                              {t('user.profile.secure')}
                             </span>
                           </>
                         ) : (
                           <span className="font-medium text-slate-900">
-                            Email & Password
+                            {t('user.profile.emailPassword')}
                           </span>
                         )}
                       </div>
@@ -419,7 +432,7 @@ export default function Profile({ userId, onStatsUpdate }) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
           {
-            label: 'Total Earned',
+            label: t('user.profile.totalEarned'),
             value: totalPoints,
             icon: (
               <svg
@@ -439,7 +452,7 @@ export default function Profile({ userId, onStatsUpdate }) {
             color: 'blue',
           },
           {
-            label: 'Completed',
+            label: t('user.profile.completed'),
             value: pointsHistory.length,
             icon: (
               <svg
@@ -459,7 +472,7 @@ export default function Profile({ userId, onStatsUpdate }) {
             color: 'green',
           },
           {
-            label: 'Average',
+            label: t('user.profile.average'),
             value:
               pointsHistory.length > 0
                 ? Math.round(totalPoints / pointsHistory.length)
@@ -508,7 +521,9 @@ export default function Profile({ userId, onStatsUpdate }) {
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="px-6 py-5 border-b border-gray-100">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-            <h3 className="text-lg font-bold text-slate-900">Points History</h3>
+            <h3 className="text-lg font-bold text-slate-900">
+              {t('user.profile.pointsHistory')}
+            </h3>
             <div className="flex gap-2 flex-wrap">
               {['all', 'thisWeek', 'thisMonth', 'custom'].map((filter) => (
                 <button
@@ -521,12 +536,12 @@ export default function Profile({ userId, onStatsUpdate }) {
                   }`}
                 >
                   {filter === 'all'
-                    ? 'All Time'
+                    ? t('user.profile.allTime')
                     : filter === 'thisWeek'
-                    ? 'This Week'
+                    ? t('user.profile.thisWeek')
                     : filter === 'thisMonth'
-                    ? 'This Month'
-                    : 'Custom Range'}
+                    ? t('user.profile.thisMonth')
+                    : t('user.profile.customRange')}
                 </button>
               ))}
             </div>
@@ -537,7 +552,7 @@ export default function Profile({ userId, onStatsUpdate }) {
             <div className="flex flex-wrap gap-3 items-end pt-3 border-t border-gray-100">
               <div className="flex-1 min-w-[150px]">
                 <label className="block text-xs font-medium text-gray-500 mb-1">
-                  From Date
+                  {t('admin.stats.fromDate')}
                 </label>
                 <input
                   type="date"
@@ -548,7 +563,7 @@ export default function Profile({ userId, onStatsUpdate }) {
               </div>
               <div className="flex-1 min-w-[150px]">
                 <label className="block text-xs font-medium text-gray-500 mb-1">
-                  To Date
+                  {t('admin.stats.toDate')}
                 </label>
                 <input
                   type="date"
@@ -564,7 +579,7 @@ export default function Profile({ userId, onStatsUpdate }) {
                 }}
                 className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-200 transition-colors"
               >
-                Clear
+                {t('user.profile.clear')}
               </button>
             </div>
           )}
@@ -587,9 +602,7 @@ export default function Profile({ userId, onStatsUpdate }) {
                   />
                 </svg>
               </div>
-              <p className="text-gray-500">
-                No activity found for this period.
-              </p>
+              <p className="text-gray-500">{t('user.profile.noActivity')}</p>
             </div>
           ) : (
             Object.values(groupedHistory).map((group) => (
@@ -622,14 +635,17 @@ export default function Profile({ userId, onStatsUpdate }) {
                         {group.title}
                       </h4>
                       <p className="text-xs text-gray-500">
-                        {group.items.length} step
-                        {group.items.length !== 1 ? 's' : ''} completed
+                        {group.items.length}{' '}
+                        {group.items.length !== 1
+                          ? t('user.profile.steps')
+                          : t('user.profile.step')}{' '}
+                        {t('user.profile.completed')}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full text-sm border border-indigo-100">
-                      +{group.totalPoints} pts
+                      +{group.totalPoints} {t('userDashboard.taskList.pts')}
                     </div>
                     <svg
                       className={`w-5 h-5 text-gray-400 transition-transform ${
@@ -663,7 +679,8 @@ export default function Profile({ userId, onStatsUpdate }) {
                           <div className="w-2 h-2 rounded-full bg-gray-300"></div>
                           <div>
                             <p className="text-sm font-medium text-gray-700">
-                              {item.step?.title || 'Task Completed'}
+                              {item.step?.title ||
+                                t('user.profile.taskCompleted')}
                             </p>
                             <p className="text-xs text-gray-500">
                               {formatDate(item.earned_at)}
@@ -671,7 +688,8 @@ export default function Profile({ userId, onStatsUpdate }) {
                           </div>
                         </div>
                         <span className="text-sm font-semibold text-gray-600">
-                          +{item.points_earned}
+                          +{item.points_earned}{' '}
+                          {t('userDashboard.taskList.pts')}
                         </span>
                       </div>
                     ))}

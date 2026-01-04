@@ -6,14 +6,23 @@ import { getTaskDetails, joinTask, submitStep } from '@/app/actions';
 import { supabase } from '@/lib/supabase';
 import Navbar from '@/components/Navbar';
 import toast from 'react-hot-toast';
+import { useLocale } from '@/context/LocaleContext';
 
 export default function TaskDetailsPage() {
   const { taskId } = useParams();
   const { user, userRole, loading } = useAuth();
+  const { t, locale } = useLocale();
   const router = useRouter();
   const [task, setTask] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [submittingStepId, setSubmittingStepId] = useState(null);
+
+  const localeMap = {
+    en: 'en-US',
+    id: 'id-ID',
+    ja: 'ja-JP',
+    zh: 'zh-CN',
+  };
 
   useEffect(() => {
     if (!loading && !user) {
@@ -103,7 +112,7 @@ export default function TaskDetailsPage() {
       });
     } catch (error) {
       console.error('Error fetching task:', error);
-      toast.error('Error loading task');
+      toast.error(t('taskPage.errorLoading'));
     } finally {
       setIsLoading(false);
     }
@@ -114,14 +123,14 @@ export default function TaskDetailsPage() {
     try {
       const result = await joinTask(taskId, user.uid);
       if (result.success) {
-        toast.success('Joined quest successfully!');
+        toast.success(t('taskPage.joinSuccess'));
         fetchTask(); // Refresh data
       } else {
-        toast.error(result.error || 'Failed to join quest');
+        toast.error(result.error || t('taskPage.joinFailed'));
       }
     } catch (error) {
       console.error('Error joining task:', error);
-      toast.error('An error occurred');
+      toast.error(t('taskPage.errorOccurred'));
     }
   };
 
@@ -133,19 +142,19 @@ export default function TaskDetailsPage() {
     const submitAction = async () => {
       const result = await submitStep(stepId, user.uid);
       if (!result.success) {
-        throw new Error(result.message || 'Failed to submit step');
+        throw new Error(result.message || t('taskPage.joinFailed'));
       }
       return result;
     };
 
     toast
       .promise(submitAction(), {
-        loading: 'Submitting step...',
+        loading: t('taskPage.submittingStep'),
         success: () => {
           fetchTask(); // Refresh data
-          return 'Step submitted successfully!';
+          return t('taskPage.stepSubmitted');
         },
-        error: (err) => err.message || 'An error occurred',
+        error: (err) => err.message || t('taskPage.errorOccurred'),
       })
       .finally(() => {
         setSubmittingStepId(null);
@@ -165,12 +174,14 @@ export default function TaskDetailsPage() {
       <div className="min-h-screen bg-white">
         <Navbar />
         <div className="max-w-7xl mx-auto px-6 py-12 text-center">
-          <h2 className="text-2xl font-bold text-gray-700">Task not found</h2>
+          <h2 className="text-2xl font-bold text-gray-700">
+            {t('taskPage.taskNotFound')}
+          </h2>
           <button
             onClick={() => router.back()}
             className="mt-4 text-indigo-600 hover:underline"
           >
-            Go back
+            {t('taskPage.goBack')}
           </button>
         </div>
       </div>
@@ -199,7 +210,7 @@ export default function TaskDetailsPage() {
               d="M10 19l-7-7m0 0l7-7m-7 7h18"
             />
           </svg>
-          Back to Tasks
+          {t('taskPage.backToTasks')}
         </button>
 
         {/* Header Section */}
@@ -220,38 +231,45 @@ export default function TaskDetailsPage() {
                   }`}
                 >
                   {task.isExpired
-                    ? 'Expired'
+                    ? t('userDashboard.taskList.expired')
                     : task.is_active
-                    ? 'Active'
-                    : 'Inactive'}
+                    ? t('taskPage.active')
+                    : t('taskPage.inactive')}
                 </span>
                 {task.isEnrolled && (
                   <span className="px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                    Enrolled
+                    {t('userDashboard.taskList.enrolled')}
                   </span>
                 )}
                 <div className="flex items-center gap-1">
-                  <span className="font-medium">Level:</span>
+                  <span className="font-medium">{t('taskPage.level')}:</span>
                   <span className="text-indigo-600">
                     {'★'.repeat(task.level) + '☆'.repeat(5 - task.level)}
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="font-medium">Deadline:</span>
+                  <span className="font-medium">
+                    {t('userDashboard.taskDetails.deadline')}:
+                  </span>
                   <span
                     className={
                       task.isExpired ? 'text-red-600 font-semibold' : ''
                     }
                   >
                     {task.deadline
-                      ? new Date(task.deadline).toLocaleDateString()
-                      : 'No deadline'}
+                      ? new Date(task.deadline).toLocaleDateString(
+                          localeMap[locale] || 'en-US'
+                        )
+                      : t('userDashboard.taskList.noDeadline')}
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="font-medium">Manager:</span>
+                  <span className="font-medium">
+                    {t('userDashboard.taskList.manager')}:
+                  </span>
                   <span className="text-gray-900 font-medium">
-                    {task.manager?.name || 'Unassigned'}
+                    {task.manager?.name ||
+                      t('userDashboard.taskDetails.unassigned')}
                   </span>
                 </div>
               </div>
@@ -262,28 +280,28 @@ export default function TaskDetailsPage() {
                 onClick={handleJoin}
                 className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-md hover:shadow-lg active:scale-95"
               >
-                Join Quest
+                {t('userDashboard.taskDetails.joinQuest')}
               </button>
             )}
             {!task.isEnrolled && userRole === 'user' && task.isExpired && (
               <div className="px-6 py-3 bg-red-50 text-red-700 font-bold rounded-xl border-2 border-red-200">
-                Quest Expired
+                {t('userDashboard.taskDetails.questExpired')}
               </div>
             )}
           </div>
 
           <div className="prose max-w-none text-gray-600 bg-gray-50/50 p-6 rounded-xl border border-gray-100">
             <h3 className="text-lg font-bold text-gray-900 mb-2">
-              About this Quest
+              {t('userDashboard.taskDetails.about')}
             </h3>
             <p className="whitespace-pre-wrap">
-              {task.description || 'No description provided.'}
+              {task.description || t('userDashboard.taskDetails.noDescription')}
             </p>
             {task.isEnrolled && (
               <div className="mt-4 pt-4 border-t border-gray-200">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-gray-700">
-                    Your Progress
+                    {t('taskPage.yourProgress')}
                   </span>
                   <span className="text-sm font-bold text-indigo-600">
                     {task.progress}%
@@ -302,7 +320,9 @@ export default function TaskDetailsPage() {
 
         {/* Steps Section */}
         <div className="space-y-6">
-          <h2 className="text-2xl font-bold text-gray-900">Quest Steps</h2>
+          <h2 className="text-2xl font-bold text-gray-900">
+            {t('taskPage.questSteps')}
+          </h2>
           {task.steps && task.steps.length > 0 ? (
             <div className="grid gap-6">
               {task.steps.map((step, index) => (
@@ -337,14 +357,14 @@ export default function TaskDetailsPage() {
                         </h3>
                         <div className="flex items-center gap-2">
                           <span className="px-3 py-1 bg-yellow-50 text-yellow-700 text-xs font-bold rounded-full border border-yellow-200 whitespace-nowrap">
-                            +{step.points_reward} Points
+                            +{step.points_reward} {t('taskPage.points')}
                           </span>
 
                           {/* Status Badges */}
                           {step.status === 'PENDING' && (
                             <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold rounded-full border border-yellow-200 flex items-center gap-1">
                               <span className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
-                              Reviewing
+                              {t('taskPage.reviewing')}
                             </span>
                           )}
                           {step.status === 'APPROVED' && (
@@ -362,12 +382,12 @@ export default function TaskDetailsPage() {
                                   d="M5 13l4 4L19 7"
                                 />
                               </svg>
-                              Completed
+                              {t('taskPage.completed')}
                             </span>
                           )}
                           {step.status === 'REJECTED' && (
                             <span className="px-3 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-full border border-red-200">
-                              Rejected
+                              {t('taskPage.rejected')}
                             </span>
                           )}
                         </div>
@@ -386,7 +406,7 @@ export default function TaskDetailsPage() {
                           }`}
                         >
                           <span className="font-bold block mb-1">
-                            Manager Feedback:
+                            {t('taskPage.managerFeedback')}
                           </span>
                           {step.feedback}
                         </div>
@@ -403,10 +423,10 @@ export default function TaskDetailsPage() {
                             {submittingStepId === step.step_id ? (
                               <>
                                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                Submitting...
+                                {t('taskPage.submitting')}
                               </>
                             ) : (
-                              'Submit for Review'
+                              t('taskPage.submitForReview')
                             )}
                           </button>
                         </div>
@@ -419,7 +439,7 @@ export default function TaskDetailsPage() {
                             disabled={submittingStepId === step.step_id}
                             className="px-4 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            Resubmit
+                            {t('taskPage.resubmit')}
                           </button>
                         </div>
                       )}
@@ -430,7 +450,7 @@ export default function TaskDetailsPage() {
             </div>
           ) : (
             <div className="text-center py-12 bg-white rounded-xl border border-gray-200 border-dashed">
-              <p className="text-gray-500">No steps defined for this quest.</p>
+              <p className="text-gray-500">{t('taskPage.noSteps')}</p>
             </div>
           )}
         </div>

@@ -4,8 +4,10 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { getUserCompanies } from '@/app/actions';
 import Navbar from '@/components/Navbar';
+import { useLocale } from '@/context/LocaleContext';
 
 export default function ManagerDashboard() {
+  const { t } = useLocale();
   const { user, userRole, loading } = useAuth();
   const router = useRouter();
   const [companies, setCompanies] = useState([]);
@@ -51,10 +53,12 @@ export default function ManagerDashboard() {
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Manager Dashboard
+            {t('manager.dashboard.title')}
           </h1>
           <p className="text-sm text-gray-500">
-            Welcome back, {user.displayName || user.email}. Select a company to view and manage tasks.
+            {t('manager.dashboard.welcome', {
+              name: user.displayName || user.email,
+            })}
           </p>
         </div>
       </div>
@@ -74,10 +78,10 @@ export default function ManagerDashboard() {
               </svg>
             </div>
             <p className="text-gray-500 font-medium">
-              No companies assigned to you yet.
+              {t('manager.dashboard.noCompanies')}
             </p>
             <p className="text-sm text-gray-400 mt-1">
-              Contact an admin to get assigned to a company.
+              {t('manager.dashboard.contactAdmin')}
             </p>
           </div>
         ) : (
@@ -85,17 +89,21 @@ export default function ManagerDashboard() {
             {companies.map((company) => (
               <div
                 key={company.company_id}
-                onClick={() => router.push(`/manager-dashboard/company/${company.company_id}`)}
+                onClick={() =>
+                  router.push(
+                    `/manager-dashboard/company/${company.company_id}`
+                  )
+                }
                 className="border border-gray-200 rounded-xl p-6 bg-white shadow-sm hover:shadow-lg hover:border-indigo-300 transition-all duration-200 cursor-pointer group"
               >
                 <h3 className="font-bold text-lg text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors">
                   {company.name}
                 </h3>
                 <p className="text-sm text-gray-600 min-h-[40px]">
-                  {company.description || 'No description provided'}
+                  {company.description || t('manager.dashboard.noDescription')}
                 </p>
                 <div className="mt-4 flex items-center text-sm text-indigo-600 font-medium group-hover:translate-x-1 transition-transform">
-                  View Tasks
+                  {t('manager.dashboard.viewTasks')}
                   <svg
                     className="w-4 h-4 ml-1"
                     fill="none"

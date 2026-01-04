@@ -174,14 +174,14 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                       {/* User Info Header */}
                       <div className="px-5 py-4 border-b border-gray-100 bg-gray-50/50">
                         <p className="text-sm font-bold text-indigo-600 truncate">
-                          {user.displayName || 'User'}
+                          {user.displayName || t('userDashboard.explorer')}
                         </p>
                         <p className="text-xs text-gray-500 truncate font-medium mb-3">
                           {user.email}
                         </p>
                         {/* Role Badge */}
                         <span className="inline-flex items-center rounded-full bg-white px-2.5 py-0.5 text-xs font-bold text-indigo-600 border border-gray-200 shadow-sm capitalize">
-                          {userRole || 'User'}
+                          {t('common.' + (userRole || 'user'))}
                         </span>
                       </div>
 
@@ -317,7 +317,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                     onClick={onOpenLogin}
                     className={secondaryButtonStyle}
                   >
-                    Log in
+                    {t('login.title')}
                   </button>
                   {/* Public signup disabled - Invite only
                   <button onClick={onOpenSignup} className={primaryButtonStyle}>
@@ -341,19 +341,19 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                   href="/#features"
                   className="block px-4 py-3 text-base font-medium text-gray-600 hover:text-indigo-600 hover:bg-white rounded-xl transition-colors"
                 >
-                  Features
+                  {t('nav.features')}
                 </Link>
                 <Link
                   href="/#pricing"
                   className="block px-4 py-3 text-base font-medium text-gray-600 hover:text-indigo-600 hover:bg-white rounded-xl transition-colors"
                 >
-                  Pricing
+                  {t('nav.pricing')}
                 </Link>
                 <Link
                   href="/#about"
                   className="block px-4 py-3 text-base font-medium text-gray-600 hover:text-indigo-600 hover:bg-white rounded-xl transition-colors"
                 >
-                  About
+                  {t('nav.about')}
                 </Link>
               </>
             ) : (
@@ -363,7 +363,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                     href="/tasks"
                     className="block px-4 py-3 text-base font-medium text-gray-600 hover:text-indigo-600 hover:bg-white rounded-xl transition-colors"
                   >
-                    My Quest
+                    {t('nav.allQuest')}
                   </Link>
                 ) : (
                   <Link
@@ -374,7 +374,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                     }
                     className="block px-4 py-3 text-base font-medium text-gray-600 hover:text-indigo-600 hover:bg-white rounded-xl transition-colors"
                   >
-                    Dashboard
+                    {t('nav.dashboard')}
                   </Link>
                 )}
               </>
@@ -385,7 +385,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                   onClick={onOpenLogin}
                   className="w-full text-center px-4 py-3 text-base font-medium text-gray-700 bg-white border border-gray-200 rounded-xl active:scale-95"
                 >
-                  Log in
+                  {t('login.title')}
                 </button>
                 {/* Public signup disabled - Invite only
                 <button

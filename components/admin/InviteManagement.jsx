@@ -3,8 +3,10 @@ import { useState, useEffect } from 'react';
 import { auth } from '../../lib/firebase';
 import { createInviteAction, getInvitesAction } from '@/app/invite-actions';
 import toast from 'react-hot-toast';
+import { useLocale } from '../../context/LocaleContext';
 
 export default function InviteManagement() {
+  const { t } = useLocale();
   const [invites, setInvites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -24,7 +26,7 @@ export default function InviteManagement() {
       setInvites(result.data || []);
     } catch (error) {
       console.error('Error fetching invites:', error);
-      toast.error('Failed to load invites');
+      toast.error(t('inviteManagement.generateFailed'));
     } finally {
       setLoading(false);
     }
@@ -35,7 +37,7 @@ export default function InviteManagement() {
     try {
       const token = await auth.currentUser?.getIdToken();
       if (!token) {
-        toast.error('Authentication error');
+        toast.error(t('common.unauthorized'));
         return;
       }
 
@@ -45,15 +47,15 @@ export default function InviteManagement() {
 
       const data = result.data;
       setInvites([data, ...invites]);
-      toast.success('Invite generated!');
+      toast.success(t('inviteManagement.linkCopied'));
 
       // Copy to clipboard
       const url = `${window.location.origin}/invite/${data.code}`;
       navigator.clipboard.writeText(url);
-      toast.success('Link copied to clipboard!');
+      toast.success(t('inviteManagement.linkCopied'));
     } catch (error) {
       console.error('Error generating invite:', error);
-      toast.error('Failed to generate invite');
+      toast.error(t('inviteManagement.generateFailed'));
     } finally {
       setGenerating(false);
     }
@@ -62,15 +64,18 @@ export default function InviteManagement() {
   const copyLink = (code) => {
     const url = `${window.location.origin}/invite/${code}`;
     navigator.clipboard.writeText(url);
-    toast.success('Link copied!');
+    toast.success(t('inviteManagement.linkCopied'));
   };
 
-  if (loading) return <div className="p-4">Loading invites...</div>;
+  if (loading)
+    return <div className="p-4">{t('inviteManagement.loading')}</div>;
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold text-gray-800">Invite Management</h2>
+        <h2 className="text-xl font-bold text-gray-800">
+          {t('inviteManagement.title')}
+        </h2>
         <button
           onClick={generateInvite}
           disabled={generating}
@@ -93,7 +98,7 @@ export default function InviteManagement() {
               />
             </svg>
           )}
-          Generate Invite
+          {t('inviteManagement.generate')}
         </button>
       </div>
 
@@ -102,19 +107,19 @@ export default function InviteManagement() {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Code
+                {t('inviteManagement.code')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
+                {t('inviteManagement.status')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Created At
+                {t('inviteManagement.createdAt')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Used By
+                {t('inviteManagement.usedBy')}
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
+                {t('inviteManagement.actions')}
               </th>
             </tr>
           </thead>
@@ -132,7 +137,9 @@ export default function InviteManagement() {
                         : 'bg-green-100 text-green-800'
                     }`}
                   >
-                    {invite.is_used ? 'Used' : 'Active'}
+                    {invite.is_used
+                      ? t('inviteManagement.used')
+                      : t('inviteManagement.active')}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -147,7 +154,7 @@ export default function InviteManagement() {
                       onClick={() => copyLink(invite.code)}
                       className="text-indigo-600 hover:text-indigo-900"
                     >
-                      Copy Link
+                      {t('inviteManagement.copyLink')}
                     </button>
                   )}
                 </td>
@@ -159,7 +166,7 @@ export default function InviteManagement() {
                   colSpan="5"
                   className="px-6 py-12 text-center text-gray-500"
                 >
-                  No invites generated yet.
+                  {t('inviteManagement.noInvites')}
                 </td>
               </tr>
             )}

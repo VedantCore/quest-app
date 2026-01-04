@@ -115,7 +115,7 @@ function DashboardContent() {
                   : 'text-gray-500 hover:text-gray-900'
               }`}
             >
-              Quests Board
+              {t('userDashboard.tabs.tasks')}
             </button>
             <button
               onClick={() => {
@@ -128,7 +128,7 @@ function DashboardContent() {
                   : 'text-gray-500 hover:text-gray-900'
               }`}
             >
-              Profile
+              {t('userDashboard.tabs.profile')}
             </button>
           </div>
         )}
@@ -145,8 +145,9 @@ function DashboardContent() {
 }
 
 export default function UserDashboard() {
+  const { t } = useLocale();
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div>{t('common.loading')}</div>}>
       <DashboardContent />
     </Suspense>
   );

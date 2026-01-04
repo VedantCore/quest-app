@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { getUserCompanies } from '@/app/actions';
 import toast from 'react-hot-toast';
+import { useLocale } from '../../context/LocaleContext';
 
 const CircularProgress = ({ percentage, size = 50, strokeWidth = 4 }) => {
   const radius = (size - strokeWidth) / 2;
@@ -48,6 +49,7 @@ const CircularProgress = ({ percentage, size = 50, strokeWidth = 4 }) => {
 
 export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
   const { userRole } = useAuth();
+  const { t, locale } = useLocale();
   const router = useRouter();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -57,6 +59,13 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
   const [companies, setCompanies] = useState([]);
   const [companiesLoaded, setCompaniesLoaded] = useState(false);
   const [expandedCompanies, setExpandedCompanies] = useState({});
+
+  const localeMap = {
+    en: 'en-US',
+    id: 'id-ID',
+    ja: 'ja-JP',
+    zh: 'zh-CN',
+  };
 
   useEffect(() => {
     fetchUserCompanies();
@@ -252,7 +261,7 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
       }
     } catch (error) {
       console.error('Error fetching user tasks:', error);
-      setError('Something went wrong while loading your tasks.');
+      setError(t('userDashboard.taskList.error'));
     } finally {
       setLoading(false);
     }
@@ -260,9 +269,9 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
 
   // Helper to format deadline
   const getDeadline = (dateStr) => {
-    if (!dateStr) return 'N/A';
+    if (!dateStr) return t('userDashboard.taskList.noDeadline');
     const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString(localeMap[locale] || 'en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
@@ -276,9 +285,11 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
           <div className="flex items-center gap-3 mb-6">
             <div
               className="animate-spin rounded-full h-5 w-5 border-2 border-gray-300 border-t-transparent"
-              aria-label="Loading"
+              aria-label={t('common.loading')}
             ></div>
-            <p className="text-gray-600">Loading your tasks…</p>
+            <p className="text-gray-600">
+              {t('userDashboard.taskList.loading')}
+            </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[...Array(4)].map((_, i) => (
@@ -344,14 +355,20 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
   const filterOptions =
     mode === 'enrolled'
       ? [
-          { key: 'all', label: 'All' },
-          { key: 'active', label: 'Active' },
-          { key: 'completed', label: 'Completed' },
+          { key: 'all', label: t('userDashboard.taskList.filters.all') },
+          { key: 'active', label: t('userDashboard.taskList.filters.active') },
+          {
+            key: 'completed',
+            label: t('userDashboard.taskList.filters.completed'),
+          },
         ]
       : [
-          { key: 'latest', label: 'Latest' },
-          { key: 'oldest', label: 'Oldest' },
-          { key: 'my-tasks', label: 'My Tasks' },
+          { key: 'latest', label: t('userDashboard.taskList.filters.latest') },
+          { key: 'oldest', label: t('userDashboard.taskList.filters.oldest') },
+          {
+            key: 'my-tasks',
+            label: t('userDashboard.taskList.filters.myTasks'),
+          },
         ];
 
   const toggleCompany = (companyId) => {
@@ -365,10 +382,10 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
     return (
       <div className="rounded-xl border border-gray-200 bg-white p-10 text-center">
         <h3 className="text-xl font-semibold text-gray-900 mb-2">
-          No tasks available
+          {t('userDashboard.taskList.noTasks')}
         </h3>
         <p className="text-gray-600">
-          You are not joined to any companies yet.
+          {t('userDashboard.taskList.noCompanies')}
         </p>
       </div>
     );
@@ -383,11 +400,11 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
             <div className="flex-1 relative">
               <input
                 type="text"
-                placeholder="Search by title or description"
+                placeholder={t('common.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-                aria-label="Search tasks"
+                aria-label={t('userDashboard.taskList.searchAria')}
               />
               <svg
                 aria-hidden="true"
@@ -430,9 +447,11 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
       {filteredTasks.length === 0 && !error && (
         <div className="rounded-xl border border-gray-200 bg-white p-10 text-center">
           <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            No matching tasks
+            {t('userDashboard.taskList.noResults')}
           </h3>
-          <p className="text-gray-600">Try a different search or filter.</p>
+          <p className="text-gray-600">
+            {t('userDashboard.taskList.noResultsSub')}
+          </p>
         </div>
       )}
 
@@ -483,7 +502,10 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
                   </h2>
                   <p className="text-sm text-gray-500 font-medium">
                     {companyTasks.length}{' '}
-                    {companyTasks.length === 1 ? 'task' : 'tasks'} available
+                    {companyTasks.length === 1
+                      ? t('userDashboard.taskList.task')
+                      : t('userDashboard.taskList.tasks')}{' '}
+                    {t('userDashboard.taskList.available')}
                   </p>
                 </div>
               </div>
@@ -535,12 +557,12 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
                                   }`}
                                 >
                                   {task.progress === 100
-                                    ? 'Completed'
-                                    : 'Enrolled'}
+                                    ? t('userDashboard.taskList.completed')
+                                    : t('userDashboard.taskList.enrolled')}
                                 </span>
                               ) : task.isExpired ? (
                                 <span className="px-2.5 py-0.5 rounded text-[10px] uppercase font-bold tracking-wide border bg-red-50 text-red-600 border-red-200">
-                                  Expired
+                                  {t('userDashboard.taskList.expired')}
                                 </span>
                               ) : null}
                             </div>
@@ -576,7 +598,8 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
                                     d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                                   />
                                 </svg>
-                                {task.earnedPoints}/{task.totalPoints} pts
+                                {task.earnedPoints}/{task.totalPoints}{' '}
+                                {t('userDashboard.taskList.pts')}
                               </div>
                               <div className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg">
                                 <span
@@ -587,15 +610,19 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
                                   }
                                 >
                                   {task.deadline
-                                    ? `Due: ${getDeadline(task.deadline)}`
-                                    : 'No deadline'}
+                                    ? `${t(
+                                        'userDashboard.taskList.due'
+                                      )}: ${getDeadline(task.deadline)}`
+                                    : t('userDashboard.taskList.noDeadline')}
                                 </span>
                               </div>
                             </div>
                             {task.manager && (
                               <div
                                 className="hidden sm:flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg"
-                                title={`Manager: ${task.manager.name}`}
+                                title={`${t(
+                                  'userDashboard.taskList.manager'
+                                )}: ${task.manager.name}`}
                               >
                                 <svg
                                   className="w-3.5 h-3.5 text-gray-400"
@@ -619,7 +646,7 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
 
                           <div className="flex items-center gap-2">
                             <button className="text-xs font-semibold text-gray-600 bg-gray-100 group-hover:bg-gray-200 px-3 py-1.5 rounded-lg transition-colors">
-                              Details
+                              {t('userDashboard.taskList.details')}
                             </button>
                           </div>
                         </div>

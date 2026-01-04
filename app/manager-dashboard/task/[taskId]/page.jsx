@@ -11,8 +11,10 @@ import {
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
+import { useLocale } from '@/context/LocaleContext';
 
 export default function TaskParticipantsPage() {
+  const { t, locale } = useLocale();
   const { taskId } = useParams();
   const { user, userRole, loading } = useAuth();
   const router = useRouter();
@@ -126,6 +128,13 @@ export default function TaskParticipantsPage() {
 
   if (!task) return null;
 
+  const localeMap = {
+    en: 'en-US',
+    id: 'id-ID',
+    ja: 'ja-JP',
+    zh: 'zh-CN',
+  };
+
   return (
     <div className="min-h-screen font-sans text-[#171717]">
       <Navbar />
@@ -136,14 +145,14 @@ export default function TaskParticipantsPage() {
           <div>
             <h1 className="text-3xl font-bold text-[#171717]">{task.title}</h1>
             <p className="mt-2 text-sm text-gray-500">
-              Manage participants and submissions
+              {t('manager.task.manageParticipants')}
             </p>
           </div>
           <Link
             href="/manager-dashboard"
             className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
           >
-            ← Back to Dashboard
+            ← {t('manager.task.backToDashboard')}
           </Link>
         </div>
       </div>
@@ -154,16 +163,16 @@ export default function TaskParticipantsPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-2">
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">
-                Description
+                {t('manager.task.description')}
               </h3>
               <p className="text-gray-700 leading-relaxed">
-                {task.description || 'No description provided.'}
+                {task.description || t('manager.dashboard.noDescription')}
               </p>
             </div>
             <div className="space-y-4">
               <div>
                 <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-2">
-                  Details
+                  {t('manager.task.details')}
                 </h3>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm">
@@ -180,13 +189,15 @@ export default function TaskParticipantsPage() {
                         d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                       />
                     </svg>
-                    <span className="text-gray-600">Deadline:</span>
+                    <span className="text-gray-600">
+                      {t('manager.company.deadline')}:
+                    </span>
                     <span className="font-medium text-gray-900">
                       {new Date(
                         new Date(task.created_at).setDate(
                           new Date(task.created_at).getDate() + 30
                         )
-                      ).toLocaleDateString('en-US', {
+                      ).toLocaleDateString(localeMap[locale] || 'en-US', {
                         month: 'short',
                         day: 'numeric',
                         year: 'numeric',
@@ -207,7 +218,9 @@ export default function TaskParticipantsPage() {
                         d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                       />
                     </svg>
-                    <span className="text-gray-600">Level:</span>
+                    <span className="text-gray-600">
+                      {t('manager.task.level')}:
+                    </span>
                     <span className="font-medium text-gray-900">
                       {task.level || 'N/A'}
                     </span>
@@ -220,7 +233,9 @@ export default function TaskParticipantsPage() {
                           : 'bg-red-50 text-red-700 border border-red-200'
                       }`}
                     >
-                      {task.is_active ? 'Active' : 'Inactive'}
+                      {task.is_active
+                        ? t('manager.company.active')
+                        : t('manager.company.inactive')}
                     </span>
                   </div>
                 </div>
@@ -250,7 +265,7 @@ export default function TaskParticipantsPage() {
                 />
               </svg>
               <h2 className="text-lg font-bold text-[#171717]">
-                Quest Steps{' '}
+                {t('manager.task.questSteps')}{' '}
                 <span className="text-gray-500 font-normal ml-2">
                   ({task.task_steps?.length || 0})
                 </span>
@@ -301,7 +316,7 @@ export default function TaskParticipantsPage() {
                 ))
               ) : (
                 <p className="text-sm text-gray-500 italic text-center py-4">
-                  No steps defined for this quest.
+                  {t('manager.task.noSteps')}
                 </p>
               )}
             </div>
@@ -312,7 +327,7 @@ export default function TaskParticipantsPage() {
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200 bg-gray-50/50">
             <h2 className="text-lg font-bold text-[#171717]">
-              Enrolled Users{' '}
+              {t('manager.task.enrolledUsers')}{' '}
               <span className="text-gray-500 font-normal ml-2">
                 ({participants.length})
               </span>
@@ -321,7 +336,7 @@ export default function TaskParticipantsPage() {
 
           {participants.length === 0 ? (
             <div className="p-12 text-center text-gray-500">
-              No users have joined this task yet.
+              {t('manager.task.noUsers')}
             </div>
           ) : (
             <ul className="divide-y divide-gray-100">
@@ -355,8 +370,10 @@ export default function TaskParticipantsPage() {
                     </p>
                   </div>
                   <div className="text-sm text-gray-500">
-                    Joined:{' '}
-                    {new Date(participant.joined_at).toLocaleDateString()}
+                    {t('manager.task.joined')}:{' '}
+                    {new Date(participant.joined_at).toLocaleDateString(
+                      localeMap[locale] || 'en-US'
+                    )}
                   </div>
                   <div className="px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700">
                     {participant.total_points} pts
@@ -390,7 +407,9 @@ export default function TaskParticipantsPage() {
                 <h3 className="text-xl font-bold text-[#171717]">
                   {selectedUser.name || selectedUser.email}
                 </h3>
-                <p className="text-sm text-gray-500">Task Progress Review</p>
+                <p className="text-sm text-gray-500">
+                  {t('manager.task.progressReview')}
+                </p>
               </div>
               <button
                 onClick={closeModal}
@@ -431,7 +450,7 @@ export default function TaskParticipantsPage() {
                         <div className="flex justify-between items-start mb-3">
                           <div>
                             <h4 className="font-bold text-[#171717] text-sm">
-                              Step {index + 1}: {step.title}
+                              {t('manager.task.step')} {index + 1}: {step.title}
                             </h4>
                             <p className="text-sm text-gray-600 mt-1">
                               {step.description}
@@ -462,7 +481,9 @@ export default function TaskParticipantsPage() {
                                 <span className="text-xs text-gray-400">
                                   {new Date(
                                     submission.submitted_at
-                                  ).toLocaleDateString()}
+                                  ).toLocaleDateString(
+                                    localeMap[locale] || 'en-US'
+                                  )}
                                 </span>
                               )}
                             </div>
@@ -482,7 +503,7 @@ export default function TaskParticipantsPage() {
                                   }
                                   className="px-3 py-1.5 text-xs font-semibold text-red-600 border border-red-200 rounded-lg hover:bg-red-50 disabled:opacity-50"
                                 >
-                                  Reject
+                                  {t('manager.task.reject')}
                                 </button>
                                 <button
                                   onClick={() =>
@@ -497,7 +518,7 @@ export default function TaskParticipantsPage() {
                                   }
                                   className="px-3 py-1.5 text-xs font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50 shadow-sm"
                                 >
-                                  Approve
+                                  {t('manager.task.approve')}
                                 </button>
                               </div>
                             )}
@@ -505,7 +526,9 @@ export default function TaskParticipantsPage() {
 
                           {status === 'PENDING' && submission && (
                             <textarea
-                              placeholder="Add feedback (optional)..."
+                              placeholder={t(
+                                'manager.task.feedbackPlaceholder'
+                              )}
                               value={feedbacks[submission.submission_id] || ''}
                               onChange={(e) =>
                                 handleFeedbackChange(
@@ -521,7 +544,7 @@ export default function TaskParticipantsPage() {
                           {submission?.feedback && (
                             <div className="bg-gray-50 p-3 rounded-lg text-sm text-gray-600 mt-2">
                               <span className="font-semibold text-gray-900">
-                                Feedback:
+                                {t('manager.task.feedbackLabel')}:
                               </span>{' '}
                               {submission.feedback}
                             </div>
@@ -532,7 +555,7 @@ export default function TaskParticipantsPage() {
                   })
                 ) : (
                   <p className="text-gray-500 text-center">
-                    No steps defined for this task.
+                    {t('manager.task.noSteps')}
                   </p>
                 )}
               </div>
@@ -543,7 +566,7 @@ export default function TaskParticipantsPage() {
                 onClick={closeModal}
                 className="px-5 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all shadow-sm"
               >
-                Close
+                {t('manager.task.close')}
               </button>
             </div>
           </div>

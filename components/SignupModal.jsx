@@ -5,8 +5,10 @@ import { auth, googleProvider } from '../lib/firebase';
 import { supabase } from '../lib/supabase';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import { useLocale } from '../context/LocaleContext';
 
 export default function SignupModal({ isOpen, onClose, onSwitchToLogin }) {
+  const { t } = useLocale();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -64,12 +66,10 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }) {
           hint: supabaseError.hint,
           code: supabaseError.code,
         });
-        toast.error(
-          `Auth successful but sync failed: ${supabaseError.message}`
-        );
+        toast.error(`${t('login.errorSync')}: ${supabaseError.message}`);
       } else {
         console.log('✅ Supabase sync successful:', data);
-        toast.success('Account created successfully!');
+        toast.success(t('signup.success'));
       }
 
       onClose();
@@ -77,7 +77,7 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }) {
     } catch (err) {
       console.error(err);
       if (err.code === 'auth/email-already-in-use') {
-        toast.error('This email is already registered. Please log in instead.');
+        toast.error(t('signup.emailInUse'));
       } else {
         toast.error(err.message);
       }
@@ -127,12 +127,10 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }) {
           hint: supabaseError.hint,
           code: supabaseError.code,
         });
-        toast.error(
-          `Auth successful but sync failed: ${supabaseError.message}`
-        );
+        toast.error(`${t('login.errorSync')}: ${supabaseError.message}`);
       } else {
         console.log('✅ Supabase sync successful:', data);
-        toast.success('Account created successfully!');
+        toast.success(t('signup.success'));
       }
 
       onClose();
@@ -170,7 +168,9 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }) {
           </svg>
         </button>
 
-        <h2 className="text-3xl font-bold text-slate-900 mb-6">Sign up</h2>
+        <h2 className="text-3xl font-bold text-slate-900 mb-6">
+          {t('signup.title')}
+        </h2>
 
         {error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded text-sm">
@@ -184,7 +184,7 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }) {
               htmlFor="name"
               className="block text-sm font-medium text-slate-700 mb-1"
             >
-              Name
+              {t('signup.name')}
             </label>
             <input
               id="name"
@@ -201,7 +201,7 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }) {
               htmlFor="email"
               className="block text-sm font-medium text-slate-700 mb-1"
             >
-              Email
+              {t('signup.email')}
             </label>
             <input
               id="email"
@@ -218,7 +218,7 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }) {
               htmlFor="password"
               className="block text-sm font-medium text-slate-700 mb-1"
             >
-              Password
+              {t('signup.password')}
             </label>
             <div className="relative">
               <input
@@ -245,7 +245,7 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }) {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268-2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
                     />
                   </svg>
                 ) : (
@@ -277,7 +277,7 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }) {
             type="submit"
             className="w-full py-3 px-4 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all shadow-sm hover:shadow"
           >
-            Sign up
+            {t('signup.button')}
           </button>
         </form>
 
@@ -287,7 +287,7 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }) {
           </div>
           <div className="relative flex justify-center text-sm">
             <span className="px-2 bg-white text-gray-500">
-              Or continue with
+              {t('signup.orContinueWith')}
             </span>
           </div>
         </div>
@@ -314,16 +314,16 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }) {
               d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
             />
           </svg>
-          Continue with Google
+          {t('signup.continueWithGoogle')}
         </button>
 
         <p className="mt-6 text-center text-sm text-gray-500">
-          Already have an account?{' '}
+          {t('signup.alreadyHaveAccount')}{' '}
           <button
             onClick={onSwitchToLogin}
             className="text-indigo-600 hover:underline font-semibold"
           >
-            Log in
+            {t('login.title')}
           </button>
         </p>
       </div>

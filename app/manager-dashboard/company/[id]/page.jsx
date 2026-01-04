@@ -7,8 +7,10 @@ import { getManagerTasks, getAllTasks, getUserCompanies } from '@/app/actions';
 import toast from 'react-hot-toast';
 import Navbar from '@/components/Navbar';
 import ManagerTaskDetailsModal from '@/components/manager/ManagerTaskDetailsModal';
+import { useLocale } from '@/context/LocaleContext';
 
 export default function CompanyTasksPage({ params }) {
+  const { t, locale } = useLocale();
   const { user, userRole, loading } = useAuth();
   const router = useRouter();
   const { id: companyId } = use(params);
@@ -66,7 +68,15 @@ export default function CompanyTasksPage({ params }) {
     if (!dateStr) return 'N/A';
     const date = new Date(dateStr);
     date.setDate(date.getDate() + 30);
-    return date.toLocaleDateString('en-US', {
+
+    const localeMap = {
+      en: 'en-US',
+      id: 'id-ID',
+      ja: 'ja-JP',
+      zh: 'zh-CN',
+    };
+
+    return date.toLocaleDateString(localeMap[locale] || 'en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
@@ -101,7 +111,7 @@ export default function CompanyTasksPage({ params }) {
               onClick={() => router.push('/manager-dashboard')}
               className="hover:text-indigo-600 transition-colors"
             >
-              Manager Dashboard
+              {t('manager.company.breadcrumb')}
             </button>
             <svg
               className="w-4 h-4 mx-2"
@@ -120,7 +130,7 @@ export default function CompanyTasksPage({ params }) {
           </nav>
           <h1 className="text-3xl font-bold text-gray-900">{company.name}</h1>
           <p className="mt-2 text-sm text-gray-500">
-            {company.description || 'No description provided'}
+            {company.description || t('manager.dashboard.noDescription')}
           </p>
         </div>
       </div>
@@ -151,7 +161,7 @@ export default function CompanyTasksPage({ params }) {
                   d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
                 />
               </svg>
-              My Assigned Tasks
+              {t('manager.company.myTasks')}
             </button>
             <button
               onClick={() => setActiveTab('all-tasks')}
@@ -174,7 +184,7 @@ export default function CompanyTasksPage({ params }) {
                   d="M4 6h16M4 10h16M4 14h16M4 18h16"
                 />
               </svg>
-              All Tasks
+              {t('manager.company.allTasks')}
             </button>
           </nav>
         </div>
@@ -195,7 +205,7 @@ export default function CompanyTasksPage({ params }) {
                   </svg>
                 </div>
                 <p className="text-gray-500 font-medium">
-                  No quests assigned to you in this company yet.
+                  {t('manager.company.noAssignedTasks')}
                 </p>
               </div>
             ) : (
@@ -213,12 +223,12 @@ export default function CompanyTasksPage({ params }) {
                         {task.title}
                       </h3>
                       <span className="text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-600 px-2 py-1 rounded border border-indigo-100 shrink-0 ml-2">
-                        Manage
+                        {t('manager.company.manage')}
                       </span>
                     </div>
 
                     <p className="text-sm text-gray-600 line-clamp-2 mb-5 min-h-[40px]">
-                      {task.description || 'No description provided.'}
+                      {task.description || t('manager.dashboard.noDescription')}
                     </p>
 
                     <div className="flex justify-between items-center text-xs text-gray-500 border-t border-gray-50 pt-4">
@@ -236,7 +246,8 @@ export default function CompanyTasksPage({ params }) {
                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                           />
                         </svg>
-                        Due: {getDeadline(task.created_at)}
+                        {t('manager.company.due')}:{' '}
+                        {getDeadline(task.created_at)}
                       </span>
                       <span
                         className={`px-2 py-0.5 rounded-full font-medium ${
@@ -245,7 +256,9 @@ export default function CompanyTasksPage({ params }) {
                             : 'bg-red-50 text-red-700'
                         }`}
                       >
-                        {task.is_active ? 'Active' : 'Inactive'}
+                        {task.is_active
+                          ? t('manager.company.active')
+                          : t('manager.company.inactive')}
                       </span>
                     </div>
                   </Link>
@@ -264,19 +277,19 @@ export default function CompanyTasksPage({ params }) {
                   <thead className="bg-gray-50/50">
                     <tr>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        Quest
+                        {t('manager.company.quest')}
                       </th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        Assigned Manager
+                        {t('manager.company.assignedManager')}
                       </th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        Status
+                        {t('manager.company.status')}
                       </th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        Deadline
+                        {t('manager.company.deadline')}
                       </th>
                       <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        Action
+                        {t('manager.company.action')}
                       </th>
                     </tr>
                   </thead>
@@ -287,7 +300,7 @@ export default function CompanyTasksPage({ params }) {
                           colSpan="5"
                           className="px-6 py-12 text-center text-gray-500"
                         >
-                          No tasks found in this company.
+                          {t('manager.company.noTasksFound')}
                         </td>
                       </tr>
                     ) : (
@@ -324,7 +337,7 @@ export default function CompanyTasksPage({ params }) {
                               </div>
                             ) : (
                               <span className="text-xs font-medium bg-gray-100 text-gray-500 px-2 py-1 rounded border border-gray-200">
-                                Unassigned
+                                {t('manager.company.unassigned')}
                               </span>
                             )}
                           </td>
@@ -336,7 +349,9 @@ export default function CompanyTasksPage({ params }) {
                                   : 'bg-red-50 text-red-700 border-red-100'
                               }`}
                             >
-                              {task.is_active ? 'Active' : 'Inactive'}
+                              {task.is_active
+                                ? t('manager.company.active')
+                                : t('manager.company.inactive')}
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -344,7 +359,7 @@ export default function CompanyTasksPage({ params }) {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-right">
                             <button className="text-xs font-medium text-gray-400 bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-lg group-hover:bg-white group-hover:text-indigo-600 group-hover:border-indigo-600 transition-all">
-                              View Details
+                              {t('manager.company.viewDetails')}
                             </button>
                           </td>
                         </tr>

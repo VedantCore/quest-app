@@ -1,8 +1,10 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { getTaskParticipants } from '@/app/actions';
+import { useLocale } from '@/context/LocaleContext';
 
 export default function ManagerTaskDetailsModal({ task, isOpen, onClose }) {
+  const { t, locale } = useLocale();
   const [participants, setParticipants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showSteps, setShowSteps] = useState(true);
@@ -29,11 +31,18 @@ export default function ManagerTaskDetailsModal({ task, isOpen, onClose }) {
 
   if (!isOpen || !task) return null;
 
+  const localeMap = {
+    en: 'en-US',
+    id: 'id-ID',
+    ja: 'ja-JP',
+    zh: 'zh-CN',
+  };
+
   const getDeadline = (dateStr) => {
     if (!dateStr) return 'N/A';
     const date = new Date(dateStr);
     date.setDate(date.getDate() + 30);
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString(localeMap[locale] || 'en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -52,10 +61,10 @@ export default function ManagerTaskDetailsModal({ task, isOpen, onClose }) {
             <h3 className="text-2xl font-bold text-slate-900">{task.title}</h3>
             <div className="flex items-center gap-3 mt-2 text-sm text-gray-500">
               <span className="bg-indigo-50 text-indigo-600 px-2.5 py-0.5 rounded-full text-xs font-bold border border-indigo-100">
-                {task.task_steps?.length || 0} Steps
+                {task.task_steps?.length || 0} {t('manager.task.steps')}
               </span>
               <span className="bg-indigo-50 text-indigo-600 px-2.5 py-0.5 rounded-full text-xs font-bold border border-indigo-100">
-                Deadline: {getDeadline(task.created_at)}
+                {t('manager.company.deadline')}: {getDeadline(task.created_at)}
               </span>
               <span
                 className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${
@@ -64,7 +73,9 @@ export default function ManagerTaskDetailsModal({ task, isOpen, onClose }) {
                     : 'bg-red-50 text-red-700 border-red-100'
                 }`}
               >
-                {task.is_active ? 'Active' : 'Inactive'}
+                {task.is_active
+                  ? t('manager.company.active')
+                  : t('manager.company.inactive')}
               </span>
             </div>
           </div>
@@ -95,10 +106,10 @@ export default function ManagerTaskDetailsModal({ task, isOpen, onClose }) {
             <div className="md:col-span-2 space-y-4">
               <div>
                 <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-2">
-                  Description
+                  {t('manager.task.description')}
                 </h4>
                 <div className="text-gray-600 text-sm leading-relaxed bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                  {task.description || 'No description provided.'}
+                  {task.description || t('manager.dashboard.noDescription')}
                 </div>
               </div>
             </div>

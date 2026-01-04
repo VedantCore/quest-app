@@ -5,9 +5,11 @@ import { createTask, updateTask, deleteTask } from '@/app/actions';
 import { getCompaniesAction } from '@/app/company-actions';
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
+import { useLocale } from '../../context/LocaleContext';
 
 export default function TaskManagement({ companyId, companyName }) {
   const { user } = useAuth();
+  const { t } = useLocale();
   const [tasks, setTasks] = useState([]);
   const [managers, setManagers] = useState([]);
   const [companies, setCompanies] = useState([]);
@@ -466,7 +468,7 @@ export default function TaskManagement({ companyId, companyName }) {
                             handleEditClick(task);
                           }}
                           className="text-gray-400 hover:text-indigo-600 transition-colors p-2 hover:bg-gray-50 rounded-lg"
-                          title="Edit Quest"
+                          title={t('common.edit')}
                         >
                           <svg
                             className="w-5 h-5"
@@ -488,7 +490,7 @@ export default function TaskManagement({ companyId, companyName }) {
                             handleDeleteClick(task.task_id);
                           }}
                           className="text-gray-400 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-lg ml-1"
-                          title="Delete Quest"
+                          title={t('common.delete')}
                         >
                           <svg
                             className="w-5 h-5"
