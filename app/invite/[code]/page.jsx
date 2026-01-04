@@ -158,6 +158,7 @@ export default function InvitePage({ params }) {
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Invalid Invite
           </h2>
+          <p className="text-gray-400">You&apos;re about to join:</p>
           <p className="text-gray-500 mb-6">
             This invite link is invalid, expired, or has already been used.
           </p>
@@ -176,7 +177,7 @@ export default function InvitePage({ params }) {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
         <div className="px-8 py-6 bg-indigo-600 text-center">
-          <h2 className="text-2xl font-bold text-white">You're Invited!</h2>
+          <h2 className="text-2xl font-bold text-white">You&apos;re Invited!</h2>
           <p className="text-indigo-100 mt-2">
             Create your account to join Quest
           </p>

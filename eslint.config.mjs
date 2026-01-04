@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "*.js", // Ignore root JS scripts as they are mostly dev/test scripts using CommonJS
+    "!middleware.js", // Keep middleware
+    "!i18n.js" // Keep i18n config
+
   ]),
 ]);
 

@@ -1,5 +1,5 @@
 'use client';
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 
 const LocaleContext = createContext();
@@ -10,6 +10,16 @@ export function LocaleProvider({ children, initialLocale = 'en' }) {
   const router = useRouter();
   const pathname = usePathname();
 
+  const loadTranslations = useCallback(async (newLocale) => {
+    try {
+      const response = await fetch(`/locales/${newLocale}.json`);
+      const data = await response.json();
+      setTranslations(data);
+    } catch (error) {
+      console.error('Failed to load translations:', error);
+    }
+  }, []);
+
   useEffect(() => {
     // Load initial locale from cookie
     const cookieLocale = document.cookie
@@ -18,21 +28,12 @@ export function LocaleProvider({ children, initialLocale = 'en' }) {
       ?.split('=')[1];
 
     if (cookieLocale) {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       setLocaleState(cookieLocale);
     }
 
     loadTranslations(cookieLocale || initialLocale);
-  }, []);
-
-  const loadTranslations = async (newLocale) => {
-    try {
-      const response = await fetch(`/locales/${newLocale}.json`);
-      const data = await response.json();
-      setTranslations(data);
-    } catch (error) {
-      console.error('Failed to load translations:', error);
-    }
-  };
+  }, [loadTranslations, initialLocale]);
 
   const setLocale = (newLocale) => {
     // Set cookie
