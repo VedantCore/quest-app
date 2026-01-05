@@ -1,5 +1,11 @@
 'use client';
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 
 const LocaleContext = createContext();
@@ -45,7 +51,7 @@ export function LocaleProvider({ children, initialLocale = 'en' }) {
     router.refresh();
   };
 
-  const t = (key) => {
+  const t = (key, params = {}) => {
     const keys = key.split('.');
     let value = translations;
 
@@ -55,6 +61,15 @@ export function LocaleProvider({ children, initialLocale = 'en' }) {
       } else {
         return key; // Return key if translation not found
       }
+    }
+
+    if (typeof value === 'string' && params) {
+      Object.keys(params).forEach((paramKey) => {
+        value = value.replace(
+          new RegExp(`{${paramKey}}|{{${paramKey}}}`, 'g'),
+          params[paramKey]
+        );
+      });
     }
 
     return value || key;

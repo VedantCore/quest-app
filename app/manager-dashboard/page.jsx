@@ -8,7 +8,7 @@ import { useLocale } from '@/context/LocaleContext';
 
 export default function ManagerDashboard() {
   const { t } = useLocale();
-  const { user, userRole, loading } = useAuth();
+  const { user, userRole, userData, loading } = useAuth();
   const router = useRouter();
   const [companies, setCompanies] = useState([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
@@ -57,7 +57,8 @@ export default function ManagerDashboard() {
           </h1>
           <p className="text-sm text-gray-500">
             {t('manager.dashboard.welcome', {
-              name: user.displayName || user.email,
+              name:
+                userData?.name || user?.displayName || user?.email || 'Manager',
             })}
           </p>
         </div>
