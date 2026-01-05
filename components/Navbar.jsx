@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation';
 import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Navbar({ onOpenLogin, onOpenSignup }) {
-  const { user, userRole, loading } = useAuth();
+  const { user, userRole, userData, loading } = useAuth();
   const { t } = useLocale();
   const router = useRouter();
 
@@ -161,9 +161,9 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                       />
                     ) : (
                       <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-medium shadow-md border-2 border-white ring-1 ring-gray-100">
-                        {user.displayName
-                          ? user.displayName.charAt(0).toUpperCase()
-                          : user.email?.charAt(0).toUpperCase()}
+                        {(userData?.name || user.displayName || user.email)
+                          ?.charAt(0)
+                          .toUpperCase()}
                       </div>
                     )}
                   </button>
@@ -174,7 +174,9 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                       {/* User Info Header */}
                       <div className="px-5 py-4 border-b border-gray-100 bg-gray-50/50">
                         <p className="text-sm font-bold text-indigo-600 truncate">
-                          {user.displayName || t('userDashboard.explorer')}
+                          {userData?.name ||
+                            user.displayName ||
+                            t('userDashboard.explorer')}
                         </p>
                         <p className="text-xs text-gray-500 truncate font-medium mb-3">
                           {user.email}

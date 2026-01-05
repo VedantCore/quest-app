@@ -785,3 +785,23 @@ export async function getUserTasksByCompany(userId, companyId = null) {
     return { success: false, error: error.message };
   }
 }
+
+/**
+ * Update user's name
+ */
+export async function updateUserName(userId, newName) {
+  try {
+    const { error } = await supabase
+      .from('users')
+      .update({ name: newName })
+      .eq('user_id', userId);
+
+    if (error) throw error;
+
+    revalidatePath('/user-dashboard');
+    return { success: true, message: 'Name updated successfully' };
+  } catch (error) {
+    console.error('Error updating name:', error);
+    return { success: false, message: 'Failed to update name' };
+  }
+}

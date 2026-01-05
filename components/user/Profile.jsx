@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { updateProfile } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
-import { getUserCompanies } from '../../app/actions';
+import { getUserCompanies, updateUserName } from '../../app/actions';
 import toast from 'react-hot-toast';
 import { uploadAvatar } from '../../app/upload-actions';
 import Image from 'next/image';
@@ -23,6 +23,8 @@ export default function Profile({ userId, onStatsUpdate }) {
   const [expandedTasks, setExpandedTasks] = useState({});
   const [customDateFrom, setCustomDateFrom] = useState('');
   const [customDateTo, setCustomDateTo] = useState('');
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [newName, setNewName] = useState('');
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -81,6 +83,31 @@ export default function Profile({ userId, onStatsUpdate }) {
       console.error('Error fetching user profile:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleNameUpdate = async () => {
+    if (!newName.trim()) {
+      toast.error(t('user.profile.nameRequired') || 'Name is required');
+      return;
+    }
+
+    try {
+      const result = await updateUserName(userId, newName);
+      if (result.success) {
+        setUserInfo((prev) => ({ ...prev, name: newName }));
+        setIsEditingName(false);
+        toast.success(
+          t('user.profile.nameUpdated') || 'Name updated successfully'
+        );
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      console.error('Error updating name:', error);
+      toast.error(
+        t('user.profile.nameUpdateFailed') || 'Failed to update name'
+      );
     }
   };
 
@@ -341,9 +368,82 @@ export default function Profile({ userId, onStatsUpdate }) {
                   </div>
                 )}
               </div>
-              <h2 className="text-2xl font-bold text-slate-900">
-                {userInfo.name}
-              </h2>
+              {isEditingName ? (
+                <div className="flex items-center gap-2 mt-1">
+                  <input
+                    type="text"
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    className="text-xl font-bold text-slate-900 border-b-2 border-indigo-500 focus:outline-none bg-transparent w-full max-w-[200px]"
+                    autoFocus
+                  />
+                  <button
+                    onClick={handleNameUpdate}
+                    className="p-1 text-green-600 hover:bg-green-50 rounded-full transition-colors"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => setIsEditingName(false)}
+                    className="p-1 text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 group/name">
+                  <h2 className="text-2xl font-bold text-slate-900">
+                    {userInfo.name}
+                  </h2>
+                  {isOwnProfile && (
+                    <button
+                      onClick={() => {
+                        setNewName(userInfo.name);
+                        setIsEditingName(true);
+                      }}
+                      className="opacity-0 group-hover/name:opacity-100 p-1 text-gray-400 hover:text-indigo-600 transition-all"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                        />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              )}
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 mt-2 border border-gray-200">
                 {t('common.' + userInfo.role)}
               </span>
