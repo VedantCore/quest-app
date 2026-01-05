@@ -435,9 +435,12 @@ export default function TaskParticipantsPage() {
               <div className="space-y-4">
                 {task.task_steps && task.task_steps.length > 0 ? (
                   task.task_steps.map((step, index) => {
-                    const submission = selectedUser.submissions?.find(
-                      (s) => s.step_id === step.step_id
-                    );
+                    const submission = selectedUser.submissions
+                      ?.filter((s) => s.step_id === step.step_id)
+                      .sort(
+                        (a, b) =>
+                          new Date(b.submitted_at) - new Date(a.submitted_at)
+                      )[0];
                     const status = submission
                       ? submission.status
                       : 'NOT_STARTED';
