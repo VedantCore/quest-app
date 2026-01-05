@@ -8,6 +8,7 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import { useLocale } from '@/context/LocaleContext';
 import toast from 'react-hot-toast';
+import { RankBadge } from '@/lib/rankUtils';
 
 export default function TaskAssignment() {
   const { t, locale } = useLocale();
@@ -147,8 +148,15 @@ export default function TaskAssignment() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      {submission.user?.email || t('manager.task.unknownUser')}
+                    <div className="flex items-center gap-2">
+                      <div className="text-sm text-gray-900">
+                        {submission.user?.email ||
+                          t('manager.task.unknownUser')}
+                      </div>
+                      <RankBadge
+                        points={submission.user?.total_points}
+                        role={submission.user?.role || 'user'}
+                      />
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">

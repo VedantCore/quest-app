@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useLocale } from '@/context/LocaleContext';
+import { RankBadge } from '@/lib/rankUtils';
 
 export default function UserList({ companyId }) {
   const { t } = useLocale();
@@ -315,8 +316,14 @@ export default function UserList({ companyId }) {
                             {user.name?.charAt(0).toUpperCase() || 'U'}
                           </div>
                         )}
-                        <div className="text-sm font-medium text-gray-900">
-                          {user.name || t('taskManagement.unassigned')}
+                        <div className="flex items-center gap-2">
+                          <div className="text-sm font-medium text-gray-900">
+                            {user.name || t('taskManagement.unassigned')}
+                          </div>
+                          <RankBadge
+                            points={user.total_points}
+                            role={user.role || 'user'}
+                          />
                         </div>
                       </div>
                     </td>

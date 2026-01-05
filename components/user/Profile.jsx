@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import { uploadAvatar } from '../../app/upload-actions';
 import Image from 'next/image';
 import { useLocale } from '../../context/LocaleContext';
+import { getRank } from '../../lib/rankUtils';
 
 export default function Profile({ userId, onStatsUpdate }) {
   const { user: authUser } = useAuth();
@@ -440,9 +441,23 @@ export default function Profile({ userId, onStatsUpdate }) {
                   )}
                 </div>
               )}
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 mt-2 border border-gray-200">
-                {t('common.' + userInfo.role)}
-              </span>
+              <div className="flex flex-wrap gap-2 mt-2">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
+                  {t('common.' + userInfo.role)}
+                </span>
+                {userInfo.role === 'user' &&
+                  (() => {
+                    const rank = getRank(totalPoints);
+                    return (
+                      <span
+                        title={`${rank.name} (${rank.range})`}
+                        className={`inline-flex items-center justify-center w-8 h-8 rounded-full shadow-sm transition-all hover:scale-110 cursor-default ${rank.classes}`}
+                      >
+                        {rank.icon}
+                      </span>
+                    );
+                  })()}
+              </div>
             </div>
 
             <div className="flex-1 w-full">

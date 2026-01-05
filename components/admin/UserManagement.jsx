@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { deleteUser } from '@/app/actions';
 import { toast } from 'react-hot-toast';
 import { useLocale } from '../../context/LocaleContext';
+import { RankBadge } from '@/lib/rankUtils';
 
 export default function UserManagement() {
   const { t } = useLocale();
@@ -341,8 +342,14 @@ export default function UserManagement() {
                             {user.name?.charAt(0).toUpperCase() || 'U'}
                           </div>
                         )}
-                        <div className="text-sm font-medium text-gray-900 group-hover:text-indigo-600 transition-colors">
-                          {user.name || t('common.noName')}
+                        <div className="flex items-center gap-2">
+                          <div className="text-sm font-medium text-gray-900 group-hover:text-indigo-600 transition-colors">
+                            {user.name || t('common.noName')}
+                          </div>
+                          <RankBadge
+                            points={user.total_points}
+                            role={user.role || 'user'}
+                          />
                         </div>
                       </Link>
                     </td>

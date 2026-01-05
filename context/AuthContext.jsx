@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
         // Fetch user role and details from Supabase
         const { data, error } = await supabase
           .from('users')
-          .select('role, name, avatar_url')
+          .select('role, name, avatar_url, total_points')
           .eq('user_id', firebaseUser.uid)
           .single();
 

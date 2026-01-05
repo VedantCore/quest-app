@@ -502,7 +502,7 @@ export async function getPendingSubmissions(managerId) {
 
       const { data: users, error: usersError } = await supabase
         .from('users')
-        .select('user_id, email, name')
+        .select('user_id, email, name, total_points, role')
         .in('user_id', userIds);
 
       if (usersError) throw usersError;

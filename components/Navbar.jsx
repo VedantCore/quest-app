@@ -8,6 +8,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { useRouter } from 'next/navigation';
 import LanguageSwitcher from './LanguageSwitcher';
+import { RankBadge } from '../lib/rankUtils';
 
 export default function Navbar({ onOpenLogin, onOpenSignup }) {
   const { user, userRole, userData, loading } = useAuth();
@@ -182,9 +183,15 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                           {user.email}
                         </p>
                         {/* Role Badge */}
-                        <span className="inline-flex items-center rounded-full bg-white px-2.5 py-0.5 text-xs font-bold text-indigo-600 border border-gray-200 shadow-sm capitalize">
-                          {t('common.' + (userRole || 'user'))}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex items-center rounded-full bg-white px-2.5 py-0.5 text-xs font-bold text-indigo-600 border border-gray-200 shadow-sm capitalize">
+                            {t('common.' + (userRole || 'user'))}
+                          </span>
+                          <RankBadge
+                            points={userData?.total_points}
+                            role={userRole}
+                          />
+                        </div>
                       </div>
 
                       {/* Links */}

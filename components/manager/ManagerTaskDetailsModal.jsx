@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { getTaskParticipants } from '@/app/actions';
 import { useLocale } from '@/context/LocaleContext';
+import { RankBadge } from '@/lib/rankUtils';
 
 export default function ManagerTaskDetailsModal({ task, isOpen, onClose }) {
   const { t, locale } = useLocale();
@@ -260,6 +261,9 @@ export default function ManagerTaskDetailsModal({ task, isOpen, onClose }) {
                             p.email?.[0]?.toUpperCase()}
                         </div>
                       )}
+                      <div className="absolute -bottom-1 -right-1 scale-75">
+                        <RankBadge points={p.total_points} role="user" />
+                      </div>
                     </div>
                   ))}
                 </div>
