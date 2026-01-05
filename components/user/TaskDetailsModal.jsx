@@ -186,7 +186,7 @@ export default function TaskDetailsModal({
                     </div>
                   </div>
                   <span className="text-xs font-bold bg-indigo-50 text-indigo-600 px-2 py-1 rounded border border-indigo-100 whitespace-nowrap">
-                    +{step.points_reward} {t('userDashboard.taskList.pts')}
+                    +{step.points_reward} {t('common.pts')}
                   </span>
                 </div>
               ))}

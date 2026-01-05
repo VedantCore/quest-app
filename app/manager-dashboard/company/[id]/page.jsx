@@ -49,23 +49,23 @@ export default function CompanyTasksPage({ params }) {
       ]);
 
       if (myTasksRes.success) setMyTasks(myTasksRes.data || []);
-      else toast.error('Failed to load my tasks');
+      else toast.error(t('manager.company.errorLoadMyTasks'));
 
       if (allTasksRes.success) {
         setAllTasks(allTasksRes.data || []);
       } else {
-        toast.error('Failed to load all tasks');
+        toast.error(t('manager.company.errorLoadAllTasks'));
       }
     } catch (error) {
       console.error(error);
-      toast.error('Error loading data');
+      toast.error(t('manager.company.errorLoadingData'));
     } finally {
       setIsLoadingData(false);
     }
   };
 
   const getDeadline = (dateStr) => {
-    if (!dateStr) return 'N/A';
+    if (!dateStr) return t('common.na');
     const date = new Date(dateStr);
     date.setDate(date.getDate() + 30);
 
@@ -328,7 +328,8 @@ export default function CompanyTasksPage({ params }) {
                                 </div>
                                 <div className="flex flex-col">
                                   <span className="text-xs font-medium text-gray-700">
-                                    {task.manager.name || 'Manager'}
+                                    {task.manager.name ||
+                                      t('manager.company.managerFallback')}
                                   </span>
                                   <span className="text-[10px] text-gray-400">
                                     {task.manager.email}

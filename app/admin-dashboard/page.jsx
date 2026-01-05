@@ -115,9 +115,7 @@ export default function AdminDashboard() {
           <h1 className="text-3xl font-bold text-gray-900">
             {t('admin.title')}
           </h1>
-          <p className="mt-2 text-sm text-gray-500">
-            Manage tasks, companies, users, and system settings.
-          </p>
+          <p className="mt-2 text-sm text-gray-500">{t('admin.subtitle')}</p>
         </div>
       </div>
 

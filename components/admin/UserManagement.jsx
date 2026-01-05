@@ -162,7 +162,9 @@ export default function UserManagement() {
 
   if (loading)
     return (
-      <div className="text-center py-12 text-gray-500">Loading users...</div>
+      <div className="text-center py-12 text-gray-500">
+        {t('userManagement.loading')}
+      </div>
     );
 
   return (
@@ -170,7 +172,7 @@ export default function UserManagement() {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {[
           {
-            label: 'Total Users',
+            label: t('userManagement.totalUsers'),
             value: users.length,
             icon: (
               <svg
@@ -189,7 +191,7 @@ export default function UserManagement() {
             ),
           },
           {
-            label: 'Admins',
+            label: t('userManagement.admins'),
             value: users.filter((u) => u.role === 'admin').length,
             icon: (
               <svg
@@ -208,7 +210,7 @@ export default function UserManagement() {
             ),
           },
           {
-            label: 'Managers',
+            label: t('userManagement.managers'),
             value: users.filter((u) => u.role === 'manager').length,
             icon: (
               <svg
@@ -227,7 +229,7 @@ export default function UserManagement() {
             ),
           },
           {
-            label: 'Users',
+            label: t('userManagement.users'),
             value: users.filter((u) => u.role === 'user').length,
             icon: (
               <svg
@@ -340,7 +342,7 @@ export default function UserManagement() {
                           </div>
                         )}
                         <div className="text-sm font-medium text-gray-900 group-hover:text-indigo-600 transition-colors">
-                          {user.name || 'No name'}
+                          {user.name || t('common.noName')}
                         </div>
                       </Link>
                     </td>
@@ -373,12 +375,12 @@ export default function UserManagement() {
                       </select>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
-                      {user.total_points || 0} pts
+                      {user.total_points || 0} {t('common.pts')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {user.created_at
                         ? new Date(user.created_at).toLocaleDateString()
-                        : 'N/A'}
+                        : t('common.noData')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <button
@@ -425,7 +427,7 @@ export default function UserManagement() {
                   : 'text-gray-500 hover:bg-gray-50'
               }`}
             >
-              <span className="sr-only">Previous</span>
+              <span className="sr-only">{t('common.previous')}</span>
               <svg
                 className="h-5 w-5"
                 xmlns="http://www.w3.org/2000/svg"
@@ -464,7 +466,7 @@ export default function UserManagement() {
                   : 'text-gray-500 hover:bg-gray-50'
               }`}
             >
-              <span className="sr-only">Next</span>
+              <span className="sr-only">{t('common.next')}</span>
               <svg
                 className="h-5 w-5"
                 xmlns="http://www.w3.org/2000/svg"

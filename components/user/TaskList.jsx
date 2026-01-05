@@ -599,7 +599,7 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
                                   />
                                 </svg>
                                 {task.earnedPoints}/{task.totalPoints}{' '}
-                                {t('userDashboard.taskList.pts')}
+                                {t('common.pts')}
                               </div>
                               <div className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg">
                                 <span

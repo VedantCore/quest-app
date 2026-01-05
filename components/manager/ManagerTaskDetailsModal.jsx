@@ -117,7 +117,7 @@ export default function ManagerTaskDetailsModal({ task, isOpen, onClose }) {
             <div className="space-y-4">
               <div>
                 <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-2">
-                  Assigned Manager
+                  {t('manager.task.assignedManager')}
                 </h4>
                 <div className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold shadow-sm border border-gray-200">
@@ -125,7 +125,7 @@ export default function ManagerTaskDetailsModal({ task, isOpen, onClose }) {
                   </div>
                   <div className="overflow-hidden">
                     <p className="text-sm font-semibold text-gray-900 truncate">
-                      {task.manager?.name || 'Unassigned'}
+                      {task.manager?.name || t('manager.task.unassigned')}
                     </p>
                     <p className="text-xs text-gray-500 truncate">
                       {task.manager?.email}
@@ -156,7 +156,9 @@ export default function ManagerTaskDetailsModal({ task, isOpen, onClose }) {
                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
                   />
                 </svg>
-                Quest Steps ({task.task_steps?.length || 0})
+                {t('manager.task.questSteps', {
+                  count: task.task_steps?.length || 0,
+                })}
               </span>
               <svg
                 className={`w-5 h-5 transition-transform ${
@@ -198,13 +200,13 @@ export default function ManagerTaskDetailsModal({ task, isOpen, onClose }) {
                         </div>
                       </div>
                       <span className="text-xs font-bold bg-indigo-50 text-indigo-600 px-2 py-1 rounded border border-indigo-100 whitespace-nowrap">
-                        {step.points_reward} pts
+                        {step.points_reward} {t('common.pts')}
                       </span>
                     </div>
                   ))
                 ) : (
                   <div className="text-sm text-gray-500 italic py-2">
-                    No steps defined for this quest.
+                    {t('manager.task.noSteps')}
                   </div>
                 )}
               </div>
@@ -215,10 +217,12 @@ export default function ManagerTaskDetailsModal({ task, isOpen, onClose }) {
           <div>
             <div className="flex justify-between items-end mb-3">
               <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wide">
-                Current Participants
+                {t('manager.task.currentParticipants')}
               </h4>
               <span className="text-xs font-medium text-gray-500">
-                Total: {participants.length}
+                {t('manager.task.totalParticipants', {
+                  count: participants.length,
+                })}
               </span>
             </div>
 
@@ -233,7 +237,7 @@ export default function ManagerTaskDetailsModal({ task, isOpen, onClose }) {
               </div>
             ) : participants.length === 0 ? (
               <div className="text-center py-4 bg-white rounded-xl border border-gray-200 border-dashed text-sm text-gray-500">
-                No participants yet.
+                {t('manager.task.noParticipants')}
               </div>
             ) : (
               <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
@@ -270,7 +274,7 @@ export default function ManagerTaskDetailsModal({ task, isOpen, onClose }) {
             onClick={onClose}
             className="px-5 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all shadow-sm"
           >
-            Close
+            {t('common.close')}
           </button>
         </div>
       </div>

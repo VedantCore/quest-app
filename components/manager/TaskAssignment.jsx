@@ -139,20 +139,21 @@ export default function TaskAssignment() {
                 <tr key={submission.submission_id}>
                   <td className="px-6 py-4">
                     <div className="text-sm font-medium text-gray-900">
-                      {submission.step?.task?.title || 'Unknown Task'}
+                      {submission.step?.task?.title ||
+                        t('manager.task.unknownTask')}
                     </div>
                     <div className="text-sm text-gray-500">
-                      {submission.step?.title || 'Unknown Step'}
+                      {submission.step?.title || t('manager.task.unknownStep')}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
-                      {submission.user?.email || 'Unknown User'}
+                      {submission.user?.email || t('manager.task.unknownUser')}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-600">
-                      {submission.step?.points_reward} pts
+                      {submission.step?.points_reward} {t('common.pts')}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

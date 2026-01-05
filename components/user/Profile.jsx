@@ -88,7 +88,7 @@ export default function Profile({ userId, onStatsUpdate }) {
 
   const handleNameUpdate = async () => {
     if (!newName.trim()) {
-      toast.error(t('user.profile.nameRequired') || 'Name is required');
+      toast.error(t('user.profile.nameRequired'));
       return;
     }
 
@@ -97,17 +97,13 @@ export default function Profile({ userId, onStatsUpdate }) {
       if (result.success) {
         setUserInfo((prev) => ({ ...prev, name: newName }));
         setIsEditingName(false);
-        toast.success(
-          t('user.profile.nameUpdated') || 'Name updated successfully'
-        );
+        toast.success(t('user.profile.nameUpdated'));
       } else {
-        toast.error(result.message);
+        toast.error(result.message || t('user.profile.nameUpdateFailed'));
       }
     } catch (error) {
       console.error('Error updating name:', error);
-      toast.error(
-        t('user.profile.nameUpdateFailed') || 'Failed to update name'
-      );
+      toast.error(t('user.profile.nameUpdateFailed'));
     }
   };
 
@@ -738,7 +734,7 @@ export default function Profile({ userId, onStatsUpdate }) {
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full text-sm border border-indigo-100">
-                      +{group.totalPoints} {t('userDashboard.taskList.pts')}
+                      +{group.totalPoints} {t('common.pts')}
                     </div>
                     <svg
                       className={`w-5 h-5 text-gray-400 transition-transform ${
@@ -781,8 +777,7 @@ export default function Profile({ userId, onStatsUpdate }) {
                           </div>
                         </div>
                         <span className="text-sm font-semibold text-gray-600">
-                          +{item.points_earned}{' '}
-                          {t('userDashboard.taskList.pts')}
+                          +{item.points_earned} {t('common.pts')}
                         </span>
                       </div>
                     ))}

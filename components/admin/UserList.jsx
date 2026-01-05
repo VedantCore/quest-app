@@ -2,8 +2,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { useLocale } from '@/context/LocaleContext';
 
 export default function UserList({ companyId }) {
+  const { t } = useLocale();
   const router = useRouter();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,14 +29,15 @@ export default function UserList({ companyId }) {
   const fetchUsers = async () => {
     try {
       let data, error;
-      
+
       console.log('[UserList] Fetching users, companyId:', companyId);
-      
+
       if (companyId) {
         // Fetch users for this company via join
         const result = await supabase
           .from('user_companies')
-          .select(`
+          .select(
+            `
             user_id,
             users!user_companies_user_id_fkey (
               user_id,
@@ -45,17 +48,18 @@ export default function UserList({ companyId }) {
               created_at,
               total_points
             )
-          `)
+          `
+          )
           .eq('company_id', companyId);
-          
+
         console.log('[UserList] Company query result:', result);
-        
+
         if (result.error) throw result.error;
         // Flatten and filter for regular users only
         data = result.data
-          .map(item => item.users)
-          .filter(u => u && u.role === 'user');
-        
+          .map((item) => item.users)
+          .filter((u) => u && u.role === 'user');
+
         console.log('[UserList] Filtered users:', data);
       } else {
         const { data: usersData, error: usersError } = await supabase
@@ -63,7 +67,7 @@ export default function UserList({ companyId }) {
           .select('*')
           .eq('role', 'user')
           .order('created_at', { ascending: false });
-        
+
         console.log('[UserList] Global query result:', usersData);
         data = usersData;
         error = usersError;
@@ -146,7 +150,7 @@ export default function UserList({ companyId }) {
       setUserTasks(tasks || []);
     } catch (error) {
       console.error('Error fetching user tasks:', error);
-      alert('Failed to fetch tasks');
+      alert(t('userList.fetchTasksFailed'));
     } finally {
       setLoadingTasks(false);
     }
@@ -243,7 +247,9 @@ export default function UserList({ companyId }) {
 
   if (loading)
     return (
-      <div className="text-center py-12 text-gray-500">Loading users...</div>
+      <div className="text-center py-12 text-gray-500">
+        {t('userList.loading')}
+      </div>
     );
 
   return (
@@ -251,7 +257,7 @@ export default function UserList({ companyId }) {
       <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6 shadow-sm">
         <input
           type="text"
-          placeholder="Search users..."
+          placeholder={t('userList.searchPlaceholder')}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-gray-400"
@@ -264,19 +270,19 @@ export default function UserList({ companyId }) {
             <thead className="bg-gray-50/50">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  {renderSortableHeader('User', 'name')}
+                  {renderSortableHeader(t('userList.user'), 'name')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  {renderSortableHeader('Email', 'email')}
+                  {renderSortableHeader(t('userList.email'), 'email')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  {renderSortableHeader('Points', 'total_points')}
+                  {renderSortableHeader(t('userList.points'), 'total_points')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  {renderSortableHeader('Joined', 'created_at')}
+                  {renderSortableHeader(t('userList.joined'), 'created_at')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Actions
+                  {t('userList.actions')}
                 </th>
               </tr>
             </thead>
@@ -287,7 +293,7 @@ export default function UserList({ companyId }) {
                     colSpan="5"
                     className="px-6 py-12 text-center text-gray-500"
                   >
-                    No users found.
+                    {t('userList.noUsers')}
                   </td>
                 </tr>
               ) : (
@@ -310,7 +316,7 @@ export default function UserList({ companyId }) {
                           </div>
                         )}
                         <div className="text-sm font-medium text-gray-900">
-                          {user.name || 'No name'}
+                          {user.name || t('taskManagement.unassigned')}
                         </div>
                       </div>
                     </td>
@@ -318,7 +324,7 @@ export default function UserList({ companyId }) {
                       {user.email}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
-                      {user.total_points || 0} pts
+                      {user.total_points || 0} {t('taskManagement.points')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {user.created_at
@@ -330,7 +336,7 @@ export default function UserList({ companyId }) {
                         onClick={() => handleViewTasks(user)}
                         className="text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
                       >
-                        View Tasks
+                        {t('userList.viewTasks')}
                       </button>
                     </td>
                   </tr>
@@ -422,10 +428,10 @@ export default function UserList({ companyId }) {
             <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 rounded-t-xl">
               <div>
                 <h3 className="text-xl font-bold text-gray-900">
-                  Participating Tasks
+                  {t('userList.participatingTasks')}
                 </h3>
                 <p className="text-sm text-gray-500 mt-1">
-                  User: {selectedUser.name}
+                  {t('userList.userLabel')}: {selectedUser.name}
                 </p>
               </div>
               <button
@@ -452,7 +458,7 @@ export default function UserList({ companyId }) {
               {loadingTasks ? (
                 <div className="flex flex-col items-center justify-center py-12 text-gray-500">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-3"></div>
-                  <p>Loading tasks...</p>
+                  <p>{t('userList.loadingTasks')}</p>
                 </div>
               ) : userTasks.length === 0 ? (
                 <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
@@ -470,7 +476,7 @@ export default function UserList({ companyId }) {
                     />
                   </svg>
                   <p className="text-gray-500 font-medium">
-                    This user hasn't joined any tasks yet.
+                    {t('userList.noTasks')}
                   </p>
                 </div>
               ) : (
@@ -494,7 +500,9 @@ export default function UserList({ companyId }) {
                               : 'bg-gray-100 text-gray-700 border border-gray-200'
                           }`}
                         >
-                          {task.is_active ? 'Active' : 'Inactive'}
+                          {task.is_active
+                            ? t('taskManagement.active')
+                            : t('taskManagement.inactive')}
                         </span>
                       </div>
                       <p className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">
@@ -503,7 +511,7 @@ export default function UserList({ companyId }) {
                       <div className="flex items-center gap-4 text-xs text-gray-500 border-t border-gray-100 pt-3">
                         <div className="flex items-center gap-1.5">
                           <span className="font-medium text-gray-700">
-                            Level:
+                            {t('taskManagement.level')}:
                           </span>
                           <span className="text-indigo-600">
                             {'★'.repeat(task.level) +
@@ -513,7 +521,7 @@ export default function UserList({ companyId }) {
                         <div className="w-px h-3 bg-gray-300"></div>
                         <div className="flex items-center gap-1.5">
                           <span className="font-medium text-gray-700">
-                            Joined:
+                            {t('userList.joined')}:
                           </span>
                           <span>
                             {task.joined_at
@@ -524,7 +532,7 @@ export default function UserList({ companyId }) {
                         <div className="w-px h-3 bg-gray-300"></div>
                         <div className="flex items-center gap-1.5">
                           <span className="font-medium text-gray-700">
-                            Points:
+                            {t('userList.points')}:
                           </span>
                           <span className="text-indigo-600 font-bold">
                             {task.earned_points} / {task.total_points}
@@ -533,10 +541,11 @@ export default function UserList({ companyId }) {
                         <div className="w-px h-3 bg-gray-300"></div>
                         <div className="flex items-center gap-1.5">
                           <span className="font-medium text-gray-700">
-                            Manager:
+                            {t('userList.manager')}:
                           </span>
                           <span className="text-gray-900">
-                            {task.manager?.name || 'Unassigned'}
+                            {task.manager?.name ||
+                              t('taskManagement.unassigned')}
                           </span>
                         </div>
                       </div>

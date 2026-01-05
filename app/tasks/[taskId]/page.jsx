@@ -357,7 +357,7 @@ export default function TaskDetailsPage() {
                         </h3>
                         <div className="flex items-center gap-2">
                           <span className="px-3 py-1 bg-yellow-50 text-yellow-700 text-xs font-bold rounded-full border border-yellow-200 whitespace-nowrap">
-                            +{step.points_reward} {t('taskPage.points')}
+                            +{step.points_reward} {t('common.pts')}
                           </span>
 
                           {/* Status Badges */}

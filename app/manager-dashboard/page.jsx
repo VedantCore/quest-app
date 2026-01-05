@@ -58,7 +58,10 @@ export default function ManagerDashboard() {
           <p className="text-sm text-gray-500">
             {t('manager.dashboard.welcome', {
               name:
-                userData?.name || user?.displayName || user?.email || 'Manager',
+                userData?.name ||
+                user?.displayName ||
+                user?.email ||
+                t('manager.dashboard.managerFallback'),
             })}
           </p>
         </div>

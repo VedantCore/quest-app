@@ -1,8 +1,10 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useLocale } from '@/context/LocaleContext';
 
 export default function Stats({ companyId }) {
+  const { t } = useLocale();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeGraph, setActiveGraph] = useState('leaderboard');
@@ -132,7 +134,7 @@ export default function Stats({ companyId }) {
   if (loading) {
     return (
       <div className="text-center py-12 text-gray-500">
-        Loading statistics...
+        {t('stats.loading')}
       </div>
     );
   }
@@ -204,11 +206,11 @@ export default function Stats({ companyId }) {
   const GraphSelector = () => (
     <div className="flex flex-wrap gap-2 mb-6">
       {[
-        { id: 'leaderboard', label: 'Leaderboard' },
-        { id: 'distribution', label: 'Points Dist.' },
-        { id: 'growth', label: 'User Growth' },
-        { id: 'roles', label: 'Roles' },
-        { id: 'activity', label: 'Activity' },
+        { id: 'leaderboard', label: t('stats.leaderboard') },
+        { id: 'distribution', label: t('stats.pointsDist') },
+        { id: 'growth', label: t('stats.userGrowth') },
+        { id: 'roles', label: t('stats.roles') },
+        { id: 'activity', label: t('stats.activity') },
       ].map((g) => (
         <button
           key={g.id}
@@ -230,12 +232,12 @@ export default function Stats({ companyId }) {
       {/* Date Range Filters */}
       <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
         <h3 className="text-sm font-semibold text-gray-700 mb-4">
-          Filter by Date Range
+          {t('stats.filterTitle')}
         </h3>
         <div className="flex flex-wrap gap-4 items-end">
           <div className="flex-1 min-w-[200px]">
             <label className="block text-xs font-medium text-gray-500 mb-2">
-              From Date
+              {t('stats.fromDate')}
             </label>
             <input
               type="date"
@@ -246,7 +248,7 @@ export default function Stats({ companyId }) {
           </div>
           <div className="flex-1 min-w-[200px]">
             <label className="block text-xs font-medium text-gray-500 mb-2">
-              To Date
+              {t('stats.toDate')}
             </label>
             <input
               type="date"
@@ -262,15 +264,17 @@ export default function Stats({ companyId }) {
             }}
             className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
           >
-            Clear Filters
+            {t('stats.clearFilters')}
           </button>
         </div>
         {(dateFrom || dateTo) && (
           <p className="text-xs text-indigo-600 mt-3">
-            Showing points earned{' '}
-            {dateFrom && `from ${new Date(dateFrom).toLocaleDateString()}`}
+            {t('stats.showingPoints')}{' '}
+            {dateFrom &&
+              `${t('stats.from')} ${new Date(dateFrom).toLocaleDateString()}`}
             {dateFrom && dateTo && ' '}
-            {dateTo && `to ${new Date(dateTo).toLocaleDateString()}`}
+            {dateTo &&
+              `${t('stats.to')} ${new Date(dateTo).toLocaleDateString()}`}
           </p>
         )}
       </div>
@@ -279,7 +283,7 @@ export default function Stats({ companyId }) {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
           <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">
-            Total Points
+            {t('stats.totalPoints')}
           </h3>
           <p className="text-3xl font-bold text-indigo-600 mt-2">
             {stats.totalPoints.toLocaleString()}
@@ -287,7 +291,7 @@ export default function Stats({ companyId }) {
         </div>
         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
           <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">
-            Average Points
+            {t('stats.avgPoints')}
           </h3>
           <p className="text-3xl font-bold text-purple-600 mt-2">
             {stats.avgPoints.toLocaleString()}
@@ -295,7 +299,7 @@ export default function Stats({ companyId }) {
         </div>
         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
           <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">
-            Total Users
+            {t('stats.totalUsers')}
           </h3>
           <p className="text-3xl font-bold text-gray-900 mt-2">
             {stats.totalUsers}
@@ -303,12 +307,14 @@ export default function Stats({ companyId }) {
         </div>
         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
           <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">
-            Active Users
+            {t('stats.activeUsers')}
           </h3>
           <p className="text-3xl font-bold text-emerald-600 mt-2">
             {stats.activeUsers}
           </p>
-          <p className="text-xs text-gray-400 mt-1">Users with points &gt; 0</p>
+          <p className="text-xs text-gray-400 mt-1">
+            {t('stats.activeUsersDesc')}
+          </p>
         </div>
       </div>
 
@@ -317,11 +323,11 @@ export default function Stats({ companyId }) {
         <div className="flex flex-col h-full">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-bold text-gray-900">
-              {activeGraph === 'leaderboard' && 'All Users Leaderboard'}
-              {activeGraph === 'distribution' && 'Points Distribution'}
-              {activeGraph === 'growth' && 'User Growth Over Time'}
-              {activeGraph === 'roles' && 'User Role Distribution'}
-              {activeGraph === 'activity' && 'Active vs Inactive Users'}
+              {activeGraph === 'leaderboard' && t('stats.leaderboardTitle')}
+              {activeGraph === 'distribution' && t('stats.distributionTitle')}
+              {activeGraph === 'growth' && t('stats.growthTitle')}
+              {activeGraph === 'roles' && t('stats.rolesTitle')}
+              {activeGraph === 'activity' && t('stats.activityTitle')}
             </h3>
           </div>
 
@@ -338,10 +344,11 @@ export default function Stats({ companyId }) {
                     <div key={index} className="relative">
                       <div className="flex items-center justify-between text-sm mb-1">
                         <span className="font-medium text-gray-700 w-48 truncate">
-                          {index + 1}. {user.name || 'Anonymous'}
+                          {index + 1}. {user.name || t('stats.anonymous')}
                         </span>
                         <span className="font-bold text-indigo-600">
-                          {user.filtered_points || 0} pts
+                          {user.filtered_points || 0}{' '}
+                          {t('taskManagement.points')}
                         </span>
                       </div>
                       <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
@@ -355,7 +362,7 @@ export default function Stats({ companyId }) {
                 })}
                 {leaderboardData.length === 0 && (
                   <p className="text-center text-gray-500 mt-10">
-                    No users found.
+                    {t('stats.noUsers')}
                   </p>
                 )}
               </div>
@@ -424,7 +431,7 @@ export default function Stats({ companyId }) {
                   </svg>
                 ) : (
                   <p className="text-center text-gray-500 mt-20">
-                    Not enough data for growth chart.
+                    {t('stats.notEnoughData')}
                   </p>
                 )}
                 <div className="absolute bottom-0 left-0 right-0 flex justify-between text-xs text-gray-400 px-2">
@@ -483,7 +490,9 @@ export default function Stats({ companyId }) {
                     <span className="text-3xl font-bold text-gray-800">
                       {totalUserRole}
                     </span>
-                    <span className="text-sm text-gray-500">Total Users</span>
+                    <span className="text-sm text-gray-500">
+                      {t('stats.totalUsers')}
+                    </span>
                   </div>
                 </div>
 
@@ -491,9 +500,11 @@ export default function Stats({ companyId }) {
                   <div className="flex items-center gap-3">
                     <div className="w-4 h-4 bg-emerald-500 rounded"></div>
                     <div>
-                      <p className="font-medium text-gray-900">Active</p>
+                      <p className="font-medium text-gray-900">
+                        {t('stats.active')}
+                      </p>
                       <p className="text-sm text-gray-500">
-                        {activeCount} users (
+                        {activeCount} {t('stats.totalUsers').toLowerCase()} (
                         {((activeCount / totalUserRole) * 100).toFixed(1)}%)
                       </p>
                     </div>
@@ -501,9 +512,11 @@ export default function Stats({ companyId }) {
                   <div className="flex items-center gap-3">
                     <div className="w-4 h-4 bg-gray-200 rounded"></div>
                     <div>
-                      <p className="font-medium text-gray-900">Inactive</p>
+                      <p className="font-medium text-gray-900">
+                        {t('stats.inactive')}
+                      </p>
                       <p className="text-sm text-gray-500">
-                        {inactiveCount} users (
+                        {inactiveCount} {t('stats.totalUsers').toLowerCase()} (
                         {((inactiveCount / totalUserRole) * 100).toFixed(1)}%)
                       </p>
                     </div>

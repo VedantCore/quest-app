@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { useLocale } from '@/context/LocaleContext';
 import toast from 'react-hot-toast';
 import {
   createCompanyAction,
@@ -15,6 +16,7 @@ import {
 } from '@/app/company-actions';
 
 export default function CompanyManagement({ allUsers }) {
+  const { t } = useLocale();
   const router = useRouter();
   const { user } = useAuth();
   const [companies, setCompanies] = useState([]);
@@ -78,11 +80,11 @@ export default function CompanyManagement({ allUsers }) {
       if (result.success) {
         setCompanies(result.data);
       } else {
-        toast.error(result.error);
+        toast.error(result.error || t('admin.company.errorFetch'));
       }
     } catch (error) {
       console.error(error);
-      toast.error('Failed to fetch companies');
+      toast.error(t('admin.company.errorFetch'));
     } finally {
       setLoading(false);
     }
@@ -98,36 +100,36 @@ export default function CompanyManagement({ allUsers }) {
       });
 
       if (result.success) {
-        toast.success('Company created successfully');
+        toast.success(t('admin.company.successCreate'));
         setCompanies([...companies, result.data]);
         setShowCreateModal(false);
         setNewCompanyName('');
         setNewCompanyDescription('');
       } else {
-        toast.error(result.error);
+        toast.error(result.error || t('admin.company.errorCreate'));
       }
     } catch (error) {
       console.error(error);
-      toast.error('Failed to create company');
+      toast.error(t('admin.company.errorCreate'));
     }
   };
 
   const handleDeleteCompany = async (companyId) => {
-    if (!confirm('Are you sure you want to delete this company?')) return;
+    if (!confirm(t('admin.company.deleteConfirm'))) return;
 
     try {
       const token = await user.getIdToken();
       const result = await deleteCompanyAction(token, companyId);
 
       if (result.success) {
-        toast.success('Company deleted successfully');
+        toast.success(t('admin.company.successDelete'));
         setCompanies(companies.filter((c) => c.company_id !== companyId));
       } else {
-        toast.error(result.error);
+        toast.error(result.error || t('admin.company.errorDelete'));
       }
     } catch (error) {
       console.error(error);
-      toast.error('Failed to delete company');
+      toast.error(t('admin.company.errorDelete'));
     }
   };
 
@@ -140,11 +142,11 @@ export default function CompanyManagement({ allUsers }) {
       if (result.success) {
         setCompanyUsers(result.data);
       } else {
-        toast.error(result.error);
+        toast.error(result.error || t('admin.company.errorFetch'));
       }
     } catch (error) {
       console.error(error);
-      toast.error('Failed to fetch company users');
+      toast.error(t('admin.company.errorFetch'));
     }
   };
 
@@ -160,21 +162,21 @@ export default function CompanyManagement({ allUsers }) {
       );
 
       if (result.success) {
-        toast.success('User removed from company');
+        toast.success(t('admin.company.successDelete'));
         setCompanyUsers(companyUsers.filter((cu) => cu.user_id !== userId));
       } else {
-        toast.error(result.error);
+        toast.error(result.error || t('admin.company.errorDelete'));
       }
     } catch (error) {
       console.error(error);
-      toast.error('Failed to remove user');
+      toast.error(t('admin.company.errorDelete'));
     }
   };
 
   const handleBulkAssign = async (e) => {
     e.preventDefault();
     if (!selectedCompany || selectedUsers.length === 0) {
-      toast.error('Please select users');
+      toast.error(t('admin.company.selectUsers'));
       return;
     }
 
@@ -187,17 +189,17 @@ export default function CompanyManagement({ allUsers }) {
       );
 
       if (result.success) {
-        toast.success(`Assigned ${selectedUsers.length} users to company`);
+        toast.success(t('admin.company.successCreate'));
         setShowAssignModal(false);
         setSelectedUsers([]);
         // Refresh company users
         handleViewCompanyUsers(selectedCompany);
       } else {
-        toast.error(result.error);
+        toast.error(result.error || t('admin.company.errorCreate'));
       }
     } catch (error) {
       console.error(error);
-      toast.error('Failed to assign users');
+      toast.error(t('admin.company.errorCreate'));
     }
   };
 
@@ -220,44 +222,49 @@ export default function CompanyManagement({ allUsers }) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">Company Management</h2>
+        <h2 className="text-2xl font-bold text-gray-900">
+          {t('admin.company.title')}
+        </h2>
         <button
           onClick={() => setShowCreateModal(true)}
           className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 font-medium transition-colors shadow-sm hover:shadow-md"
         >
-          Create Company
+          {t('admin.company.create')}
         </button>
       </div>
 
       {companies.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <p className="text-gray-500">
-            No companies yet. Create one to get started.
-          </p>
+          <p className="text-gray-500">{t('admin.company.noCompanies')}</p>
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {companies.map((company) => (
             <div
               key={company.company_id}
-              onClick={() => router.push(`/admin-dashboard/company/${company.company_id}`)}
+              onClick={() =>
+                router.push(`/admin-dashboard/company/${company.company_id}`)
+              }
               className="border border-gray-200 rounded-xl p-5 bg-white shadow-sm hover:shadow-lg hover:border-indigo-300 transition-all duration-200 cursor-pointer group"
             >
               <h3 className="font-bold text-lg text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors">
                 {company.name}
               </h3>
               <p className="text-sm text-gray-600 min-h-[40px]">
-                {company.description || 'No description provided'}
+                {company.description ||
+                  t('userDashboard.taskDetails.noDescription')}
               </p>
               <div className="mt-4 flex gap-2">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    router.push(`/admin-dashboard/company/${company.company_id}`);
+                    router.push(
+                      `/admin-dashboard/company/${company.company_id}`
+                    );
                   }}
                   className="flex-1 text-sm font-medium bg-white border border-indigo-200 text-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-50 transition-colors shadow-sm"
                 >
-                  View Company
+                  {t('admin.company.view')}
                 </button>
                 <button
                   onClick={(e) => {
@@ -266,7 +273,7 @@ export default function CompanyManagement({ allUsers }) {
                   }}
                   className="text-sm font-medium bg-red-50 text-red-600 px-4 py-2 rounded-lg hover:bg-red-100 transition-colors border border-red-200"
                 >
-                  Delete
+                  {t('admin.company.delete')}
                 </button>
               </div>
             </div>
@@ -278,11 +285,13 @@ export default function CompanyManagement({ allUsers }) {
       {showCreateModal && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-30 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold mb-4">Create New Company</h3>
+            <h3 className="text-xl font-bold mb-4">
+              {t('admin.company.createTitle')}
+            </h3>
             <form onSubmit={handleCreateCompany} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Company Name *
+                  {t('admin.company.name')} *
                 </label>
                 <input
                   type="text"
@@ -294,7 +303,7 @@ export default function CompanyManagement({ allUsers }) {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
+                  {t('admin.company.description')}
                 </label>
                 <textarea
                   value={newCompanyDescription}
@@ -309,13 +318,13 @@ export default function CompanyManagement({ allUsers }) {
                   onClick={() => setShowCreateModal(false)}
                   className="px-4 py-2 border rounded-md hover:bg-gray-50"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                 >
-                  Create
+                  {t('common.create')}
                 </button>
               </div>
             </form>
@@ -329,7 +338,7 @@ export default function CompanyManagement({ allUsers }) {
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-bold">
-                {selectedCompany.name} - Users
+                {selectedCompany.name} - {t('admin.company.users')}
               </h3>
               <button
                 onClick={() => {
@@ -346,12 +355,12 @@ export default function CompanyManagement({ allUsers }) {
               onClick={() => setShowAssignModal(true)}
               className="mb-4 bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
             >
-              Assign Users
+              {t('admin.company.assignUsers')}
             </button>
 
             {companyUsers.length === 0 ? (
               <p className="text-gray-500 text-center py-8">
-                No users assigned yet
+                {t('admin.company.noUsersAssigned')}
               </p>
             ) : (
               <div className="space-y-2">
@@ -364,14 +373,14 @@ export default function CompanyManagement({ allUsers }) {
                       <p className="font-medium">{cu.users.name}</p>
                       <p className="text-sm text-gray-600">{cu.users.email}</p>
                       <span className="text-xs px-2 py-1 bg-gray-100 rounded">
-                        {cu.users.role}
+                        {t('common.' + cu.users.role)}
                       </span>
                     </div>
                     <button
                       onClick={() => handleRemoveUserFromCompany(cu.user_id)}
                       className="text-red-600 hover:text-red-800"
                     >
-                      Remove
+                      {t('admin.company.remove')}
                     </button>
                   </div>
                 ))}
@@ -387,7 +396,7 @@ export default function CompanyManagement({ allUsers }) {
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-bold">
-                Users Without Company Assignment ({unassignedUsers.length})
+                {t('admin.company.unassignedUsers')} ({unassignedUsers.length})
               </h3>
               <button
                 onClick={() => setShowUnassignedModal(false)}
@@ -407,7 +416,7 @@ export default function CompanyManagement({ allUsers }) {
                     <p className="font-medium">{user.name}</p>
                     <p className="text-sm text-gray-600">{user.email}</p>
                     <span className="text-xs px-2 py-1 bg-gray-100 rounded">
-                      {user.role}
+                      {t('common.' + user.role)}
                     </span>
                   </div>
                   <div className="flex gap-2">
@@ -422,12 +431,12 @@ export default function CompanyManagement({ allUsers }) {
                             company.company_id
                           );
                           if (result.success) {
-                            toast.success(
-                              `Assigned ${user.name} to ${company.name}`
-                            );
+                            toast.success(t('admin.company.successCreate'));
                             fetchUnassignedUsers();
                           } else {
-                            toast.error(result.error);
+                            toast.error(
+                              result.error || t('admin.company.errorCreate')
+                            );
                           }
                         }}
                         className="px-3 py-1 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700"
@@ -442,7 +451,7 @@ export default function CompanyManagement({ allUsers }) {
 
             {companies.length === 0 && (
               <p className="text-center text-gray-500 py-4">
-                Create a company first before assigning users.
+                {t('admin.company.createFirst')}
               </p>
             )}
           </div>
@@ -455,7 +464,7 @@ export default function CompanyManagement({ allUsers }) {
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-bold">
-                Assign Users to {selectedCompany.name}
+                {t('admin.company.assignUsers')} to {selectedCompany.name}
               </h3>
               <button
                 onClick={() => {
@@ -492,11 +501,11 @@ export default function CompanyManagement({ allUsers }) {
                         <p className="font-medium">{user.name}</p>
                         <p className="text-sm text-gray-600">{user.email}</p>
                         <span className="text-xs px-2 py-1 bg-gray-100 rounded">
-                          {user.role}
+                          {t('common.' + user.role)}
                         </span>
                         {alreadyAssigned && (
                           <span className="ml-2 text-xs text-green-600">
-                            Already assigned
+                            {t('admin.company.alreadyAssigned')}
                           </span>
                         )}
                       </div>
@@ -514,14 +523,15 @@ export default function CompanyManagement({ allUsers }) {
                   }}
                   className="px-4 py-2 border rounded-md hover:bg-gray-50"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                   disabled={selectedUsers.length === 0}
                 >
-                  Assign {selectedUsers.length} User(s)
+                  {t('admin.company.assign')} {selectedUsers.length}{' '}
+                  {t('admin.company.users')}
                 </button>
               </div>
             </form>

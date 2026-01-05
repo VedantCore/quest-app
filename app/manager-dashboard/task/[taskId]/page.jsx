@@ -52,13 +52,13 @@ export default function TaskParticipantsPage() {
       ]);
 
       if (taskRes.success) setTask(taskRes.data);
-      else toast.error('Failed to load task details');
+      else toast.error(t('manager.task.errorLoadTaskDetails'));
 
       if (participantsRes.success) setParticipants(participantsRes.data || []);
-      else toast.error('Failed to load participants');
+      else toast.error(t('manager.task.errorLoadParticipants'));
     } catch (error) {
       console.error(error);
-      toast.error('Error loading page data');
+      toast.error(t('manager.task.errorLoadingPageData'));
     } finally {
       setIsLoadingData(false);
     }
@@ -222,7 +222,7 @@ export default function TaskParticipantsPage() {
                       {t('manager.task.level')}:
                     </span>
                     <span className="font-medium text-gray-900">
-                      {task.level || 'N/A'}
+                      {task.level || t('common.na')}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
@@ -310,7 +310,7 @@ export default function TaskParticipantsPage() {
                       )}
                     </div>
                     <span className="flex-shrink-0 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg font-bold text-sm border border-indigo-200">
-                      {step.points_reward} pts
+                      {step.points_reward} {t('common.pts')}
                     </span>
                   </div>
                 ))
@@ -376,7 +376,7 @@ export default function TaskParticipantsPage() {
                     )}
                   </div>
                   <div className="px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700">
-                    {participant.total_points} pts
+                    {participant.total_points} {t('common.pts')}
                   </div>
                   <svg
                     className="w-5 h-5 text-gray-300 group-hover:text-gray-500 transition-colors"
@@ -460,7 +460,7 @@ export default function TaskParticipantsPage() {
                             </p>
                           </div>
                           <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2 py-1 rounded">
-                            {step.points_reward} pts
+                            {step.points_reward} {t('common.pts')}
                           </span>
                         </div>
 
@@ -478,7 +478,7 @@ export default function TaskParticipantsPage() {
                                     : 'bg-gray-100 text-gray-600 border-gray-200'
                                 }`}
                               >
-                                {status.replace('_', ' ')}
+                                {t(`manager.task.status.${status}`)}
                               </span>
                               {submission && (
                                 <span className="text-xs text-gray-400">
