@@ -95,24 +95,23 @@ export async function updateTask(taskId, taskData, steps) {
       }
 
       // Upsert steps (update existing, insert new)
+      // NEW: Upsert logic to handle duplicates gracefully
       for (const step of steps) {
+        const stepData = {
+          task_id: taskId,
+          title: step.title,
+          description: step.description,
+          points_reward: parseInt(step.points_reward),
+        };
+        // If we have an ID, force it (standard update)
         if (step.step_id) {
-          await supabase
-            .from('task_steps')
-            .update({
-              title: step.title,
-              description: step.description,
-              points_reward: parseInt(step.points_reward),
-            })
-            .eq('step_id', step.step_id);
-        } else {
-          await supabase.from('task_steps').insert({
-            task_id: taskId,
-            title: step.title,
-            description: step.description,
-            points_reward: parseInt(step.points_reward),
-          });
+          stepData.step_id = step.step_id;
         }
+        // This handles both Insert and Update based on the unique constraint
+        const { error } = await supabase
+          .from('task_steps')
+          .upsert(stepData, { onConflict: 'task_id, title' });
+        if (error) throw error;
       }
     }
 
