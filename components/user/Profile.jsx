@@ -459,14 +459,7 @@ export default function Profile({ userId, onStatsUpdate }) {
                     {userInfo.email}
                   </p>
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
-                    {t('user.profile.dob')}
-                  </label>
-                  <p className="text-gray-400 font-medium border-b border-gray-100 pb-2 italic">
-                    {t('user.profile.notSet')}
-                  </p>
-                </div>
+
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
                     {t('user.profile.memberSince')}
