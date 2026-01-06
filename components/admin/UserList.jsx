@@ -2,11 +2,15 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/context/AuthContext';
 import { useLocale } from '@/context/LocaleContext';
 import { RankBadge } from '@/lib/rankUtils';
+import { removeUserFromCompanyAction } from '@/app/company-actions';
+import toast from 'react-hot-toast';
 
 export default function UserList({ companyId }) {
   const { t } = useLocale();
+  const { user: currentUser } = useAuth();
   const router = useRouter();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -160,6 +164,30 @@ export default function UserList({ companyId }) {
   const closeTaskModal = () => {
     setSelectedUser(null);
     setUserTasks([]);
+  };
+
+  const handleRemoveUser = async (userId) => {
+    if (!confirm('Are you sure you want to remove this user from the company?'))
+      return;
+
+    try {
+      const token = await currentUser.getIdToken();
+      const result = await removeUserFromCompanyAction(
+        token,
+        userId,
+        companyId
+      );
+
+      if (result.success) {
+        toast.success('User removed successfully');
+        setUsers(users.filter((u) => u.user_id !== userId));
+      } else {
+        toast.error(result.error);
+      }
+    } catch (error) {
+      console.error('Error removing user:', error);
+      toast.error('Failed to remove user');
+    }
   };
 
   const filteredUsers = users.filter((user) => {
@@ -339,12 +367,36 @@ export default function UserList({ companyId }) {
                         : 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <button
-                        onClick={() => handleViewTasks(user)}
-                        className="text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
-                      >
-                        {t('userList.viewTasks')}
-                      </button>
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => handleViewTasks(user)}
+                          className="text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
+                        >
+                          {t('userList.viewTasks')}
+                        </button>
+                        {companyId && (
+                          <button
+                            onClick={() => handleRemoveUser(user.user_id)}
+                            className="text-red-600 hover:text-red-800 font-medium transition-colors"
+                            title="Remove from company"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-5 w-5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                              />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))
