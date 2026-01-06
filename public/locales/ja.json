@@ -43,6 +43,7 @@
     "dashboard": {
       "title": "マネージャーダッシュボード",
       "welcome": "おかえりなさい、{name}さん。タスクを表示・管理する会社を選択してください。",
+      "companiesManaged": "管理している会社",
       "noCompanies": "まだ会社が割り当てられていません。",
       "contactAdmin": "会社に割り当てられるには、管理者に連絡してください。",
       "viewTasks": "タスクを表示",

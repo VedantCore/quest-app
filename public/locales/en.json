@@ -43,6 +43,7 @@
     "dashboard": {
       "title": "Manager Dashboard",
       "welcome": "Welcome back, {name}. Select a company to view and manage tasks.",
+      "companiesManaged": "Companies Managed By You",
       "noCompanies": "No companies assigned to you yet.",
       "contactAdmin": "Contact an admin to get assigned to a company.",
       "viewTasks": "View Tasks",

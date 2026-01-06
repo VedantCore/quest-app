@@ -69,6 +69,9 @@ export default function ManagerDashboard() {
 
       {/* Company Cards */}
       <div className="max-w-7xl mx-auto px-6 py-8">
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">
+          {t('manager.dashboard.companiesManaged')}
+        </h2>
         {companies.length === 0 ? (
           <div className="bg-white rounded-xl border border-gray-200 p-12 text-center shadow-sm">
             <div className="mx-auto h-12 w-12 text-gray-300 mb-4">

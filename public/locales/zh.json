@@ -43,6 +43,7 @@
     "dashboard": {
       "title": "经理仪表板",
       "welcome": "欢迎回来，{name}。请选择一家公司来查看和管理任务。",
+      "companiesManaged": "您管理的公司",
       "noCompanies": "尚未为您分配任何公司。",
       "contactAdmin": "请联系管理员以分配到公司。",
       "viewTasks": "查看任务",

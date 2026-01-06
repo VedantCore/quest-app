@@ -43,6 +43,7 @@
     "dashboard": {
       "title": "Dasbor Manajer",
       "welcome": "Selamat datang kembali, {name}. Pilih perusahaan untuk melihat dan mengelola tugas.",
+      "companiesManaged": "Perusahaan yang Anda Kelola",
       "noCompanies": "Belum ada perusahaan yang ditugaskan kepada Anda.",
       "contactAdmin": "Hubungi admin untuk ditugaskan ke perusahaan.",
       "viewTasks": "Lihat Tugas",
