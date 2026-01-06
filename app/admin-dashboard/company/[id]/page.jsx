@@ -8,7 +8,11 @@ import ManagerList from '@/components/admin/ManagerList';
 import UserList from '@/components/admin/UserList';
 import Stats from '@/components/admin/Stats';
 import Navbar from '@/components/Navbar';
-import { getCompaniesAction, getCompanyUsersAction, bulkAssignUsersToCompanyAction } from '@/app/company-actions';
+import {
+  getCompaniesAction,
+  getCompanyUsersAction,
+  bulkAssignUsersToCompanyAction,
+} from '@/app/company-actions';
 import toast from 'react-hot-toast';
 
 export default function CompanyDetailPage({ params }) {
@@ -18,13 +22,14 @@ export default function CompanyDetailPage({ params }) {
   const [company, setCompany] = useState(null);
   const [loadingCompany, setLoadingCompany] = useState(true);
   const { id: companyId } = use(params);
-  
+
   // User assignment state
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [allUsers, setAllUsers] = useState([]);
   const [companyUsers, setCompanyUsers] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     if (!loading && (!user || userRole !== 'admin')) {
@@ -60,19 +65,19 @@ export default function CompanyDetailPage({ params }) {
   const handleOpenAssignModal = async () => {
     setShowAssignModal(true);
     setLoadingUsers(true);
-    
+
     try {
       const token = await user.getIdToken();
-      
+
       // Fetch all users
       const { data: usersData, error: usersError } = await supabase
         .from('users')
         .select('*')
         .order('name');
-      
+
       if (usersError) throw usersError;
       setAllUsers(usersData || []);
-      
+
       // Fetch current company users
       const result = await getCompanyUsersAction(token, companyId);
       if (result.success) {
@@ -102,7 +107,9 @@ export default function CompanyDetailPage({ params }) {
       );
 
       if (result.success) {
-        toast.success(`Assigned ${selectedUsers.length} user(s) to ${company.name}`);
+        toast.success(
+          `Assigned ${selectedUsers.length} user(s) to ${company.name}`
+        );
         setShowAssignModal(false);
         setSelectedUsers([]);
         // Refresh the page to show new users
@@ -246,7 +253,9 @@ export default function CompanyDetailPage({ params }) {
           </nav>
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">{company.name}</h1>
+              <h1 className="text-3xl font-bold text-gray-900">
+                {company.name}
+              </h1>
               <p className="mt-2 text-sm text-gray-500">
                 {company.description || 'No description provided'}
               </p>
@@ -313,11 +322,14 @@ export default function CompanyDetailPage({ params }) {
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold">Assign Users to {company.name}</h3>
+              <h3 className="text-xl font-bold">
+                Assign Users to {company.name}
+              </h3>
               <button
                 onClick={() => {
                   setShowAssignModal(false);
                   setSelectedUsers([]);
+                  setSearchTerm('');
                 }}
                 className="text-gray-500 hover:text-gray-700"
               >
@@ -331,34 +343,59 @@ export default function CompanyDetailPage({ params }) {
               </div>
             ) : (
               <form onSubmit={handleBulkAssign}>
+                <div className="mb-4">
+                  <input
+                    type="text"
+                    placeholder="Search users..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
                 <div className="space-y-2 mb-4 max-h-96 overflow-y-auto">
-                  {allUsers.map((u) => {
-                    const alreadyAssigned = companyUsers.some((cu) => cu.users?.user_id === u.user_id);
-                    return (
-                      <label
-                        key={u.user_id}
-                        className={`flex items-center p-3 border rounded-md cursor-pointer hover:bg-gray-50 ${
-                          alreadyAssigned ? 'opacity-50' : ''
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedUsers.includes(u.user_id)}
-                          onChange={() => toggleUserSelection(u.user_id)}
-                          disabled={alreadyAssigned}
-                          className="mr-3"
-                        />
-                        <div>
-                          <p className="font-medium">{u.name}</p>
-                          <p className="text-sm text-gray-600">{u.email}</p>
-                          <span className="text-xs px-2 py-1 bg-gray-100 rounded">{u.role}</span>
-                          {alreadyAssigned && (
-                            <span className="ml-2 text-xs text-green-600">Already assigned</span>
-                          )}
-                        </div>
-                      </label>
-                    );
-                  })}
+                  {allUsers
+                    .filter(
+                      (u) =>
+                        u.name
+                          ?.toLowerCase()
+                          .includes(searchTerm.toLowerCase()) ||
+                        u.email
+                          ?.toLowerCase()
+                          .includes(searchTerm.toLowerCase())
+                    )
+                    .map((u) => {
+                      const alreadyAssigned = companyUsers.some(
+                        (cu) => cu.users?.user_id === u.user_id
+                      );
+                      return (
+                        <label
+                          key={u.user_id}
+                          className={`flex items-center p-3 border rounded-md cursor-pointer hover:bg-gray-50 ${
+                            alreadyAssigned ? 'opacity-50' : ''
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedUsers.includes(u.user_id)}
+                            onChange={() => toggleUserSelection(u.user_id)}
+                            disabled={alreadyAssigned}
+                            className="mr-3"
+                          />
+                          <div>
+                            <p className="font-medium">{u.name}</p>
+                            <p className="text-sm text-gray-600">{u.email}</p>
+                            <span className="text-xs px-2 py-1 bg-gray-100 rounded">
+                              {u.role}
+                            </span>
+                            {alreadyAssigned && (
+                              <span className="ml-2 text-xs text-green-600">
+                                Already assigned
+                              </span>
+                            )}
+                          </div>
+                        </label>
+                      );
+                    })}
                 </div>
 
                 <div className="flex gap-2 justify-end">
@@ -367,6 +404,7 @@ export default function CompanyDetailPage({ params }) {
                     onClick={() => {
                       setShowAssignModal(false);
                       setSelectedUsers([]);
+                      setSearchTerm('');
                     }}
                     className="px-4 py-2 border rounded-md hover:bg-gray-50"
                   >
