@@ -8,7 +8,6 @@ import {
   createCompanyAction,
   getCompaniesAction,
   updateCompanyAction,
-  deleteCompanyAction,
   getCompanyUsersAction,
   assignUserToCompanyAction,
   removeUserFromCompanyAction,
@@ -111,25 +110,6 @@ export default function CompanyManagement({ allUsers }) {
     } catch (error) {
       console.error(error);
       toast.error(t('admin.company.errorCreate'));
-    }
-  };
-
-  const handleDeleteCompany = async (companyId) => {
-    if (!confirm(t('admin.company.deleteConfirm'))) return;
-
-    try {
-      const token = await user.getIdToken();
-      const result = await deleteCompanyAction(token, companyId);
-
-      if (result.success) {
-        toast.success(t('admin.company.successDelete'));
-        setCompanies(companies.filter((c) => c.company_id !== companyId));
-      } else {
-        toast.error(result.error || t('admin.company.errorDelete'));
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error(t('admin.company.errorDelete'));
     }
   };
 
@@ -262,18 +242,9 @@ export default function CompanyManagement({ allUsers }) {
                       `/admin-dashboard/company/${company.company_id}`
                     );
                   }}
-                  className="flex-1 text-sm font-medium bg-white border border-indigo-200 text-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-50 transition-colors shadow-sm"
+                  className="w-full text-sm font-medium bg-white border border-indigo-200 text-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-50 transition-colors shadow-sm"
                 >
                   {t('admin.company.view')}
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteCompany(company.company_id);
-                  }}
-                  className="text-sm font-medium bg-red-50 text-red-600 px-4 py-2 rounded-lg hover:bg-red-100 transition-colors border border-red-200"
-                >
-                  {t('admin.company.delete')}
                 </button>
               </div>
             </div>
