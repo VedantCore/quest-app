@@ -533,167 +533,15 @@ export default function Profile({ userId, onStatsUpdate }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {[
-          {
-            label: t('user.profile.totalEarned'),
-            value: totalPoints,
-            icon: (
-              <svg
-                className="w-6 h-6 text-indigo-600"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            ),
-            color: 'blue',
-          },
-          {
-            label: t('user.profile.completed'),
-            value: pointsHistory.length,
-            icon: (
-              <svg
-                className="w-6 h-6 text-indigo-600"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-            ),
-            color: 'green',
-          },
-          {
-            label: t('user.profile.average'),
-            value:
-              pointsHistory.length > 0
-                ? Math.round(totalPoints / pointsHistory.length)
-                : 0,
-            icon: (
-              <svg
-                className="w-6 h-6 text-purple-600"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-                />
-              </svg>
-            ),
-            color: 'purple',
-          },
-        ].map((stat, i) => (
-          <div
-            key={i}
-            className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow"
-          >
-            <div className="flex items-center gap-4">
-              <div
-                className={`w-12 h-12 bg-${stat.color}-50 rounded-xl flex items-center justify-center`}
-              >
-                {stat.icon}
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">
-                  {stat.label}
-                </p>
-                <p className="text-3xl font-bold text-indigo-600">
-                  {stat.value}
-                </p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-5 border-b border-gray-100">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-            <h3 className="text-lg font-bold text-slate-900">
-              {t('user.profile.pointsHistory')}
-            </h3>
-            <div className="flex gap-2 flex-wrap">
-              {['all', 'thisWeek', 'thisMonth', 'custom'].map((filter) => (
-                <button
-                  key={filter}
-                  onClick={() => setHistoryFilter(filter)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    historyFilter === filter
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  {filter === 'all'
-                    ? t('user.profile.allTime')
-                    : filter === 'thisWeek'
-                    ? t('user.profile.thisWeek')
-                    : filter === 'thisMonth'
-                    ? t('user.profile.thisMonth')
-                    : t('user.profile.customRange')}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Custom Date Range Inputs */}
-          {historyFilter === 'custom' && (
-            <div className="flex flex-wrap gap-3 items-end pt-3 border-t border-gray-100">
-              <div className="flex-1 min-w-[150px]">
-                <label className="block text-xs font-medium text-gray-500 mb-1">
-                  {t('admin.stats.fromDate')}
-                </label>
-                <input
-                  type="date"
-                  value={customDateFrom}
-                  onChange={(e) => setCustomDateFrom(e.target.value)}
-                  className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                />
-              </div>
-              <div className="flex-1 min-w-[150px]">
-                <label className="block text-xs font-medium text-gray-500 mb-1">
-                  {t('admin.stats.toDate')}
-                </label>
-                <input
-                  type="date"
-                  value={customDateTo}
-                  onChange={(e) => setCustomDateTo(e.target.value)}
-                  className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                />
-              </div>
-              <button
-                onClick={() => {
-                  setCustomDateFrom('');
-                  setCustomDateTo('');
-                }}
-                className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-200 transition-colors"
-              >
-                {t('user.profile.clear')}
-              </button>
-            </div>
-          )}
-        </div>
-        <div className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
-          {Object.keys(groupedHistory).length === 0 ? (
-            <div className="p-12 text-center">
-              <div className="flex justify-center mb-3">
+      {userInfo.role === 'user' && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[
+            {
+              label: t('user.profile.totalEarned'),
+              value: totalPoints,
+              icon: (
                 <svg
-                  className="w-12 h-12 text-gray-300"
+                  className="w-6 h-6 text-indigo-600"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -701,27 +549,217 @@ export default function Profile({ userId, onStatsUpdate }) {
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth={1}
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                    strokeWidth={2}
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-              </div>
-              <p className="text-gray-500">{t('user.profile.noActivity')}</p>
-            </div>
-          ) : (
-            Object.values(groupedHistory).map((group) => (
-              <div
-                key={group.taskId}
-                className="border-b border-gray-100 last:border-0"
-              >
-                <div
-                  onClick={() => toggleTask(group.taskId)}
-                  className="px-6 py-4 hover:bg-gray-50 transition-colors flex items-center justify-between cursor-pointer"
+              ),
+              color: 'blue',
+            },
+            {
+              label: t('user.profile.completed'),
+              value: pointsHistory.length,
+              icon: (
+                <svg
+                  className="w-6 h-6 text-indigo-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              ),
+              color: 'green',
+            },
+            {
+              label: t('user.profile.average'),
+              value:
+                pointsHistory.length > 0
+                  ? Math.round(totalPoints / pointsHistory.length)
+                  : 0,
+              icon: (
+                <svg
+                  className="w-6 h-6 text-purple-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                  />
+                </svg>
+              ),
+              color: 'purple',
+            },
+          ].map((stat, i) => (
+            <div
+              key={i}
+              className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className="flex items-center gap-4">
+                <div
+                  className={`w-12 h-12 bg-${stat.color}-50 rounded-xl flex items-center justify-center`}
+                >
+                  {stat.icon}
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+                    {stat.label}
+                  </p>
+                  <p className="text-3xl font-bold text-indigo-600">
+                    {stat.value}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {userInfo.role === 'user' && (
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="px-6 py-5 border-b border-gray-100">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+              <h3 className="text-lg font-bold text-slate-900">
+                {t('user.profile.pointsHistory')}
+              </h3>
+              <div className="flex gap-2 flex-wrap">
+                {['all', 'thisWeek', 'thisMonth', 'custom'].map((filter) => (
+                  <button
+                    key={filter}
+                    onClick={() => setHistoryFilter(filter)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                      historyFilter === filter
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {filter === 'all'
+                      ? t('user.profile.allTime')
+                      : filter === 'thisWeek'
+                      ? t('user.profile.thisWeek')
+                      : filter === 'thisMonth'
+                      ? t('user.profile.thisMonth')
+                      : t('user.profile.customRange')}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Custom Date Range Inputs */}
+            {historyFilter === 'custom' && (
+              <div className="flex flex-wrap gap-3 items-end pt-3 border-t border-gray-100">
+                <div className="flex-1 min-w-[150px]">
+                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                    {t('admin.stats.fromDate')}
+                  </label>
+                  <input
+                    type="date"
+                    value={customDateFrom}
+                    onChange={(e) => setCustomDateFrom(e.target.value)}
+                    className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                </div>
+                <div className="flex-1 min-w-[150px]">
+                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                    {t('admin.stats.toDate')}
+                  </label>
+                  <input
+                    type="date"
+                    value={customDateTo}
+                    onChange={(e) => setCustomDateTo(e.target.value)}
+                    className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                </div>
+                <button
+                  onClick={() => {
+                    setCustomDateFrom('');
+                    setCustomDateTo('');
+                  }}
+                  className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-200 transition-colors"
+                >
+                  {t('user.profile.clear')}
+                </button>
+              </div>
+            )}
+          </div>
+          <div className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
+            {Object.keys(groupedHistory).length === 0 ? (
+              <div className="p-12 text-center">
+                <div className="flex justify-center mb-3">
+                  <svg
+                    className="w-12 h-12 text-gray-300"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1}
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                    />
+                  </svg>
+                </div>
+                <p className="text-gray-500">{t('user.profile.noActivity')}</p>
+              </div>
+            ) : (
+              Object.values(groupedHistory).map((group) => (
+                <div
+                  key={group.taskId}
+                  className="border-b border-gray-100 last:border-0"
+                >
+                  <div
+                    onClick={() => toggleTask(group.taskId)}
+                    className="px-6 py-4 hover:bg-gray-50 transition-colors flex items-center justify-between cursor-pointer"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                          />
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-slate-900 text-sm">
+                          {group.title}
+                        </h4>
+                        <p className="text-xs text-gray-500">
+                          {group.items.length}{' '}
+                          {group.items.length !== 1
+                            ? t('user.profile.steps')
+                            : t('user.profile.step')}{' '}
+                          {t('user.profile.completed')}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full text-sm border border-indigo-100">
+                        +{group.totalPoints} {t('common.pts')}
+                      </div>
                       <svg
-                        className="w-5 h-5"
+                        className={`w-5 h-5 text-gray-400 transition-transform ${
+                          expandedTasks[group.taskId]
+                            ? 'transform rotate-180'
+                            : ''
+                        }`}
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -730,79 +768,45 @@ export default function Profile({ userId, onStatsUpdate }) {
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           strokeWidth={2}
-                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                          d="M19 9l-7 7-7-7"
                         />
                       </svg>
                     </div>
-                    <div>
-                      <h4 className="font-semibold text-slate-900 text-sm">
-                        {group.title}
-                      </h4>
-                      <p className="text-xs text-gray-500">
-                        {group.items.length}{' '}
-                        {group.items.length !== 1
-                          ? t('user.profile.steps')
-                          : t('user.profile.step')}{' '}
-                        {t('user.profile.completed')}
-                      </p>
-                    </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div className="font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full text-sm border border-indigo-100">
-                      +{group.totalPoints} {t('common.pts')}
-                    </div>
-                    <svg
-                      className={`w-5 h-5 text-gray-400 transition-transform ${
-                        expandedTasks[group.taskId]
-                          ? 'transform rotate-180'
-                          : ''
-                      }`}
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </div>
-                </div>
 
-                {/* Expanded Steps */}
-                {expandedTasks[group.taskId] && (
-                  <div className="bg-gray-50 px-6 py-2 border-t border-gray-100">
-                    {group.items.map((item) => (
-                      <div
-                        key={item.history_id}
-                        className="py-3 flex items-center justify-between border-b border-gray-200 last:border-0"
-                      >
-                        <div className="flex items-center gap-3 pl-14">
-                          <div className="w-2 h-2 rounded-full bg-gray-300"></div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-700">
-                              {item.step?.title ||
-                                t('user.profile.taskCompleted')}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {formatDate(item.earned_at)}
-                            </p>
+                  {/* Expanded Steps */}
+                  {expandedTasks[group.taskId] && (
+                    <div className="bg-gray-50 px-6 py-2 border-t border-gray-100">
+                      {group.items.map((item) => (
+                        <div
+                          key={item.history_id}
+                          className="py-3 flex items-center justify-between border-b border-gray-200 last:border-0"
+                        >
+                          <div className="flex items-center gap-3 pl-14">
+                            <div className="w-2 h-2 rounded-full bg-gray-300"></div>
+                            <div>
+                              <p className="text-sm font-medium text-gray-700">
+                                {item.step?.title ||
+                                  t('user.profile.taskCompleted')}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {formatDate(item.earned_at)}
+                              </p>
+                            </div>
                           </div>
+                          <span className="text-sm font-semibold text-gray-600">
+                            +{item.points_earned} {t('common.pts')}
+                          </span>
                         </div>
-                        <span className="text-sm font-semibold text-gray-600">
-                          +{item.points_earned} {t('common.pts')}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))
-          )}
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
