@@ -1829,5 +1829,15 @@
     "submitForReview": "提交审核",
     "resubmit": "重新提交",
     "noSteps": "此任务未定义任何步骤。"
+  },
+  "notifications": {
+    "title": "通知",
+    "markAllRead": "全部标记为已读",
+    "noNotifications": "暂无通知",
+    "viewAll": "查看所有通知",
+    "justNow": "刚刚",
+    "minutesAgo": "{count}分钟前",
+    "hoursAgo": "{count}小时前",
+    "daysAgo": "{count}天前"
   }
 }

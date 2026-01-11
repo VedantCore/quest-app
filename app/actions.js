@@ -245,14 +245,32 @@ export async function joinTask(taskId, userId) {
  */
 export async function submitStep(stepId, userId) {
   try {
-    // First, get the task_id for this step
+    // First, get the task_id, step title, and task details
     const { data: step, error: stepError } = await supabase
       .from('task_steps')
-      .select('task_id')
+      .select('task_id, title')
       .eq('step_id', stepId)
       .single();
 
     if (stepError) throw stepError;
+
+    // Get task details including assigned manager
+    const { data: task, error: taskError } = await supabase
+      .from('tasks')
+      .select('title, assigned_manager_id')
+      .eq('task_id', step.task_id)
+      .single();
+
+    if (taskError) throw taskError;
+
+    // Get user name for notification
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('name, email')
+      .eq('user_id', userId)
+      .single();
+
+    if (userError) throw userError;
 
     // Find the user's current active enrollment for this task
     const { data: activeEnrollment, error: enrollmentError } = await supabase
@@ -278,6 +296,8 @@ export async function submitStep(stepId, userId) {
       .eq('user_id', userId)
       .gte('submitted_at', activeEnrollment.joined_at)
       .single();
+
+    let submissionId = null;
 
     if (existingSubmission) {
       // If already approved, don't allow resubmission
@@ -306,15 +326,38 @@ export async function submitStep(stepId, userId) {
         .eq('submission_id', existingSubmission.submission_id);
 
       if (error) throw error;
+      submissionId = existingSubmission.submission_id;
     } else {
       // Create new submission
-      const { error } = await supabase.from('step_submissions').insert({
-        step_id: stepId,
-        user_id: userId,
-        status: 'PENDING',
-      });
+      const { data: newSubmission, error } = await supabase
+        .from('step_submissions')
+        .insert({
+          step_id: stepId,
+          user_id: userId,
+          status: 'PENDING',
+        })
+        .select()
+        .single();
 
       if (error) throw error;
+      submissionId = newSubmission.submission_id;
+    }
+
+    // Create notification for the assigned manager
+    if (task.assigned_manager_id && submissionId) {
+      const { createNotification } = await import('./notification-actions');
+      await createNotification({
+        managerId: task.assigned_manager_id,
+        taskId: step.task_id,
+        userId: userId,
+        stepId: stepId,
+        submissionId: submissionId,
+        type: 'STEP_SUBMITTED',
+        title: 'New Step Submission',
+        message: `${user.name || user.email} submitted "${
+          step.title
+        }" for review in task "${task.title}"`,
+      });
     }
 
     revalidatePath('/user-dashboard');

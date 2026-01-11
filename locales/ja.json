@@ -1829,5 +1829,15 @@
     "submitForReview": "審査に提出",
     "resubmit": "再提出",
     "noSteps": "このクエストにはステップが定義されていません。"
+  },
+  "notifications": {
+    "title": "通知",
+    "markAllRead": "すべて既読にする",
+    "noNotifications": "通知はまだありません",
+    "viewAll": "すべての通知を表示",
+    "justNow": "たった今",
+    "minutesAgo": "{count}分前",
+    "hoursAgo": "{count}時間前",
+    "daysAgo": "{count}日前"
   }
 }

@@ -9,6 +9,7 @@ import { auth } from '../lib/firebase';
 import { useRouter } from 'next/navigation';
 import LanguageSwitcher from './LanguageSwitcher';
 import { RankBadge } from '../lib/rankUtils';
+import NotificationDropdown from './NotificationDropdown';
 
 export default function Navbar({ onOpenLogin, onOpenSignup }) {
   const { user, userRole, userData, loading } = useAuth();
@@ -146,6 +147,9 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
           {!loading && (
             <>
               <LanguageSwitcher />
+              {user && userRole === 'manager' && (
+                <NotificationDropdown managerId={user.uid} />
+              )}
               {user ? (
                 <div className="relative" ref={profileDropdownRef}>
                   <button

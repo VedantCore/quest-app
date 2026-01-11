@@ -1829,5 +1829,15 @@
     "submitForReview": "Kirim untuk Ditinjau",
     "resubmit": "Kirim Ulang",
     "noSteps": "Tidak ada langkah yang ditentukan untuk quest ini."
+  },
+  "notifications": {
+    "title": "Notifikasi",
+    "markAllRead": "Tandai semua sebagai sudah dibaca",
+    "noNotifications": "Belum ada notifikasi",
+    "viewAll": "Lihat semua notifikasi",
+    "justNow": "Baru saja",
+    "minutesAgo": "{count}m yang lalu",
+    "hoursAgo": "{count}j yang lalu",
+    "daysAgo": "{count}h yang lalu"
   }
 }
