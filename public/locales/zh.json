@@ -1854,5 +1854,15 @@
     "submitForReview": "Submit for Review",
     "resubmit": "Resubmit",
     "noSteps": "No steps defined for this quest."
+  },
+  "notifications": {
+    "title": "通知",
+    "markAllRead": "全部标记为已读",
+    "noNotifications": "暂无通知",
+    "viewAll": "查看所有通知",
+    "justNow": "刚刚",
+    "minutesAgo": "{count}分钟前",
+    "hoursAgo": "{count}小时前",
+    "daysAgo": "{count}天前"
   }
 }

@@ -1854,5 +1854,15 @@
     "submitForReview": "Submit for Review",
     "resubmit": "Resubmit",
     "noSteps": "No steps defined for this quest."
+  },
+  "notifications": {
+    "title": "通知",
+    "markAllRead": "すべて既読にする",
+    "noNotifications": "通知はまだありません",
+    "viewAll": "すべての通知を表示",
+    "justNow": "たった今",
+    "minutesAgo": "{count}分前",
+    "hoursAgo": "{count}時間前",
+    "daysAgo": "{count}日前"
   }
 }

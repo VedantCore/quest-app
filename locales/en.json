@@ -1764,6 +1764,8 @@
     "justNow": "Just now",
     "minutesAgo": "{count}m ago",
     "hoursAgo": "{count}h ago",
-    "daysAgo": "{count}d ago"
+    "daysAgo": "{count}d ago",
+    "stepSubmittedTitle": "New Step Submission",
+    "stepSubmittedMessage": "{userName} submitted \"{stepTitle}\" for review in task \"{taskTitle}\""
   }
 }

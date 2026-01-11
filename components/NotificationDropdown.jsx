@@ -226,14 +226,14 @@ export default function NotificationDropdown({ managerId }) {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <p className="font-medium text-sm text-gray-900 line-clamp-1">
-                          {notification.title}
+                          {t(notification.title)}
                         </p>
                         {!notification.is_read && (
                           <span className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0 mt-1"></span>
                         )}
                       </div>
                       <p className="text-sm text-gray-600 line-clamp-2 mt-1">
-                        {notification.message}
+                        {t(notification.message, notification.metadata || {})}
                       </p>
                       <p className="text-xs text-gray-400 mt-1">
                         {getTimeAgo(notification.created_at)}

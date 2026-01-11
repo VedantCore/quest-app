@@ -14,6 +14,7 @@ export async function createNotification({
   type,
   title,
   message,
+  metadata = {},
 }) {
   try {
     const { data, error } = await supabase
@@ -27,6 +28,7 @@ export async function createNotification({
         type,
         title,
         message,
+        metadata,
         is_read: false,
       })
       .select()

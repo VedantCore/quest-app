@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS public.notifications (
   type VARCHAR(50) NOT NULL, -- 'STEP_SUBMITTED', 'TASK_UPDATED', etc.
   title VARCHAR(255) NOT NULL,
   message TEXT NOT NULL,
+  metadata JSONB DEFAULT '{}'::jsonb,
   is_read BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   read_at TIMESTAMP WITH TIME ZONE
