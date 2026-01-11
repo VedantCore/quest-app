@@ -48,7 +48,10 @@
       "contactAdmin": "请联系管理员以分配到公司。",
       "viewTasks": "查看任务",
       "noDescription": "未提供描述",
-      "managerFallback": "经理"
+      "managerFallback": "经理",
+      "participateInTasks": "参与任务",
+      "browseAndJoinTasks": "浏览可用任务并作为参与者加入",
+      "browseQuests": "浏览任务"
     },
     "company": {
       "breadcrumb": "经理仪表板",

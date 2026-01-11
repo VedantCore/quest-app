@@ -48,7 +48,10 @@
       "contactAdmin": "会社に割り当てられるには、管理者に連絡してください。",
       "viewTasks": "タスクを表示",
       "noDescription": "説明はありません",
-      "managerFallback": "マネージャー"
+      "managerFallback": "マネージャー",
+      "participateInTasks": "クエストに参加",
+      "browseAndJoinTasks": "利用可能なクエストを閲覧して参加者として参加する",
+      "browseQuests": "クエストを閲覧"
     },
     "company": {
       "breadcrumb": "マネージャーダッシュボード",

@@ -275,19 +275,23 @@ export default function TaskDetailsPage() {
               </div>
             </div>
 
-            {!task.isEnrolled && userRole === 'user' && !task.isExpired && (
-              <button
-                onClick={handleJoin}
-                className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-md hover:shadow-lg active:scale-95"
-              >
-                {t('userDashboard.taskDetails.joinQuest')}
-              </button>
-            )}
-            {!task.isEnrolled && userRole === 'user' && task.isExpired && (
-              <div className="px-6 py-3 bg-red-50 text-red-700 font-bold rounded-xl border-2 border-red-200">
-                {t('userDashboard.taskDetails.questExpired')}
-              </div>
-            )}
+            {!task.isEnrolled &&
+              (userRole === 'user' || userRole === 'manager') &&
+              !task.isExpired && (
+                <button
+                  onClick={handleJoin}
+                  className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-md hover:shadow-lg active:scale-95"
+                >
+                  {t('userDashboard.taskDetails.joinQuest')}
+                </button>
+              )}
+            {!task.isEnrolled &&
+              (userRole === 'user' || userRole === 'manager') &&
+              task.isExpired && (
+                <div className="px-6 py-3 bg-red-50 text-red-700 font-bold rounded-xl border-2 border-red-200">
+                  {t('userDashboard.taskDetails.questExpired')}
+                </div>
+              )}
           </div>
 
           <div className="prose max-w-none text-gray-600 bg-gray-50/50 p-6 rounded-xl border border-gray-100">

@@ -12,7 +12,7 @@ export default function TasksPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && (!user || userRole === 'admin' || userRole === 'manager')) {
+    if (!loading && (!user || userRole === 'admin')) {
       router.push('/');
     }
   }, [user, userRole, loading, router]);
@@ -30,7 +30,7 @@ export default function TasksPage() {
     );
   }
 
-  if (!user || userRole === 'admin' || userRole === 'manager') {
+  if (!user || userRole === 'admin') {
     return null; // Redirect handled in useEffect
   }
 

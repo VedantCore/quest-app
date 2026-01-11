@@ -48,7 +48,10 @@
       "contactAdmin": "Contact an admin to get assigned to a company.",
       "viewTasks": "View Tasks",
       "noDescription": "No description provided",
-      "managerFallback": "Manager"
+      "managerFallback": "Manager",
+      "participateInTasks": "Participate in Quests",
+      "browseAndJoinTasks": "Browse available quests and join as a participant",
+      "browseQuests": "Browse Quests"
     },
     "company": {
       "breadcrumb": "Manager Dashboard",

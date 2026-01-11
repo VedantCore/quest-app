@@ -48,7 +48,10 @@
       "contactAdmin": "Hubungi admin untuk ditugaskan ke perusahaan.",
       "viewTasks": "Lihat Tugas",
       "noDescription": "Tidak ada deskripsi yang diberikan",
-      "managerFallback": "Manajer"
+      "managerFallback": "Manajer",
+      "participateInTasks": "Berpartisipasi dalam Quest",
+      "browseAndJoinTasks": "Jelajahi quest yang tersedia dan bergabung sebagai peserta",
+      "browseQuests": "Jelajahi Quest"
     },
     "company": {
       "breadcrumb": "Dasbor Manajer",
