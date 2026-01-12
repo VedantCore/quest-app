@@ -79,7 +79,7 @@
       "description": "Description",
       "details": "Details",
       "level": "Level",
-      "questSteps": "Quest Steps ({count})",
+      "questSteps": "Quest Steps",
       "noSteps": "No steps defined for this quest.",
       "enrolledUsers": "Enrolled Users",
       "noUsers": "No users have joined this task yet.",
