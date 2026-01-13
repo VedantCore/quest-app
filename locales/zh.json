@@ -70,7 +70,14 @@
       "errorLoadMyTasks": "加载我的任务失败",
       "errorLoadAllTasks": "加载所有任务失败",
       "errorLoadingData": "加载数据错误",
-      "managerFallback": "经理"
+      "managerFallback": "经理",
+      "leaderboard": "排行榜",
+      "rank": "排名",
+      "user": "用户",
+      "points": "积分",
+      "level": "等级",
+      "noUsersFound": "该公司未发现任何用户。",
+      "unknownUser": "未知用户"
     },
     "task": {
       "manageParticipants": "管理参与者和提交内容",

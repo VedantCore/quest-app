@@ -70,7 +70,14 @@
       "errorLoadMyTasks": "Gagal memuat tugas saya",
       "errorLoadAllTasks": "Gagal memuat semua tugas",
       "errorLoadingData": "Gagal memuat data",
-      "managerFallback": "Manajer"
+      "managerFallback": "Manajer",
+      "leaderboard": "Papan Peringkat",
+      "rank": "Peringkat",
+      "user": "Pengguna",
+      "points": "Poin",
+      "level": "Tingkat",
+      "noUsersFound": "Tidak ada pengguna ditemukan di perusahaan ini.",
+      "unknownUser": "Pengguna Tidak Dikenal"
     },
     "task": {
       "manageParticipants": "Kelola peserta dan pengiriman",

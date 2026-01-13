@@ -73,7 +73,14 @@
       "errorLoadMyTasks": "Failed to load my tasks",
       "errorLoadAllTasks": "Failed to load all tasks",
       "errorLoadingData": "Error loading data",
-      "managerFallback": "Manager"
+      "managerFallback": "Manager",
+      "leaderboard": "Leaderboard",
+      "rank": "Rank",
+      "user": "User",
+      "points": "Points",
+      "level": "Level",
+      "noUsersFound": "No users found in this company.",
+      "unknownUser": "Unknown User"
     },
     "task": {
       "steps": "Steps",

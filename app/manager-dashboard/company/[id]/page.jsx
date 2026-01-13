@@ -7,6 +7,7 @@ import { getManagerTasks, getAllTasks, getUserCompanies } from '@/app/actions';
 import toast from 'react-hot-toast';
 import Navbar from '@/components/Navbar';
 import ManagerTaskDetailsModal from '@/components/manager/ManagerTaskDetailsModal';
+import CompanyLeaderboard from '@/components/manager/CompanyLeaderboard';
 import { useLocale } from '@/context/LocaleContext';
 
 export default function CompanyTasksPage({ params }) {
@@ -185,6 +186,29 @@ export default function CompanyTasksPage({ params }) {
                 />
               </svg>
               {t('manager.company.allTasks')}
+            </button>
+            <button
+              onClick={() => setActiveTab('leaderboard')}
+              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2 ${
+                activeTab === 'leaderboard'
+                  ? 'border-indigo-600 text-indigo-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                />
+              </svg>
+              {t('manager.company.leaderboard')}
             </button>
           </nav>
         </div>
@@ -371,6 +395,11 @@ export default function CompanyTasksPage({ params }) {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Leaderboard Tab */}
+        {activeTab === 'leaderboard' && (
+          <CompanyLeaderboard companyId={companyId} />
         )}
       </div>
     </div>

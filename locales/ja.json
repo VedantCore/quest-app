@@ -70,7 +70,14 @@
       "errorLoadMyTasks": "自分のタスクの読み込みに失敗しました",
       "errorLoadAllTasks": "すべてのタスクの読み込みに失敗しました",
       "errorLoadingData": "データの読み込みエラー",
-      "managerFallback": "マネージャー"
+      "managerFallback": "マネージャー",
+      "leaderboard": "リーダーボード",
+      "rank": "ランク",
+      "user": "ユーザー",
+      "points": "ポイント",
+      "level": "レベル",
+      "noUsersFound": "この会社にユーザーは見つかりませんでした。",
+      "unknownUser": "不明なユーザー"
     },
     "task": {
       "manageParticipants": "参加者と提出物の管理",
