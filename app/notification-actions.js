@@ -1,5 +1,5 @@
 'use server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 import { revalidatePath } from 'next/cache';
 
 /**
@@ -17,7 +17,7 @@ export async function createNotification({
   metadata = {},
 }) {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('notifications')
       .insert({
         manager_id: managerId,
@@ -48,7 +48,7 @@ export async function createNotification({
  */
 export async function getManagerNotifications(managerId, limit = 50) {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('notifications')
       .select(
         `
@@ -76,7 +76,7 @@ export async function getManagerNotifications(managerId, limit = 50) {
  */
 export async function getUnreadNotificationCount(managerId) {
   try {
-    const { count, error } = await supabase
+    const { count, error } = await supabaseAdmin
       .from('notifications')
       .select('*', { count: 'exact', head: true })
       .eq('manager_id', managerId)
@@ -96,7 +96,7 @@ export async function getUnreadNotificationCount(managerId) {
  */
 export async function markNotificationAsRead(notificationId) {
   try {
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('notifications')
       .update({
         is_read: true,
@@ -119,7 +119,7 @@ export async function markNotificationAsRead(notificationId) {
  */
 export async function markAllNotificationsAsRead(managerId) {
   try {
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('notifications')
       .update({
         is_read: true,
@@ -143,7 +143,7 @@ export async function markAllNotificationsAsRead(managerId) {
  */
 export async function deleteNotification(notificationId) {
   try {
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('notifications')
       .delete()
       .eq('notification_id', notificationId);
@@ -163,7 +163,7 @@ export async function deleteNotification(notificationId) {
  */
 export async function deleteReadNotifications(managerId) {
   try {
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('notifications')
       .delete()
       .eq('manager_id', managerId)
