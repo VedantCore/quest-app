@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { getUserCompanies } from '@/app/actions';
 import Navbar from '@/components/Navbar';
 import { useLocale } from '@/context/LocaleContext';
+import { RankBadge } from '@/lib/rankUtils';
 
 export default function ManagerDashboard() {
   const { t } = useLocale();
@@ -51,19 +52,24 @@ export default function ManagerDashboard() {
 
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {t('manager.dashboard.title')}
-          </h1>
-          <p className="text-sm text-gray-500">
-            {t('manager.dashboard.welcome', {
-              name:
-                userData?.name ||
-                user?.displayName ||
-                user?.email ||
-                t('manager.dashboard.managerFallback'),
-            })}
-          </p>
+        <div className="max-w-7xl mx-auto px-6 py-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              {t('manager.dashboard.title')}
+            </h1>
+            <p className="text-sm text-gray-500">
+              {t('manager.dashboard.welcome', {
+                name:
+                  userData?.name ||
+                  user?.displayName ||
+                  user?.email ||
+                  t('manager.dashboard.managerFallback'),
+              })}
+            </p>
+          </div>
+          <div className="flex-shrink-0">
+            <RankBadge points={userData?.total_points} role={userRole} />
+          </div>
         </div>
       </div>
 

@@ -445,7 +445,7 @@ export default function Profile({ userId, onStatsUpdate }) {
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
                   {t('common.' + userInfo.role)}
                 </span>
-                {userInfo.role === 'user' &&
+                {(userInfo.role === 'user' || userInfo.role === 'manager') &&
                   (() => {
                     const rank = getRank(totalPoints);
                     return (
