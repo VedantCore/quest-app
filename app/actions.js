@@ -353,8 +353,10 @@ export async function submitStep(stepId, userId) {
         stepId: stepId,
         submissionId: submissionId,
         type: 'STEP_SUBMITTED',
-        title: 'notifications.stepSubmittedTitle',
-        message: 'notifications.stepSubmittedMessage',
+        title: 'Step Submitted for Review',
+        message: `${user.name || user.email} submitted "${
+          step.title
+        }" for review in "${task.title}"`,
         metadata: {
           userName: user.name || user.email,
           stepTitle: step.title,
