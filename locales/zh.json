@@ -1552,7 +1552,13 @@
     "inactiveUsers": "不活跃用户",
     "admins": "管理员",
     "managers": "经理",
-    "users": "用户"
+    "users": "用户",
+    "editPoints": "编辑积分",
+    "currentPoints": "当前积分",
+    "newPoints": "新积分",
+    "enterPoints": "输入新积分值",
+    "pointsUpdateSuccess": "用户积分更新成功",
+    "pointsUpdateFailed": "更新用户积分失败"
   },
   "taskManagement": {
     "title": "任务管理",

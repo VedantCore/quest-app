@@ -1552,7 +1552,13 @@
     "inactiveUsers": "Pengguna Tidak Aktif",
     "admins": "Admin",
     "managers": "Manajer",
-    "users": "Pengguna"
+    "users": "Pengguna",
+    "editPoints": "Edit Poin",
+    "currentPoints": "Poin Saat Ini",
+    "newPoints": "Poin Baru",
+    "enterPoints": "Masukkan nilai poin baru",
+    "pointsUpdateSuccess": "Poin pengguna berhasil diperbarui",
+    "pointsUpdateFailed": "Gagal memperbarui poin pengguna"
   },
   "taskManagement": {
     "title": "Manajemen Tugas",

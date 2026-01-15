@@ -2,13 +2,15 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { deleteUser } from '@/app/actions';
+import { deleteUser, updateUserPoints } from '@/app/actions';
 import { toast } from 'react-hot-toast';
 import { useLocale } from '../../context/LocaleContext';
 import { RankBadge } from '@/lib/rankUtils';
+import { useAuth } from '@/context/AuthContext';
 
 export default function UserManagement() {
   const { t } = useLocale();
+  const { user: currentUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -16,6 +18,11 @@ export default function UserManagement() {
   const [sortConfig, setSortConfig] = useState({
     key: 'created_at',
     direction: 'desc',
+  });
+  const [editPointsModal, setEditPointsModal] = useState({
+    isOpen: false,
+    user: null,
+    newPoints: '',
   });
 
   // Pagination
@@ -72,6 +79,37 @@ export default function UserManagement() {
       }
     } catch (error) {
       console.error('Error deleting user:', error);
+      toast.error(t('common.serverError'));
+    }
+  };
+
+  const handleEditPoints = (user) => {
+    setEditPointsModal({
+      isOpen: true,
+      user: user,
+      newPoints: user.total_points || 0,
+    });
+  };
+
+  const handleSavePoints = async () => {
+    if (!editPointsModal.user || !currentUser) return;
+
+    try {
+      const result = await updateUserPoints(
+        editPointsModal.user.user_id,
+        editPointsModal.newPoints,
+        currentUser.uid
+      );
+
+      if (result.success) {
+        toast.success(t('userManagement.pointsUpdateSuccess'));
+        setEditPointsModal({ isOpen: false, user: null, newPoints: '' });
+        fetchUsers();
+      } else {
+        toast.error(result.message || t('userManagement.pointsUpdateFailed'));
+      }
+    } catch (error) {
+      console.error('Error updating points:', error);
       toast.error(t('common.serverError'));
     }
   };
@@ -390,25 +428,46 @@ export default function UserManagement() {
                         : t('common.noData')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <button
-                        onClick={() => handleDeleteUser(user)}
-                        className="text-gray-400 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-lg"
-                        title={t('userManagement.deleteUser')}
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleEditPoints(user)}
+                          className="text-gray-400 hover:text-indigo-500 transition-colors p-2 hover:bg-indigo-50 rounded-lg"
+                          title={t('userManagement.editPoints')}
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                          />
-                        </svg>
-                      </button>
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => handleDeleteUser(user)}
+                          className="text-gray-400 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-lg"
+                          title={t('userManagement.deleteUser')}
+                        >
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                          </svg>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -489,6 +548,118 @@ export default function UserManagement() {
               </svg>
             </button>
           </nav>
+        </div>
+      )}
+
+      {/* Edit Points Modal */}
+      {editPointsModal.isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-900">
+                {t('userManagement.editPoints')}
+              </h3>
+              <button
+                onClick={() =>
+                  setEditPointsModal({
+                    isOpen: false,
+                    user: null,
+                    newPoints: '',
+                  })
+                }
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {editPointsModal.user && (
+              <div className="space-y-4">
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    {editPointsModal.user.avatar_url ? (
+                      <img
+                        src={editPointsModal.user.avatar_url}
+                        alt={editPointsModal.user.name}
+                        className="h-10 w-10 rounded-full object-cover border border-gray-200"
+                      />
+                    ) : (
+                      <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-sm font-medium">
+                        {editPointsModal.user.name?.charAt(0).toUpperCase() ||
+                          'U'}
+                      </div>
+                    )}
+                    <div>
+                      <div className="font-semibold text-gray-900">
+                        {editPointsModal.user.name || t('common.noName')}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {editPointsModal.user.email}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    {t('userManagement.currentPoints')}:{' '}
+                    <span className="font-semibold text-indigo-600">
+                      {editPointsModal.user.total_points || 0} {t('common.pts')}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {t('userManagement.newPoints')}
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={editPointsModal.newPoints}
+                    onChange={(e) =>
+                      setEditPointsModal({
+                        ...editPointsModal,
+                        newPoints: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    placeholder={t('userManagement.enterPoints')}
+                  />
+                </div>
+
+                <div className="flex gap-3 mt-6">
+                  <button
+                    onClick={() =>
+                      setEditPointsModal({
+                        isOpen: false,
+                        user: null,
+                        newPoints: '',
+                      })
+                    }
+                    className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                  >
+                    {t('common.cancel')}
+                  </button>
+                  <button
+                    onClick={handleSavePoints}
+                    className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                  >
+                    {t('common.save')}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

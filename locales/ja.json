@@ -1552,7 +1552,13 @@
     "inactiveUsers": "非アクティブユーザー",
     "admins": "管理者",
     "managers": "マネージャー",
-    "users": "ユーザー"
+    "users": "ユーザー",
+    "editPoints": "ポイント編集",
+    "currentPoints": "現在のポイント",
+    "newPoints": "新しいポイント",
+    "enterPoints": "新しいポイント値を入力",
+    "pointsUpdateSuccess": "ユーザーポイントが正常に更新されました",
+    "pointsUpdateFailed": "ユーザーポイントの更新に失敗しました"
   },
   "taskManagement": {
     "title": "タスク管理",

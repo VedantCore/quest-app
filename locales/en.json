@@ -1478,7 +1478,13 @@
     "managers": "Managers",
     "users": "Users",
     "activeUsers": "Active Users",
-    "inactiveUsers": "Inactive Users"
+    "inactiveUsers": "Inactive Users",
+    "editPoints": "Edit Points",
+    "currentPoints": "Current Points",
+    "newPoints": "New Points",
+    "enterPoints": "Enter new points value",
+    "pointsUpdateSuccess": "User points updated successfully",
+    "pointsUpdateFailed": "Failed to update user points"
   },
   "taskManagement": {
     "title": "Quest Management",

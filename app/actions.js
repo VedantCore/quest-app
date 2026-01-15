@@ -853,3 +853,52 @@ export async function updateUserName(userId, newName) {
     return { success: false, message: 'Failed to update name' };
   }
 }
+
+/**
+ * Admin updates user's total points
+ */
+export async function updateUserPoints(userId, newPoints, adminId) {
+  try {
+    // Verify admin role
+    const { data: admin, error: adminError } = await supabase
+      .from('users')
+      .select('role')
+      .eq('user_id', adminId)
+      .single();
+
+    if (adminError) throw adminError;
+
+    if (!admin || admin.role !== 'admin') {
+      return {
+        success: false,
+        message: 'Unauthorized: Only admins can update user points',
+      };
+    }
+
+    // Validate points
+    const points = parseInt(newPoints);
+    if (isNaN(points) || points < 0) {
+      return {
+        success: false,
+        message: 'Invalid points value. Points must be a non-negative number.',
+      };
+    }
+
+    // Update user points
+    const { error } = await supabase
+      .from('users')
+      .update({ total_points: points })
+      .eq('user_id', userId);
+
+    if (error) throw error;
+
+    revalidatePath('/admin-dashboard');
+    return { success: true, message: 'User points updated successfully' };
+  } catch (error) {
+    console.error('Error updating user points:', error);
+    return {
+      success: false,
+      message: 'Failed to update user points: ' + error.message,
+    };
+  }
+}
