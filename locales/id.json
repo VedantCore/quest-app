@@ -1845,6 +1845,8 @@
     "justNow": "Baru saja",
     "minutesAgo": "{count}m yang lalu",
     "hoursAgo": "{count}j yang lalu",
-    "daysAgo": "{count}h yang lalu"
+    "daysAgo": "{count}h yang lalu",
+    "stepSubmittedTitle": "Langkah Diserahkan",
+    "stepSubmittedMessage": "{userName} mengirimkan langkah untuk {taskTitle}"
   }
 }
