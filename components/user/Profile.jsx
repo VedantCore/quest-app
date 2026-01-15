@@ -307,7 +307,7 @@ export default function Profile({ userId, onStatsUpdate }) {
                       uploading ? 'opacity-50' : 'group-hover:opacity-75'
                     }`}
                   >
-                    {userInfo.name?.charAt(0).toUpperCase()}
+                    {(userInfo.name || userInfo.email)?.charAt(0).toUpperCase()}
                   </div>
                 )}
 
@@ -414,12 +414,12 @@ export default function Profile({ userId, onStatsUpdate }) {
               ) : (
                 <div className="flex items-center gap-2 group/name">
                   <h2 className="text-2xl font-bold text-slate-900">
-                    {userInfo.name}
+                    {userInfo.name || userInfo.email}
                   </h2>
                   {isOwnProfile && (
                     <button
                       onClick={() => {
-                        setNewName(userInfo.name);
+                        setNewName(userInfo.name || userInfo.email);
                         setIsEditingName(true);
                       }}
                       className="opacity-0 group-hover/name:opacity-100 p-1 text-gray-400 hover:text-indigo-600 transition-all"

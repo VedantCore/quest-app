@@ -25,16 +25,23 @@ export const AuthProvider = ({ children }) => {
 
       if (firebaseUser) {
         // Fetch user role and details from Supabase
-        const { data, error } = await supabase
-          .from('users')
-          .select('role, name, avatar_url, total_points')
-          .eq('user_id', firebaseUser.uid)
-          .single();
+        try {
+          const { data, error } = await supabase
+            .from('users')
+            .select('role, name, avatar_url, total_points')
+            .eq('user_id', firebaseUser.uid)
+            .single();
 
-        if (data && !error) {
-          setUserRole(data.role);
-          setUserData(data);
-        } else {
+          if (data && !error) {
+            setUserRole(data.role);
+            setUserData(data);
+          } else {
+            console.error('Error fetching user data:', error);
+            setUserRole(null);
+            setUserData(null);
+          }
+        } catch (err) {
+          console.error('Exception fetching user data:', err);
           setUserRole(null);
           setUserData(null);
         }
