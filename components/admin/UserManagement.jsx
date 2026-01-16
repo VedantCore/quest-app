@@ -41,7 +41,43 @@ export default function UserManagement() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setUsers(data || []);
+
+      // Fetch companies for each user
+      const usersWithCompanies = await Promise.all(
+        (data || []).map(async (user) => {
+          const { data: userCompanies, error: companiesError } = await supabase
+            .from('user_companies')
+            .select(
+              `
+              company_id,
+              companies (
+                company_id,
+                name
+              )
+            `
+            )
+            .eq('user_id', user.user_id);
+
+          if (companiesError) {
+            console.error(
+              'Error fetching companies for user:',
+              user.user_id,
+              companiesError
+            );
+          }
+
+          // Extract companies from the nested structure
+          const companies =
+            userCompanies?.map((uc) => uc.companies).filter(Boolean) || [];
+
+          return {
+            ...user,
+            companies,
+          };
+        })
+      );
+
+      setUsers(usersWithCompanies);
     } catch (error) {
       console.error('Error fetching users:', error);
     } finally {
@@ -338,6 +374,9 @@ export default function UserManagement() {
                   {renderSortableHeader(t('common.role'), 'role')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  {t('common.companies')}
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   {renderSortableHeader(t('common.points'), 'total_points')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -352,7 +391,7 @@ export default function UserManagement() {
               {sortedUsers.length === 0 ? (
                 <tr>
                   <td
-                    colSpan="6"
+                    colSpan="7"
                     className="px-6 py-12 text-center text-gray-500"
                   >
                     {t('userManagement.noUsers')}
@@ -418,6 +457,38 @@ export default function UserManagement() {
                           {t('common.admin')}
                         </option>
                       </select>
+                    </td>
+                    <td className="px-6 py-4">
+                      {user.companies && user.companies.length > 0 ? (
+                        <div className="flex flex-wrap gap-1.5 max-w-xs">
+                          {user.companies.map((company) => (
+                            <Link
+                              key={company.company_id}
+                              href={`/admin-dashboard/company/${company.company_id}`}
+                              className="inline-flex items-center px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full hover:bg-blue-100 transition-colors border border-blue-200"
+                            >
+                              <svg
+                                className="w-3 h-3 mr-1"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                                />
+                              </svg>
+                              {company.name}
+                            </Link>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-sm text-gray-400 italic">
+                          {t('common.noCompanies')}
+                        </span>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
                       {user.total_points || 0} {t('common.pts')}

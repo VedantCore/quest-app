@@ -1513,7 +1513,9 @@
     "textfield": "テキストフィールド",
     "revert": "復元",
     "revertLayer": "レイヤー復元",
-    "noName": "名前なし"
+    "noName": "名前なし",
+    "companies": "会社",
+    "noCompanies": "会社なし"
   },
   "inviteManagement": {
     "title": "招待管理",

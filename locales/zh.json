@@ -1513,7 +1513,9 @@
     "textfield": "文本框",
     "revert": "还原",
     "revertLayer": "还原图层",
-    "noName": "无姓名"
+    "noName": "无姓名",
+    "companies": "公司",
+    "noCompanies": "没有公司"
   },
   "inviteManagement": {
     "title": "邀请管理",

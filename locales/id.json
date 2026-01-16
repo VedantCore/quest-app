@@ -1513,7 +1513,9 @@
     "textfield": "Textfield",
     "revert": "Kembalikan",
     "revertLayer": "Kembalikan Lapisan",
-    "noName": "Tanpa nama"
+    "noName": "Tanpa nama",
+    "companies": "Perusahaan",
+    "noCompanies": "Tidak ada perusahaan"
   },
   "inviteManagement": {
     "title": "Manajemen Undangan",

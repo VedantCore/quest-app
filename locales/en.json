@@ -1439,7 +1439,9 @@
     "textfield": "Textfield",
     "revert": "Revert",
     "revertLayer": "Revert Layer",
-    "noName": "No name"
+    "noName": "No name",
+    "companies": "Companies",
+    "noCompanies": "No companies"
   },
   "inviteManagement": {
     "title": "Invite Management",
