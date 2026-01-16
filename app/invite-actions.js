@@ -61,10 +61,11 @@ export async function getInvitesAction(token) {
       throw new Error('Unauthorized');
     }
 
-    // 3. Fetch Invites
+    // 3. Fetch Active Invites Only
     const { data, error } = await supabaseAdmin
       .from('invites')
       .select('*')
+      .eq('is_used', false)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
