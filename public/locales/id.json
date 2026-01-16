@@ -39,6 +39,26 @@
     "success": "Akun berhasil dibuat!",
     "emailInUse": "Email ini sudah terdaftar. Silakan masuk saja."
   },
+  "invite": {
+    "title": "Anda Diundang!",
+    "subtitle": "Buat akun Anda untuk bergabung dengan Quest",
+    "invalidTitle": "Undangan Tidak Valid",
+    "invalidText": "Tautan undangan ini tidak valid, kedaluwarsa, atau telah digunakan.",
+    "joining": "Anda akan bergabung dengan:",
+    "goHome": "Kembali ke Beranda",
+    "fullName": "Nama Lengkap",
+    "emailAddress": "Alamat Email",
+    "password": "Kata Sandi",
+    "creatingAccount": "Membuat Akun...",
+    "createAccount": "Buat Akun",
+    "placeholderName": "Budi Santoso",
+    "placeholderEmail": "budi@example.com",
+    "success": "Akun berhasil dibuat!",
+    "errorGeneric": "Terjadi kesalahan saat pendaftaran. Silakan coba lagi.",
+    "emailRegistered": "Email sudah terdaftar, mencoba masuk...",
+    "wrongPassword": "Email ini sudah terdaftar dengan kata sandi yang berbeda. Silakan hubungi dukungan atau gunakan kata sandi yang benar.",
+    "setupFailed": "Akun dibuat tetapi pengaturan gagal: {error}"
+  },
   "manager": {
     "dashboard": {
       "title": "Dasbor Manajer",
@@ -49,9 +69,9 @@
       "viewTasks": "Lihat Tugas",
       "noDescription": "Tidak ada deskripsi yang diberikan",
       "managerFallback": "Manajer",
-      "participateInTasks": "Berpartisipasi dalam Quest",
-      "browseAndJoinTasks": "Jelajahi quest yang tersedia dan bergabung sebagai peserta",
-      "browseQuests": "Jelajahi Quest"
+      "participateInTasks": "Berpartisipasi dalam Misi",
+      "browseAndJoinTasks": "Jelajahi misi yang tersedia dan bergabung sebagai peserta",
+      "browseQuests": "Jelajahi Misi"
     },
     "company": {
       "breadcrumb": "Dasbor Manajer",
@@ -145,11 +165,11 @@
     }
   },
   "home": {
-    "tagline1": "この指とまれ",
-    "tagline2": "共感した人が集まる。",
-    "tagline3": "共感した人だけで実行する。",
-    "tagline4": "共感が、そのまま成果になる。",
-    "tagline5": "エントリー式プロジェクトシステム。",
+    "tagline1": "Mari bergabung",
+    "tagline2": "Tempat berkumpulnya orang-orang dengan visi yang sama.",
+    "tagline3": "Dijalankan hanya oleh mereka yang peduli.",
+    "tagline4": "Kepedulian yang membuahkan hasil nyata.",
+    "tagline5": "Sistem proyek berbasis partisipasi.",
     "copyright": "© 2025 Quest App Inc."
   },
   "admin": {
@@ -212,6 +232,7 @@
       "unassignedUsers": "Pengguna Tanpa Penugasan Perusahaan",
       "alreadyAssigned": "Sudah ditugaskan",
       "assign": "Tugaskan",
+      "assignUsersTo": "Tugaskan Pengguna ke {company}",
       "createFirst": "Buat perusahaan terlebih dahulu sebelum menugaskan pengguna."
     },
     "users": {
@@ -278,31 +299,6 @@
       "close": "Tutup",
       "joinQuest": "Gabung Quest",
       "questExpired": "Quest Kedaluwarsa"
-    },
-    "taskPage": {
-      "errorLoading": "Gagal memuat tugas",
-      "joinSuccess": "Berhasil bergabung dengan quest!",
-      "joinFailed": "Gagal bergabung dengan quest",
-      "errorOccurred": "Terjadi kesalahan",
-      "submittingStep": "Mengirimkan langkah...",
-      "stepSubmitted": "Langkah berhasil dikirim!",
-      "taskNotFound": "Tugas tidak ditemukan",
-      "goBack": "Kembali",
-      "backToTasks": "Kembali ke Tugas",
-      "active": "Aktif",
-      "inactive": "Tidak Aktif",
-      "level": "Level",
-      "yourProgress": "Kemajuan Anda",
-      "questSteps": "Langkah Quest",
-      "points": "Poin",
-      "reviewing": "Meninjau",
-      "completed": "Selesai",
-      "rejected": "Ditolak",
-      "managerFeedback": "Umpan Balik Manajer:",
-      "submitting": "Mengirim...",
-      "submitForReview": "Kirim untuk Ditinjau",
-      "resubmit": "Kirim Ulang",
-      "noSteps": "Tidak ada langkah yang ditentukan untuk quest ini."
     }
   },
   "tasks": {
@@ -373,12 +369,12 @@
     "save": "Simpan",
     "cancel": "Batal",
     "delete": "Hapus",
-    "edit": "Edit",
+    "edit": "Ubah",
     "close": "Tutup",
     "submit": "Kirim",
     "search": "Cari",
     "searchPlaceholder": "Cari berdasarkan judul atau deskripsi",
-    "filter": "Filter",
+    "filter": "Saring",
     "export": "Ekspor",
     "import": "Impor",
     "refresh": "Segarkan",
@@ -397,7 +393,7 @@
     "success": "Berhasil",
     "error": "Kesalahan",
     "warning": "Peringatan",
-    "info": "Info",
+    "info": "Informasi",
     "all": "Semua",
     "code": "Kode",
     "usedBy": "Digunakan Oleh",
@@ -1541,7 +1537,9 @@
     "textfield": "Textfield",
     "revert": "Kembalikan",
     "revertLayer": "Kembalikan Lapisan",
-    "noName": "Tanpa nama"
+    "noName": "Tanpa nama",
+    "companies": "Perusahaan",
+    "noCompanies": "Tidak ada perusahaan"
   },
   "inviteManagement": {
     "title": "Manajemen Undangan",
@@ -1580,7 +1578,13 @@
     "inactiveUsers": "Pengguna Tidak Aktif",
     "admins": "Admin",
     "managers": "Manajer",
-    "users": "Pengguna"
+    "users": "Pengguna",
+    "editPoints": "Edit Poin",
+    "currentPoints": "Poin Saat Ini",
+    "newPoints": "Poin Baru",
+    "enterPoints": "Masukkan nilai poin baru",
+    "pointsUpdateSuccess": "Poin pengguna berhasil diperbarui",
+    "pointsUpdateFailed": "Gagal memperbarui poin pengguna"
   },
   "taskManagement": {
     "title": "Manajemen Tugas",
@@ -1841,29 +1845,29 @@
     "reject": "Apakah Anda yakin ingin menolak pengajuan ini?"
   },
   "taskPage": {
-    "errorLoading": "Error loading task",
-    "joinSuccess": "Joined quest successfully!",
-    "joinFailed": "Failed to join quest",
-    "errorOccurred": "An error occurred",
-    "submittingStep": "Submitting step...",
-    "stepSubmitted": "Step submitted successfully!",
-    "taskNotFound": "Task not found",
-    "goBack": "Go back",
-    "backToTasks": "Back to Tasks",
-    "active": "Active",
-    "inactive": "Inactive",
+    "errorLoading": "Gagal memuat tugas",
+    "joinSuccess": "Berhasil bergabung dengan quest!",
+    "joinFailed": "Gagal bergabung dengan quest",
+    "errorOccurred": "Terjadi kesalahan",
+    "submittingStep": "Mengirimkan langkah...",
+    "stepSubmitted": "Langkah berhasil dikirim!",
+    "taskNotFound": "Tugas tidak ditemukan",
+    "goBack": "Kembali",
+    "backToTasks": "Kembali ke Tugas",
+    "active": "Aktif",
+    "inactive": "Tidak Aktif",
     "level": "Level",
-    "yourProgress": "Your Progress",
-    "questSteps": "Quest Steps",
-    "points": "Points",
-    "reviewing": "Reviewing",
-    "completed": "Completed",
-    "rejected": "Rejected",
-    "managerFeedback": "Manager Feedback:",
-    "submitting": "Submitting...",
-    "submitForReview": "Submit for Review",
-    "resubmit": "Resubmit",
-    "noSteps": "No steps defined for this quest."
+    "yourProgress": "Kemajuan Anda",
+    "questSteps": "Langkah Quest",
+    "points": "Poin",
+    "reviewing": "Meninjau",
+    "completed": "Selesai",
+    "rejected": "Ditolak",
+    "managerFeedback": "Umpan Balik Manajer:",
+    "submitting": "Mengirim...",
+    "submitForReview": "Kirim untuk Ditinjau",
+    "resubmit": "Kirim Ulang",
+    "noSteps": "Tidak ada langkah yang ditentukan untuk quest ini."
   },
   "notifications": {
     "title": "Notifikasi",
@@ -1873,6 +1877,8 @@
     "justNow": "Baru saja",
     "minutesAgo": "{count}m yang lalu",
     "hoursAgo": "{count}j yang lalu",
-    "daysAgo": "{count}h yang lalu"
+    "daysAgo": "{count}h yang lalu",
+    "stepSubmittedTitle": "Langkah Diserahkan",
+    "stepSubmittedMessage": "{userName} mengirimkan langkah untuk {taskTitle}"
   }
 }

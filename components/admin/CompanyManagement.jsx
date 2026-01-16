@@ -435,7 +435,9 @@ export default function CompanyManagement({ allUsers }) {
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-bold">
-                {t('admin.company.assignUsers')} to {selectedCompany.name}
+                {t('admin.company.assignUsersTo', {
+                  company: selectedCompany.name,
+                })}
               </h3>
               <button
                 onClick={() => {

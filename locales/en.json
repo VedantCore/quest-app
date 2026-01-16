@@ -39,6 +39,26 @@
     "success": "Account created successfully!",
     "emailInUse": "This email is already registered. Please log in instead."
   },
+  "invite": {
+    "title": "You're Invited!",
+    "subtitle": "Create your account to join Quest",
+    "invalidTitle": "Invalid Invite",
+    "invalidText": "This invite link is invalid, expired, or has already been used.",
+    "joining": "You're about to join:",
+    "goHome": "Go Home",
+    "fullName": "Full Name",
+    "emailAddress": "Email Address",
+    "password": "Password",
+    "creatingAccount": "Creating Account...",
+    "createAccount": "Create Account",
+    "placeholderName": "John Doe",
+    "placeholderEmail": "john@example.com",
+    "success": "Account created successfully!",
+    "errorGeneric": "An error occurred during signup. Please try again.",
+    "emailRegistered": "Email already registered, signing you in...",
+    "wrongPassword": "This email is already registered with a different password. Please contact support or use the correct password.",
+    "setupFailed": "Account created but setup failed: {error}"
+  },
   "manager": {
     "dashboard": {
       "title": "Manager Dashboard",
@@ -48,7 +68,10 @@
       "contactAdmin": "Contact an admin to get assigned to a company.",
       "viewTasks": "View Tasks",
       "noDescription": "No description provided",
-      "managerFallback": "Manager"
+      "managerFallback": "Manager",
+      "participateInTasks": "Participate in Quests",
+      "browseAndJoinTasks": "Browse available quests and join as a participant",
+      "browseQuests": "Browse Quests"
     },
     "company": {
       "breadcrumb": "Manager Dashboard",
@@ -184,6 +207,7 @@
       "unassignedUsers": "Users Without Company Assignment",
       "alreadyAssigned": "Already assigned",
       "assign": "Assign",
+      "assignUsersTo": "Assign Users to {company}",
       "createFirst": "Create a company first before assigning users."
     },
     "users": {

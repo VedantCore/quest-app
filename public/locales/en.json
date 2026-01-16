@@ -39,6 +39,26 @@
     "success": "Account created successfully!",
     "emailInUse": "This email is already registered. Please log in instead."
   },
+  "invite": {
+    "title": "You're Invited!",
+    "subtitle": "Create your account to join Quest",
+    "invalidTitle": "Invalid Invite",
+    "invalidText": "This invite link is invalid, expired, or has already been used.",
+    "joining": "You're about to join:",
+    "goHome": "Go Home",
+    "fullName": "Full Name",
+    "emailAddress": "Email Address",
+    "password": "Password",
+    "creatingAccount": "Creating Account...",
+    "createAccount": "Create Account",
+    "placeholderName": "John Doe",
+    "placeholderEmail": "john@example.com",
+    "success": "Account created successfully!",
+    "errorGeneric": "An error occurred during signup. Please try again.",
+    "emailRegistered": "Email already registered, signing you in...",
+    "wrongPassword": "This email is already registered with a different password. Please contact support or use the correct password.",
+    "setupFailed": "Account created but setup failed: {error}"
+  },
   "manager": {
     "dashboard": {
       "title": "Manager Dashboard",
@@ -187,6 +207,7 @@
       "unassignedUsers": "Users Without Company Assignment",
       "alreadyAssigned": "Already assigned",
       "assign": "Assign",
+      "assignUsersTo": "Assign Users to {company}",
       "createFirst": "Create a company first before assigning users."
     },
     "users": {
@@ -278,31 +299,6 @@
       "close": "Close",
       "joinQuest": "Join Quest",
       "questExpired": "Quest Expired"
-    },
-    "taskPage": {
-      "errorLoading": "Error loading task",
-      "joinSuccess": "Joined quest successfully!",
-      "joinFailed": "Failed to join quest",
-      "errorOccurred": "An error occurred",
-      "submittingStep": "Submitting step...",
-      "stepSubmitted": "Step submitted successfully!",
-      "taskNotFound": "Task not found",
-      "goBack": "Go back",
-      "backToTasks": "Back to Tasks",
-      "active": "Active",
-      "inactive": "Inactive",
-      "level": "Level",
-      "yourProgress": "Your Progress",
-      "questSteps": "Quest Steps",
-      "points": "Points",
-      "reviewing": "Reviewing",
-      "completed": "Completed",
-      "rejected": "Rejected",
-      "managerFeedback": "Manager Feedback:",
-      "submitting": "Submitting...",
-      "submitForReview": "Submit for Review",
-      "resubmit": "Resubmit",
-      "noSteps": "No steps defined for this quest."
     }
   },
   "tasks": {
@@ -360,6 +356,7 @@
     }
   },
   "common": {
+    "joined": "Joined",
     "100": "100",
     "200": "200",
     "300": "300",
@@ -369,7 +366,6 @@
     "700": "700",
     "800": "800",
     "900": "900",
-    "joined": "Joined",
     "loading": "Loading",
     "save": "Save",
     "cancel": "Cancel",
@@ -1467,7 +1463,9 @@
     "textfield": "Textfield",
     "revert": "Revert",
     "revertLayer": "Revert Layer",
-    "noName": "No name"
+    "noName": "No name",
+    "companies": "Companies",
+    "noCompanies": "No companies"
   },
   "inviteManagement": {
     "title": "Invite Management",
@@ -1506,7 +1504,13 @@
     "managers": "Managers",
     "users": "Users",
     "activeUsers": "Active Users",
-    "inactiveUsers": "Inactive Users"
+    "inactiveUsers": "Inactive Users",
+    "editPoints": "Edit Points",
+    "currentPoints": "Current Points",
+    "newPoints": "New Points",
+    "enterPoints": "Enter new points value",
+    "pointsUpdateSuccess": "User points updated successfully",
+    "pointsUpdateFailed": "Failed to update user points"
   },
   "taskManagement": {
     "title": "Quest Management",
@@ -1798,6 +1802,8 @@
     "justNow": "Just now",
     "minutesAgo": "{count}m ago",
     "hoursAgo": "{count}h ago",
-    "daysAgo": "{count}d ago"
+    "daysAgo": "{count}d ago",
+    "stepSubmittedTitle": "Step Submitted",
+    "stepSubmittedMessage": "{userName} submitted step for {taskTitle}"
   }
 }

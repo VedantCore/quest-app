@@ -39,6 +39,26 @@
     "success": "Akun berhasil dibuat!",
     "emailInUse": "Email ini sudah terdaftar. Silakan masuk saja."
   },
+  "invite": {
+    "title": "Anda Diundang!",
+    "subtitle": "Buat akun Anda untuk bergabung dengan Quest",
+    "invalidTitle": "Undangan Tidak Valid",
+    "invalidText": "Tautan undangan ini tidak valid, kedaluwarsa, atau telah digunakan.",
+    "joining": "Anda akan bergabung dengan:",
+    "goHome": "Kembali ke Beranda",
+    "fullName": "Nama Lengkap",
+    "emailAddress": "Alamat Email",
+    "password": "Kata Sandi",
+    "creatingAccount": "Membuat Akun...",
+    "createAccount": "Buat Akun",
+    "placeholderName": "Budi Santoso",
+    "placeholderEmail": "budi@example.com",
+    "success": "Akun berhasil dibuat!",
+    "errorGeneric": "Terjadi kesalahan saat pendaftaran. Silakan coba lagi.",
+    "emailRegistered": "Email sudah terdaftar, mencoba masuk...",
+    "wrongPassword": "Email ini sudah terdaftar dengan kata sandi yang berbeda. Silakan hubungi dukungan atau gunakan kata sandi yang benar.",
+    "setupFailed": "Akun dibuat tetapi pengaturan gagal: {error}"
+  },
   "manager": {
     "dashboard": {
       "title": "Dasbor Manajer",
@@ -48,7 +68,10 @@
       "contactAdmin": "Hubungi admin untuk ditugaskan ke perusahaan.",
       "viewTasks": "Lihat Tugas",
       "noDescription": "Tidak ada deskripsi yang diberikan",
-      "managerFallback": "Manajer"
+      "managerFallback": "Manajer",
+      "participateInTasks": "Berpartisipasi dalam Misi",
+      "browseAndJoinTasks": "Jelajahi misi yang tersedia dan bergabung sebagai peserta",
+      "browseQuests": "Jelajahi Misi"
     },
     "company": {
       "breadcrumb": "Dasbor Manajer",
@@ -209,6 +232,7 @@
       "unassignedUsers": "Pengguna Tanpa Penugasan Perusahaan",
       "alreadyAssigned": "Sudah ditugaskan",
       "assign": "Tugaskan",
+      "assignUsersTo": "Tugaskan Pengguna ke {company}",
       "createFirst": "Buat perusahaan terlebih dahulu sebelum menugaskan pengguna."
     },
     "users": {

@@ -39,6 +39,26 @@
     "success": "账号创建成功！",
     "emailInUse": "此电子邮件已注册。请直接登录。"
   },
+  "invite": {
+    "title": "你收到了邀请！",
+    "subtitle": "创建您的帐户以加入 Quest",
+    "invalidTitle": "无效邀请",
+    "invalidText": "此邀请链接无效、已过期或已被使用。",
+    "joining": "您即将加入：",
+    "goHome": "回到首页",
+    "fullName": "全名",
+    "emailAddress": "电子邮箱",
+    "password": "密码",
+    "creatingAccount": "正在创建帐户...",
+    "createAccount": "创建帐户",
+    "placeholderName": "张三",
+    "placeholderEmail": "zhangsan@example.com",
+    "success": "帐户创建成功！",
+    "errorGeneric": "注册过程中发生错误。请再试一次。",
+    "emailRegistered": "该邮箱已注册，正在为您登录...",
+    "wrongPassword": "该邮箱已使用其他密码注册。请联系支持人员或使用正确的密码。",
+    "setupFailed": "帐户已创建，但设置失败：{error}"
+  },
   "manager": {
     "dashboard": {
       "title": "经理仪表板",
@@ -212,6 +232,7 @@
       "unassignedUsers": "未分配公司的用户",
       "alreadyAssigned": "已分配",
       "assign": "分配",
+      "assignUsersTo": "将用户分配给 {company}",
       "createFirst": "在分配用户之前，请先创建一个公司。"
     },
     "users": {
@@ -278,31 +299,6 @@
       "close": "关闭",
       "joinQuest": "加入任务",
       "questExpired": "任务已过期"
-    },
-    "taskPage": {
-      "errorLoading": "加载任务时出错",
-      "joinSuccess": "成功加入任务！",
-      "joinFailed": "加入任务失败",
-      "errorOccurred": "发生错误",
-      "submittingStep": "正在提交步骤...",
-      "stepSubmitted": "步骤提交成功！",
-      "taskNotFound": "未找到任务",
-      "goBack": "返回",
-      "backToTasks": "返回任务列表",
-      "active": "进行中",
-      "inactive": "未激活",
-      "level": "等级",
-      "yourProgress": "您的进度",
-      "questSteps": "任务步骤",
-      "points": "积分",
-      "reviewing": "审核中",
-      "completed": "已完成",
-      "rejected": "已拒绝",
-      "managerFeedback": "经理反馈：",
-      "submitting": "正在提交...",
-      "submitForReview": "提交审核",
-      "resubmit": "重新提交",
-      "noSteps": "此任务未定义任何步骤。"
     }
   },
   "tasks": {
@@ -1541,7 +1537,9 @@
     "textfield": "文本框",
     "revert": "还原",
     "revertLayer": "还原图层",
-    "noName": "无姓名"
+    "noName": "无姓名",
+    "companies": "公司",
+    "noCompanies": "没有公司"
   },
   "inviteManagement": {
     "title": "邀请管理",
@@ -1580,7 +1578,13 @@
     "inactiveUsers": "不活跃用户",
     "admins": "管理员",
     "managers": "经理",
-    "users": "用户"
+    "users": "用户",
+    "editPoints": "编辑积分",
+    "currentPoints": "当前积分",
+    "newPoints": "新积分",
+    "enterPoints": "输入新积分值",
+    "pointsUpdateSuccess": "用户积分更新成功",
+    "pointsUpdateFailed": "更新用户积分失败"
   },
   "taskManagement": {
     "title": "任务管理",
@@ -1841,29 +1845,29 @@
     "reject": "您确定要拒绝此提交吗？"
   },
   "taskPage": {
-    "errorLoading": "Error loading task",
-    "joinSuccess": "Joined quest successfully!",
-    "joinFailed": "Failed to join quest",
-    "errorOccurred": "An error occurred",
-    "submittingStep": "Submitting step...",
-    "stepSubmitted": "Step submitted successfully!",
-    "taskNotFound": "Task not found",
-    "goBack": "Go back",
-    "backToTasks": "Back to Tasks",
-    "active": "Active",
-    "inactive": "Inactive",
-    "level": "Level",
-    "yourProgress": "Your Progress",
-    "questSteps": "Quest Steps",
-    "points": "Points",
-    "reviewing": "Reviewing",
-    "completed": "Completed",
-    "rejected": "Rejected",
-    "managerFeedback": "Manager Feedback:",
-    "submitting": "Submitting...",
-    "submitForReview": "Submit for Review",
-    "resubmit": "Resubmit",
-    "noSteps": "No steps defined for this quest."
+    "errorLoading": "加载任务时出错",
+    "joinSuccess": "成功加入任务！",
+    "joinFailed": "加入任务失败",
+    "errorOccurred": "发生错误",
+    "submittingStep": "正在提交步骤...",
+    "stepSubmitted": "步骤提交成功！",
+    "taskNotFound": "未找到任务",
+    "goBack": "返回",
+    "backToTasks": "返回任务列表",
+    "active": "进行中",
+    "inactive": "未激活",
+    "level": "等级",
+    "yourProgress": "您的进度",
+    "questSteps": "任务步骤",
+    "points": "积分",
+    "reviewing": "审核中",
+    "completed": "已完成",
+    "rejected": "已拒绝",
+    "managerFeedback": "经理反馈：",
+    "submitting": "正在提交...",
+    "submitForReview": "提交审核",
+    "resubmit": "重新提交",
+    "noSteps": "此任务未定义任何步骤。"
   },
   "notifications": {
     "title": "通知",
@@ -1873,6 +1877,8 @@
     "justNow": "刚刚",
     "minutesAgo": "{count}分钟前",
     "hoursAgo": "{count}小时前",
-    "daysAgo": "{count}天前"
+    "daysAgo": "{count}天前",
+    "stepSubmittedTitle": "步骤已提交",
+    "stepSubmittedMessage": "{userName}为{taskTitle}提交了步骤"
   }
 }

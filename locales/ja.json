@@ -39,6 +39,26 @@
     "success": "アカウントが正常に作成されました！",
     "emailInUse": "このメールアドレスはすでに登録されています。代わりにログインしてください。"
   },
+  "invite": {
+    "title": "招待されました！",
+    "subtitle": "Questに参加するためにアカウントを作成してください",
+    "invalidTitle": "無効な招待",
+    "invalidText": "この招待リンクは無効、期限切れ、または既に使用されています。",
+    "joining": "参加しようとしています：",
+    "goHome": "ホームへ戻る",
+    "fullName": "フルネーム",
+    "emailAddress": "メールアドレス",
+    "password": "パスワード",
+    "creatingAccount": "アカウント作成中...",
+    "createAccount": "アカウントを作成",
+    "placeholderName": "山田 太郎",
+    "placeholderEmail": "yamada@example.com",
+    "success": "アカウントが正常に作成されました！",
+    "errorGeneric": "サインアップ中にエラーが発生しました。もう一度お試しください。",
+    "emailRegistered": "メールアドレスは既に登録されています。サインインします...",
+    "wrongPassword": "このメールアドレスは既に別のパスワードで登録されています。サポートに連絡するか、正しいパスワードを使用してください。",
+    "setupFailed": "アカウントは作成されましたが、設定に失敗しました: {error}"
+  },
   "manager": {
     "dashboard": {
       "title": "マネージャーダッシュボード",
@@ -48,7 +68,10 @@
       "contactAdmin": "会社に割り当てられるには、管理者に連絡してください。",
       "viewTasks": "タスクを表示",
       "noDescription": "説明はありません",
-      "managerFallback": "マネージャー"
+      "managerFallback": "マネージャー",
+      "participateInTasks": "クエストに参加する",
+      "browseAndJoinTasks": "利用可能なクエストを閲覧して参加者として参加する",
+      "browseQuests": "クエストを閲覧"
     },
     "company": {
       "breadcrumb": "マネージャーダッシュボード",
@@ -209,6 +232,7 @@
       "unassignedUsers": "会社未割り当てのユーザー",
       "alreadyAssigned": "割り当て済み",
       "assign": "割り当て",
+      "assignUsersTo": "ユーザーを {company} に割り当てる",
       "createFirst": "ユーザーを割り当てる前に、まず会社を作成してください。"
     },
     "users": {

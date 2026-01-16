@@ -39,6 +39,26 @@
     "success": "アカウントが正常に作成されました！",
     "emailInUse": "このメールアドレスはすでに登録されています。代わりにログインしてください。"
   },
+  "invite": {
+    "title": "招待されました！",
+    "subtitle": "Questに参加するためにアカウントを作成してください",
+    "invalidTitle": "無効な招待",
+    "invalidText": "この招待リンクは無効、期限切れ、または既に使用されています。",
+    "joining": "参加しようとしています：",
+    "goHome": "ホームへ戻る",
+    "fullName": "フルネーム",
+    "emailAddress": "メールアドレス",
+    "password": "パスワード",
+    "creatingAccount": "アカウント作成中...",
+    "createAccount": "アカウントを作成",
+    "placeholderName": "山田 太郎",
+    "placeholderEmail": "yamada@example.com",
+    "success": "アカウントが正常に作成されました！",
+    "errorGeneric": "サインアップ中にエラーが発生しました。もう一度お試しください。",
+    "emailRegistered": "メールアドレスは既に登録されています。サインインします...",
+    "wrongPassword": "このメールアドレスは既に別のパスワードで登録されています。サポートに連絡するか、正しいパスワードを使用してください。",
+    "setupFailed": "アカウントは作成されましたが、設定に失敗しました: {error}"
+  },
   "manager": {
     "dashboard": {
       "title": "マネージャーダッシュボード",
@@ -49,7 +69,7 @@
       "viewTasks": "タスクを表示",
       "noDescription": "説明はありません",
       "managerFallback": "マネージャー",
-      "participateInTasks": "クエストに参加",
+      "participateInTasks": "クエストに参加する",
       "browseAndJoinTasks": "利用可能なクエストを閲覧して参加者として参加する",
       "browseQuests": "クエストを閲覧"
     },
@@ -212,6 +232,7 @@
       "unassignedUsers": "会社未割り当てのユーザー",
       "alreadyAssigned": "割り当て済み",
       "assign": "割り当て",
+      "assignUsersTo": "ユーザーを {company} に割り当てる",
       "createFirst": "ユーザーを割り当てる前に、まず会社を作成してください。"
     },
     "users": {
@@ -278,31 +299,6 @@
       "close": "閉じる",
       "joinQuest": "クエストに参加",
       "questExpired": "クエスト期限切れ"
-    },
-    "taskPage": {
-      "errorLoading": "タスクの読み込み中にエラーが発生しました",
-      "joinSuccess": "クエストに参加しました！",
-      "joinFailed": "クエストへの参加に失敗しました",
-      "errorOccurred": "エラーが発生しました",
-      "submittingStep": "ステップを送信中...",
-      "stepSubmitted": "ステップが正常に送信されました！",
-      "taskNotFound": "タスクが見つかりません",
-      "goBack": "戻る",
-      "backToTasks": "タスク一覧に戻る",
-      "active": "有効",
-      "inactive": "無効",
-      "level": "レベル",
-      "yourProgress": "あなたの進捗",
-      "questSteps": "クエストのステップ",
-      "points": "ポイント",
-      "reviewing": "審査中",
-      "completed": "完了",
-      "rejected": "却下",
-      "managerFeedback": "マネージャーのフィードバック:",
-      "submitting": "送信中...",
-      "submitForReview": "審査に提出",
-      "resubmit": "再提出",
-      "noSteps": "このクエストにはステップが定義されていません。"
     }
   },
   "tasks": {
@@ -1541,7 +1537,9 @@
     "textfield": "テキストフィールド",
     "revert": "復元",
     "revertLayer": "レイヤー復元",
-    "noName": "名前なし"
+    "noName": "名前なし",
+    "companies": "会社",
+    "noCompanies": "会社なし"
   },
   "inviteManagement": {
     "title": "招待管理",
@@ -1580,7 +1578,13 @@
     "inactiveUsers": "非アクティブユーザー",
     "admins": "管理者",
     "managers": "マネージャー",
-    "users": "ユーザー"
+    "users": "ユーザー",
+    "editPoints": "ポイント編集",
+    "currentPoints": "現在のポイント",
+    "newPoints": "新しいポイント",
+    "enterPoints": "新しいポイント値を入力",
+    "pointsUpdateSuccess": "ユーザーポイントが正常に更新されました",
+    "pointsUpdateFailed": "ユーザーポイントの更新に失敗しました"
   },
   "taskManagement": {
     "title": "タスク管理",
@@ -1841,29 +1845,29 @@
     "reject": "この提出を拒否してもよろしいですか？"
   },
   "taskPage": {
-    "errorLoading": "Error loading task",
-    "joinSuccess": "Joined quest successfully!",
-    "joinFailed": "Failed to join quest",
-    "errorOccurred": "An error occurred",
-    "submittingStep": "Submitting step...",
-    "stepSubmitted": "Step submitted successfully!",
-    "taskNotFound": "Task not found",
-    "goBack": "Go back",
-    "backToTasks": "Back to Tasks",
-    "active": "Active",
-    "inactive": "Inactive",
-    "level": "Level",
-    "yourProgress": "Your Progress",
-    "questSteps": "Quest Steps",
-    "points": "Points",
-    "reviewing": "Reviewing",
-    "completed": "Completed",
-    "rejected": "Rejected",
-    "managerFeedback": "Manager Feedback:",
-    "submitting": "Submitting...",
-    "submitForReview": "Submit for Review",
-    "resubmit": "Resubmit",
-    "noSteps": "No steps defined for this quest."
+    "errorLoading": "タスクの読み込み中にエラーが発生しました",
+    "joinSuccess": "クエストに参加しました！",
+    "joinFailed": "クエストへの参加に失敗しました",
+    "errorOccurred": "エラーが発生しました",
+    "submittingStep": "ステップを送信中...",
+    "stepSubmitted": "ステップが正常に送信されました！",
+    "taskNotFound": "タスクが見つかりません",
+    "goBack": "戻る",
+    "backToTasks": "タスク一覧に戻る",
+    "active": "有効",
+    "inactive": "無効",
+    "level": "レベル",
+    "yourProgress": "あなたの進捗",
+    "questSteps": "クエストのステップ",
+    "points": "ポイント",
+    "reviewing": "審査中",
+    "completed": "完了",
+    "rejected": "却下",
+    "managerFeedback": "マネージャーのフィードバック:",
+    "submitting": "送信中...",
+    "submitForReview": "審査に提出",
+    "resubmit": "再提出",
+    "noSteps": "このクエストにはステップが定義されていません。"
   },
   "notifications": {
     "title": "通知",
@@ -1873,6 +1877,8 @@
     "justNow": "たった今",
     "minutesAgo": "{count}分前",
     "hoursAgo": "{count}時間前",
-    "daysAgo": "{count}日前"
+    "daysAgo": "{count}日前",
+    "stepSubmittedTitle": "ステップが提出されました",
+    "stepSubmittedMessage": "{userName}が{taskTitle}のステップを提出しました"
   }
 }

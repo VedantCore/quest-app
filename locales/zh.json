@@ -39,6 +39,26 @@
     "success": "账号创建成功！",
     "emailInUse": "此电子邮件已注册。请直接登录。"
   },
+  "invite": {
+    "title": "你收到了邀请！",
+    "subtitle": "创建您的帐户以加入 Quest",
+    "invalidTitle": "无效邀请",
+    "invalidText": "此邀请链接无效、已过期或已被使用。",
+    "joining": "您即将加入：",
+    "goHome": "回到首页",
+    "fullName": "全名",
+    "emailAddress": "电子邮箱",
+    "password": "密码",
+    "creatingAccount": "正在创建帐户...",
+    "createAccount": "创建帐户",
+    "placeholderName": "张三",
+    "placeholderEmail": "zhangsan@example.com",
+    "success": "帐户创建成功！",
+    "errorGeneric": "注册过程中发生错误。请再试一次。",
+    "emailRegistered": "该邮箱已注册，正在为您登录...",
+    "wrongPassword": "该邮箱已使用其他密码注册。请联系支持人员或使用正确的密码。",
+    "setupFailed": "帐户已创建，但设置失败：{error}"
+  },
   "manager": {
     "dashboard": {
       "title": "经理仪表板",
@@ -48,7 +68,10 @@
       "contactAdmin": "请联系管理员以分配到公司。",
       "viewTasks": "查看任务",
       "noDescription": "未提供描述",
-      "managerFallback": "经理"
+      "managerFallback": "经理",
+      "participateInTasks": "参与任务",
+      "browseAndJoinTasks": "浏览可用任务并作为参与者加入",
+      "browseQuests": "浏览任务"
     },
     "company": {
       "breadcrumb": "经理仪表板",
@@ -209,6 +232,7 @@
       "unassignedUsers": "未分配公司的用户",
       "alreadyAssigned": "已分配",
       "assign": "分配",
+      "assignUsersTo": "将用户分配给 {company}",
       "createFirst": "在分配用户之前，请先创建一个公司。"
     },
     "users": {
