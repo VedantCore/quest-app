@@ -100,7 +100,15 @@
       "points": "Points",
       "level": "Level",
       "noUsersFound": "No users found in this company.",
-      "unknownUser": "Unknown User"
+      "unknownUser": "Unknown User",
+      "actions": "Actions",
+      "managePoints": "Manage Points",
+      "increase": "Increase",
+      "decrease": "Decrease",
+      "setPoints": "Set",
+      "reset": "Reset",
+      "enterAmount": "Please enter an amount",
+      "errorUpdatingPoints": "Failed to update points"
     },
     "task": {
       "steps": "Steps",
@@ -368,6 +376,7 @@
     "900": "900",
     "loading": "Loading",
     "save": "Save",
+    "saving": "Saving...",
     "cancel": "Cancel",
     "delete": "Delete",
     "edit": "Edit",

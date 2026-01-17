@@ -3,11 +3,19 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useLocale } from '@/context/LocaleContext';
 import { RankBadge } from '@/lib/rankUtils';
+import { managerUpdateUserPoints } from '@/app/actions';
+import toast from 'react-hot-toast';
+import { useAuth } from '@/context/AuthContext';
 
 export default function CompanyLeaderboard({ companyId }) {
   const { t } = useLocale();
+  const { user } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [editingUser, setEditingUser] = useState(null);
+  const [pointsAction, setPointsAction] = useState('increase');
+  const [pointsAmount, setPointsAmount] = useState('');
+  const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
     if (companyId) {
@@ -49,6 +57,40 @@ export default function CompanyLeaderboard({ companyId }) {
       console.error('Error fetching leaderboard:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePointsUpdate = async (userId) => {
+    if (!user) return;
+
+    if (pointsAction !== 'reset' && !pointsAmount) {
+      toast.error(t('manager.company.enterAmount'));
+      return;
+    }
+
+    setUpdating(true);
+    try {
+      const result = await managerUpdateUserPoints(
+        userId,
+        companyId,
+        user.uid,
+        pointsAction,
+        pointsAmount ? parseInt(pointsAmount) : 0
+      );
+
+      if (result.success) {
+        toast.success(result.message);
+        setEditingUser(null);
+        setPointsAmount('');
+        await fetchLeaderboard();
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      console.error('Error updating points:', error);
+      toast.error(t('manager.company.errorUpdatingPoints'));
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -112,6 +154,9 @@ export default function CompanyLeaderboard({ companyId }) {
               <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 {t('manager.company.points')}
               </th>
+              <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                {t('manager.company.actions')}
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -119,7 +164,9 @@ export default function CompanyLeaderboard({ companyId }) {
               <tr
                 key={user.user_id}
                 className={`hover:bg-gray-50/50 transition-colors ${
-                  index < 3 ? 'bg-gradient-to-r from-gray-50/30 to-transparent' : ''
+                  index < 3
+                    ? 'bg-gradient-to-r from-gray-50/30 to-transparent'
+                    : ''
                 }`}
               >
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -148,7 +195,9 @@ export default function CompanyLeaderboard({ companyId }) {
                       <span className="text-sm font-bold text-gray-900">
                         {user.name || t('manager.company.unknownUser')}
                       </span>
-                      <span className="text-xs text-gray-500">{user.email}</span>
+                      <span className="text-xs text-gray-500">
+                        {user.email}
+                      </span>
                     </div>
                   </div>
                 </td>
@@ -159,6 +208,67 @@ export default function CompanyLeaderboard({ companyId }) {
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
                     {user.total_points?.toLocaleString() || 0} {t('common.pts')}
                   </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-right">
+                  {editingUser === user.user_id ? (
+                    <div className="flex items-center justify-end gap-2">
+                      <select
+                        value={pointsAction}
+                        onChange={(e) => setPointsAction(e.target.value)}
+                        className="text-xs border border-gray-300 rounded px-2 py-1"
+                        disabled={updating}
+                      >
+                        <option value="increase">
+                          {t('manager.company.increase')}
+                        </option>
+                        <option value="decrease">
+                          {t('manager.company.decrease')}
+                        </option>
+                        <option value="set">
+                          {t('manager.company.setPoints')}
+                        </option>
+                        <option value="reset">
+                          {t('manager.company.reset')}
+                        </option>
+                      </select>
+                      {pointsAction !== 'reset' && (
+                        <input
+                          type="number"
+                          min="0"
+                          value={pointsAmount}
+                          onChange={(e) => setPointsAmount(e.target.value)}
+                          placeholder="Amount"
+                          className="w-20 text-xs border border-gray-300 rounded px-2 py-1"
+                          disabled={updating}
+                        />
+                      )}
+                      <button
+                        onClick={() => handlePointsUpdate(user.user_id)}
+                        disabled={updating}
+                        className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 disabled:opacity-50"
+                      >
+                        {updating ? t('common.saving') : t('common.save')}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setEditingUser(null);
+                          setPointsAmount('');
+                          setPointsAction('increase');
+                        }}
+                        disabled={updating}
+                        className="text-xs bg-gray-400 text-white px-2 py-1 rounded hover:bg-gray-500 disabled:opacity-50"
+                      >
+                        {t('common.cancel')}
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setEditingUser(user.user_id)}
+                      className="text-xs bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700 transition-colors"
+                    >
+                      {t('manager.company.managePoints')}
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}

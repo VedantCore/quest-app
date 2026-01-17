@@ -100,7 +100,15 @@
       "points": "积分",
       "level": "等级",
       "noUsersFound": "该公司未发现任何用户。",
-      "unknownUser": "未知用户"
+      "unknownUser": "未知用户",
+      "actions": "操作",
+      "managePoints": "管理积分",
+      "increase": "增加",
+      "decrease": "减少",
+      "setPoints": "设置",
+      "reset": "重置",
+      "enterAmount": "请输入数量",
+      "errorUpdatingPoints": "更新积分失败"
     },
     "task": {
       "manageParticipants": "管理参与者和提交内容",
@@ -367,6 +375,7 @@
     "900": "900",
     "loading": "加载中...",
     "save": "保存",
+    "saving": "保存中...",
     "cancel": "取消",
     "delete": "删除",
     "edit": "编辑",

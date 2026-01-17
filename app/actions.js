@@ -902,3 +902,137 @@ export async function updateUserPoints(userId, newPoints, adminId) {
     };
   }
 }
+
+/**
+ * Manager updates user's points (reset, increase, or decrease)
+ * Only for users in the same company as the manager
+ */
+export async function managerUpdateUserPoints(
+  userId,
+  companyId,
+  managerId,
+  action,
+  amount = 0
+) {
+  try {
+    // Verify manager role
+    const { data: manager, error: managerError } = await supabase
+      .from('users')
+      .select('role')
+      .eq('user_id', managerId)
+      .single();
+
+    if (managerError) throw managerError;
+
+    if (!manager || manager.role !== 'manager') {
+      return {
+        success: false,
+        message: 'Unauthorized: Only managers can update user points',
+      };
+    }
+
+    // Verify manager belongs to the company
+    const { data: managerCompany, error: managerCompanyError } = await supabase
+      .from('user_companies')
+      .select('company_id')
+      .eq('user_id', managerId)
+      .eq('company_id', companyId)
+      .single();
+
+    if (managerCompanyError || !managerCompany) {
+      return {
+        success: false,
+        message: 'Unauthorized: Manager must belong to this company',
+      };
+    }
+
+    // Verify user belongs to the same company
+    const { data: userCompany, error: userCompanyError } = await supabase
+      .from('user_companies')
+      .select('company_id')
+      .eq('user_id', userId)
+      .eq('company_id', companyId)
+      .single();
+
+    if (userCompanyError || !userCompany) {
+      return {
+        success: false,
+        message: 'User must belong to this company',
+      };
+    }
+
+    // Get current user points
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('total_points')
+      .eq('user_id', userId)
+      .single();
+
+    if (userError) throw userError;
+
+    let newPoints = user.total_points || 0;
+
+    // Calculate new points based on action
+    switch (action) {
+      case 'reset':
+        newPoints = 0;
+        break;
+      case 'increase':
+        const increaseAmount = parseInt(amount);
+        if (isNaN(increaseAmount) || increaseAmount <= 0) {
+          return {
+            success: false,
+            message: 'Invalid amount. Must be a positive number.',
+          };
+        }
+        newPoints += increaseAmount;
+        break;
+      case 'decrease':
+        const decreaseAmount = parseInt(amount);
+        if (isNaN(decreaseAmount) || decreaseAmount <= 0) {
+          return {
+            success: false,
+            message: 'Invalid amount. Must be a positive number.',
+          };
+        }
+        newPoints = Math.max(0, newPoints - decreaseAmount);
+        break;
+      case 'set':
+        const setAmount = parseInt(amount);
+        if (isNaN(setAmount) || setAmount < 0) {
+          return {
+            success: false,
+            message: 'Invalid points value. Must be a non-negative number.',
+          };
+        }
+        newPoints = setAmount;
+        break;
+      default:
+        return {
+          success: false,
+          message: 'Invalid action. Use reset, increase, decrease, or set.',
+        };
+    }
+
+    // Update user points
+    const { error } = await supabase
+      .from('users')
+      .update({ total_points: newPoints })
+      .eq('user_id', userId);
+
+    if (error) throw error;
+
+    revalidatePath('/manager-dashboard');
+    return {
+      success: true,
+      message: 'User points updated successfully',
+      newPoints,
+    };
+  } catch (error) {
+    console.error('Error updating user points:', error);
+    return {
+      success: false,
+      message: 'Failed to update user points: ' + error.message,
+    };
+  }
+}

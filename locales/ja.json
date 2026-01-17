@@ -100,7 +100,15 @@
       "points": "ポイント",
       "level": "レベル",
       "noUsersFound": "この会社にユーザーは見つかりませんでした。",
-      "unknownUser": "不明なユーザー"
+      "unknownUser": "不明なユーザー",
+      "actions": "アクション",
+      "managePoints": "ポイント管理",
+      "increase": "増やす",
+      "decrease": "減らす",
+      "setPoints": "設定",
+      "reset": "リセット",
+      "enterAmount": "金額を入力してください",
+      "errorUpdatingPoints": "ポイントの更新に失敗しました"
     },
     "task": {
       "manageParticipants": "参加者と提出物の管理",
@@ -367,6 +375,7 @@
     "900": "900",
     "loading": "読み込み中...",
     "save": "保存",
+    "saving": "保存中...",
     "cancel": "キャンセル",
     "delete": "削除",
     "edit": "編集",

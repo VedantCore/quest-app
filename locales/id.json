@@ -100,7 +100,15 @@
       "points": "Poin",
       "level": "Tingkat",
       "noUsersFound": "Tidak ada pengguna ditemukan di perusahaan ini.",
-      "unknownUser": "Pengguna Tidak Dikenal"
+      "unknownUser": "Pengguna Tidak Dikenal",
+      "actions": "Tindakan",
+      "managePoints": "Kelola Poin",
+      "increase": "Tambah",
+      "decrease": "Kurangi",
+      "setPoints": "Atur",
+      "reset": "Reset",
+      "enterAmount": "Silakan masukkan jumlah",
+      "errorUpdatingPoints": "Gagal memperbarui poin"
     },
     "task": {
       "manageParticipants": "Kelola peserta dan pengiriman",
@@ -367,6 +375,7 @@
     "900": "900",
     "loading": "Memuat...",
     "save": "Simpan",
+    "saving": "Menyimpan...",
     "cancel": "Batal",
     "delete": "Hapus",
     "edit": "Ubah",
