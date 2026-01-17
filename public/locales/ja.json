@@ -71,7 +71,14 @@
       "managerFallback": "マネージャー",
       "participateInTasks": "クエストに参加する",
       "browseAndJoinTasks": "利用可能なクエストを閲覧して参加者として参加する",
-      "browseQuests": "クエストを閲覧"
+      "browseQuests": "クエストを閲覧",
+      "myQuests": "マイクエスト",
+      "viewParticipatingQuests": "参加中のクエストを表示および追跡する",
+      "viewMyQuests": "マイクエストを表示"
+    },
+    "myQuests": {
+      "title": "マイクエスト",
+      "subtitle": "参加中のクエストを追跡および管理する"
     },
     "company": {
       "breadcrumb": "マネージャーダッシュボード",
@@ -100,7 +107,15 @@
       "points": "ポイント",
       "level": "レベル",
       "noUsersFound": "この会社にユーザーは見つかりませんでした。",
-      "unknownUser": "不明なユーザー"
+      "unknownUser": "不明なユーザー",
+      "actions": "アクション",
+      "managePoints": "ポイント管理",
+      "increase": "増やす",
+      "decrease": "減らす",
+      "setPoints": "設定",
+      "reset": "リセット",
+      "enterAmount": "金額を入力してください",
+      "errorUpdatingPoints": "ポイントの更新に失敗しました"
     },
     "task": {
       "manageParticipants": "参加者と提出物の管理",
@@ -367,6 +382,7 @@
     "900": "900",
     "loading": "読み込み中...",
     "save": "保存",
+    "saving": "保存中...",
     "cancel": "キャンセル",
     "delete": "削除",
     "edit": "編集",
@@ -400,7 +416,7 @@
     "noInvites": "招待がまだ生成されていません。",
     "noUsers": "ユーザーが見つかりません",
     "noTasks": "タスクが見つかりません",
-    "noCompanies": "会社が見つかりません",
+    "noCompanies": "会社なし",
     "noPendingSubmissions": "保留中の提出はありません",
     "changeRole": "ロール変更",
     "deleteUser": "ユーザーを削除",
@@ -1538,8 +1554,7 @@
     "revert": "復元",
     "revertLayer": "レイヤー復元",
     "noName": "名前なし",
-    "companies": "会社",
-    "noCompanies": "会社なし"
+    "companies": "会社"
   },
   "inviteManagement": {
     "title": "招待管理",
@@ -1778,6 +1793,10 @@
     "progress": "進捗",
     "joinTask": "タスク参加",
     "leaveTask": "タスク離脱",
+    "leaveQuest": "クエストを離れる",
+    "unjoinSuccess": "クエストから離脱しました！",
+    "unjoinFailed": "クエストの離脱に失敗しました",
+    "unjoinConfirm": "このクエストを離れてもよろしいですか？すべての進捗が失われます。",
     "submitStep": "ステップ提出",
     "viewSubmission": "提出表示",
     "noParticipants": "参加者がまだいません",

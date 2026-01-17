@@ -71,7 +71,14 @@
       "managerFallback": "Manajer",
       "participateInTasks": "Berpartisipasi dalam Misi",
       "browseAndJoinTasks": "Jelajahi misi yang tersedia dan bergabung sebagai peserta",
-      "browseQuests": "Jelajahi Misi"
+      "browseQuests": "Jelajahi Misi",
+      "myQuests": "Misi Saya",
+      "viewParticipatingQuests": "Lihat dan lacak misi yang Anda ikuti",
+      "viewMyQuests": "Lihat Misi Saya"
+    },
+    "myQuests": {
+      "title": "Misi Saya",
+      "subtitle": "Lacak dan kelola misi yang Anda ikuti"
     },
     "company": {
       "breadcrumb": "Dasbor Manajer",
@@ -100,7 +107,15 @@
       "points": "Poin",
       "level": "Tingkat",
       "noUsersFound": "Tidak ada pengguna ditemukan di perusahaan ini.",
-      "unknownUser": "Pengguna Tidak Dikenal"
+      "unknownUser": "Pengguna Tidak Dikenal",
+      "actions": "Tindakan",
+      "managePoints": "Kelola Poin",
+      "increase": "Tambah",
+      "decrease": "Kurangi",
+      "setPoints": "Atur",
+      "reset": "Reset",
+      "enterAmount": "Silakan masukkan jumlah",
+      "errorUpdatingPoints": "Gagal memperbarui poin"
     },
     "task": {
       "manageParticipants": "Kelola peserta dan pengiriman",
@@ -367,6 +382,7 @@
     "900": "900",
     "loading": "Memuat...",
     "save": "Simpan",
+    "saving": "Menyimpan...",
     "cancel": "Batal",
     "delete": "Hapus",
     "edit": "Ubah",
@@ -400,7 +416,7 @@
     "noInvites": "Belum ada undangan yang dibuat.",
     "noUsers": "Tidak ada pengguna ditemukan",
     "noTasks": "Tidak ada tugas ditemukan",
-    "noCompanies": "Tidak ada perusahaan ditemukan",
+    "noCompanies": "Tidak ada perusahaan",
     "noPendingSubmissions": "Tidak ada pengajuan tertunda",
     "changeRole": "Ubah Peran",
     "deleteUser": "Hapus Pengguna",
@@ -1538,8 +1554,7 @@
     "revert": "Kembalikan",
     "revertLayer": "Kembalikan Lapisan",
     "noName": "Tanpa nama",
-    "companies": "Perusahaan",
-    "noCompanies": "Tidak ada perusahaan"
+    "companies": "Perusahaan"
   },
   "inviteManagement": {
     "title": "Manajemen Undangan",
@@ -1778,6 +1793,10 @@
     "progress": "Kemajuan",
     "joinTask": "Bergabung Tugas",
     "leaveTask": "Tinggalkan Tugas",
+    "leaveQuest": "Tinggalkan Misi",
+    "unjoinSuccess": "Berhasil meninggalkan misi!",
+    "unjoinFailed": "Gagal meninggalkan misi",
+    "unjoinConfirm": "Apakah Anda yakin ingin meninggalkan misi ini? Semua kemajuan Anda akan hilang.",
     "submitStep": "Kirim Langkah",
     "viewSubmission": "Lihat Pengajuan",
     "noParticipants": "Belum ada peserta",

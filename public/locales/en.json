@@ -71,7 +71,14 @@
       "managerFallback": "Manager",
       "participateInTasks": "Participate in Quests",
       "browseAndJoinTasks": "Browse available quests and join as a participant",
-      "browseQuests": "Browse Quests"
+      "browseQuests": "Browse Quests",
+      "myQuests": "My Quests",
+      "viewParticipatingQuests": "View and track quests you're participating in",
+      "viewMyQuests": "View My Quests"
+    },
+    "myQuests": {
+      "title": "My Quests",
+      "subtitle": "Track and manage quests you're participating in"
     },
     "company": {
       "breadcrumb": "Manager Dashboard",
@@ -100,7 +107,15 @@
       "points": "Points",
       "level": "Level",
       "noUsersFound": "No users found in this company.",
-      "unknownUser": "Unknown User"
+      "unknownUser": "Unknown User",
+      "actions": "Actions",
+      "managePoints": "Manage Points",
+      "increase": "Increase",
+      "decrease": "Decrease",
+      "setPoints": "Set",
+      "reset": "Reset",
+      "enterAmount": "Please enter an amount",
+      "errorUpdatingPoints": "Failed to update points"
     },
     "task": {
       "steps": "Steps",
@@ -356,7 +371,6 @@
     }
   },
   "common": {
-    "joined": "Joined",
     "100": "100",
     "200": "200",
     "300": "300",
@@ -366,8 +380,10 @@
     "700": "700",
     "800": "800",
     "900": "900",
+    "joined": "Joined",
     "loading": "Loading",
     "save": "Save",
+    "saving": "Saving...",
     "cancel": "Cancel",
     "delete": "Delete",
     "edit": "Edit",
@@ -1773,6 +1789,10 @@
     "errorLoading": "Error loading task",
     "joinSuccess": "Joined quest successfully!",
     "joinFailed": "Failed to join quest",
+    "leaveQuest": "Leave Quest",
+    "unjoinSuccess": "Successfully left the quest!",
+    "unjoinFailed": "Failed to leave quest",
+    "unjoinConfirm": "Are you sure you want to leave this quest? All your progress will be lost.",
     "errorOccurred": "An error occurred",
     "submittingStep": "Submitting step...",
     "stepSubmitted": "Step submitted successfully!",
