@@ -2,7 +2,12 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { getTaskDetails, joinTask, unjoinTask, submitStep } from '@/app/actions';
+import {
+  getTaskDetails,
+  joinTask,
+  unjoinTask,
+  submitStep,
+} from '@/app/actions';
 import { supabase } from '@/lib/supabase';
 import Navbar from '@/components/Navbar';
 import toast from 'react-hot-toast';
@@ -136,7 +141,7 @@ export default function TaskDetailsPage() {
 
   const handleUnjoin = async () => {
     if (!user) return;
-    
+
     // Show confirmation dialog
     if (!confirm(t('taskPage.unjoinConfirm'))) {
       return;
@@ -308,7 +313,7 @@ export default function TaskDetailsPage() {
                     {t('userDashboard.taskDetails.joinQuest')}
                   </button>
                 )}
-              
+
               {task.isEnrolled &&
                 (userRole === 'user' || userRole === 'manager') && (
                   <button
