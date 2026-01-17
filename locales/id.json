@@ -71,7 +71,14 @@
       "managerFallback": "Manajer",
       "participateInTasks": "Berpartisipasi dalam Misi",
       "browseAndJoinTasks": "Jelajahi misi yang tersedia dan bergabung sebagai peserta",
-      "browseQuests": "Jelajahi Misi"
+      "browseQuests": "Jelajahi Misi",
+      "myQuests": "Misi Saya",
+      "viewParticipatingQuests": "Lihat dan lacak misi yang Anda ikuti",
+      "viewMyQuests": "Lihat Misi Saya"
+    },
+    "myQuests": {
+      "title": "Misi Saya",
+      "subtitle": "Lacak dan kelola misi yang Anda ikuti"
     },
     "company": {
       "breadcrumb": "Dasbor Manajer",

@@ -75,6 +75,39 @@ export default function ManagerDashboard() {
 
       {/* Company Cards */}
       <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* My Quests Section */}
+        <div className="bg-gradient-to-r from-green-50 to-teal-50 rounded-xl border border-green-200 p-6 mb-8 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-1">
+                {t('manager.dashboard.myQuests')}
+              </h3>
+              <p className="text-sm text-gray-600">
+                {t('manager.dashboard.viewParticipatingQuests')}
+              </p>
+            </div>
+            <button
+              onClick={() => router.push('/user-dashboard')}
+              className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2 whitespace-nowrap"
+            >
+              {t('manager.dashboard.viewMyQuests')}
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
         {/* Browse Available Tasks Section */}
         <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-200 p-6 mb-8 shadow-sm">
           <div className="flex items-center justify-between">

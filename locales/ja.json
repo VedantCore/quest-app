@@ -71,7 +71,14 @@
       "managerFallback": "マネージャー",
       "participateInTasks": "クエストに参加する",
       "browseAndJoinTasks": "利用可能なクエストを閲覧して参加者として参加する",
-      "browseQuests": "クエストを閲覧"
+      "browseQuests": "クエストを閲覧",
+      "myQuests": "マイクエスト",
+      "viewParticipatingQuests": "参加中のクエストを表示および追跡する",
+      "viewMyQuests": "マイクエストを表示"
+    },
+    "myQuests": {
+      "title": "マイクエスト",
+      "subtitle": "参加中のクエストを追跡および管理する"
     },
     "company": {
       "breadcrumb": "マネージャーダッシュボード",

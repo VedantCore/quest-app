@@ -71,7 +71,14 @@
       "managerFallback": "经理",
       "participateInTasks": "参与任务",
       "browseAndJoinTasks": "浏览可用任务并作为参与者加入",
-      "browseQuests": "浏览任务"
+      "browseQuests": "浏览任务",
+      "myQuests": "我的任务",
+      "viewParticipatingQuests": "查看和跟踪您正在参与的任务",
+      "viewMyQuests": "查看我的任务"
+    },
+    "myQuests": {
+      "title": "我的任务",
+      "subtitle": "跟踪和管理您正在参与的任务"
     },
     "company": {
       "breadcrumb": "经理仪表板",

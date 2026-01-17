@@ -71,7 +71,14 @@
       "managerFallback": "Manager",
       "participateInTasks": "Participate in Quests",
       "browseAndJoinTasks": "Browse available quests and join as a participant",
-      "browseQuests": "Browse Quests"
+      "browseQuests": "Browse Quests",
+      "myQuests": "My Quests",
+      "viewParticipatingQuests": "View and track quests you're participating in",
+      "viewMyQuests": "View My Quests"
+    },
+    "myQuests": {
+      "title": "My Quests",
+      "subtitle": "Track and manage quests you're participating in"
     },
     "company": {
       "breadcrumb": "Manager Dashboard",

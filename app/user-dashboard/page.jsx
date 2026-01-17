@@ -16,19 +16,19 @@ function DashboardContent() {
   const [activeTab, setActiveTab] = useState('tasks');
   const [stats, setStats] = useState(null);
 
-  const isStaff = userRole === 'admin' || userRole === 'manager';
+  const isAdmin = userRole === 'admin';
 
   // Handle Tabs & Role Restrictions
   useEffect(() => {
-    if (isStaff) {
-      // If Admin/Manager, FORCE 'profile' tab
+    if (isAdmin) {
+      // If Admin, FORCE 'profile' tab
       setActiveTab('profile');
     } else {
-      // If standard User, allow switching via URL or default
+      // If standard User or Manager, allow switching via URL or default
       const tabParam = searchParams.get('tab');
       if (tabParam) setActiveTab(tabParam);
     }
-  }, [searchParams, isStaff]);
+  }, [searchParams, isAdmin]);
 
   useEffect(() => {
     if (!loading && !user) router.push('/');
@@ -50,21 +50,21 @@ function DashboardContent() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
-            {isStaff
+            {isAdmin
               ? t('userDashboard.title')
               : `${t('userDashboard.welcome')}, ${
                   user.displayName || t('userDashboard.explorer')
                 }`}
           </h1>
           <p className="text-gray-600">
-            {isStaff
+            {isAdmin
               ? t('userDashboard.subtitle')
               : t('userDashboard.trackProgress')}
           </p>
         </div>
 
-        {/* Stats Row (HIDDEN for Staff) */}
-        {!isStaff && activeTab === 'tasks' && stats && (
+        {/* Stats Row (HIDDEN for Admin) */}
+        {!isAdmin && activeTab === 'tasks' && stats && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
               <p className="text-xs text-gray-500 font-bold uppercase">
@@ -101,8 +101,8 @@ function DashboardContent() {
           </div>
         )}
 
-        {/* Tab Switcher (HIDDEN for Staff) */}
-        {!isStaff && (
+        {/* Tab Switcher (HIDDEN for Admin only) */}
+        {!isAdmin && (
           <div className="bg-white p-1 rounded-xl inline-flex border border-gray-200 shadow-sm mb-6">
             <button
               onClick={() => {
@@ -134,7 +134,7 @@ function DashboardContent() {
         )}
 
         {/* Main Content Area */}
-        {activeTab === 'tasks' && !isStaff ? (
+        {activeTab === 'tasks' && !isAdmin ? (
           <TaskList userId={user.uid} onStatsUpdate={setStats} />
         ) : (
           <Profile userId={user.uid} onStatsUpdate={setStats} />
