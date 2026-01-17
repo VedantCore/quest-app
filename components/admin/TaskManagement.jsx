@@ -897,6 +897,7 @@ export default function TaskManagement({ companyId, companyName }) {
                     type="date"
                     required
                     value={formData.deadline}
+                    min={new Date().toISOString().split('T')[0]}
                     onChange={(e) =>
                       setFormData({ ...formData, deadline: e.target.value })
                     }
