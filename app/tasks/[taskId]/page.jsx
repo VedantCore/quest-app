@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { getTaskDetails, joinTask, submitStep } from '@/app/actions';
+import { getTaskDetails, joinTask, unjoinTask, submitStep } from '@/app/actions';
 import { supabase } from '@/lib/supabase';
 import Navbar from '@/components/Navbar';
 import toast from 'react-hot-toast';
@@ -130,6 +130,28 @@ export default function TaskDetailsPage() {
       }
     } catch (error) {
       console.error('Error joining task:', error);
+      toast.error(t('taskPage.errorOccurred'));
+    }
+  };
+
+  const handleUnjoin = async () => {
+    if (!user) return;
+    
+    // Show confirmation dialog
+    if (!confirm(t('taskPage.unjoinConfirm'))) {
+      return;
+    }
+
+    try {
+      const result = await unjoinTask(taskId, user.uid);
+      if (result.success) {
+        toast.success(t('taskPage.unjoinSuccess'));
+        fetchTask(); // Refresh data
+      } else {
+        toast.error(result.message || t('taskPage.unjoinFailed'));
+      }
+    } catch (error) {
+      console.error('Error unjoining task:', error);
       toast.error(t('taskPage.errorOccurred'));
     }
   };
@@ -275,23 +297,36 @@ export default function TaskDetailsPage() {
               </div>
             </div>
 
-            {!task.isEnrolled &&
-              (userRole === 'user' || userRole === 'manager') &&
-              !task.isExpired && (
-                <button
-                  onClick={handleJoin}
-                  className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-md hover:shadow-lg active:scale-95"
-                >
-                  {t('userDashboard.taskDetails.joinQuest')}
-                </button>
-              )}
-            {!task.isEnrolled &&
-              (userRole === 'user' || userRole === 'manager') &&
-              task.isExpired && (
-                <div className="px-6 py-3 bg-red-50 text-red-700 font-bold rounded-xl border-2 border-red-200">
-                  {t('userDashboard.taskDetails.questExpired')}
-                </div>
-              )}
+            <div className="flex gap-3">
+              {!task.isEnrolled &&
+                (userRole === 'user' || userRole === 'manager') &&
+                !task.isExpired && (
+                  <button
+                    onClick={handleJoin}
+                    className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-md hover:shadow-lg active:scale-95"
+                  >
+                    {t('userDashboard.taskDetails.joinQuest')}
+                  </button>
+                )}
+              
+              {task.isEnrolled &&
+                (userRole === 'user' || userRole === 'manager') && (
+                  <button
+                    onClick={handleUnjoin}
+                    className="px-6 py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors shadow-md hover:shadow-lg active:scale-95"
+                  >
+                    {t('taskPage.leaveQuest')}
+                  </button>
+                )}
+
+              {!task.isEnrolled &&
+                (userRole === 'user' || userRole === 'manager') &&
+                task.isExpired && (
+                  <div className="px-6 py-3 bg-red-50 text-red-700 font-bold rounded-xl border-2 border-red-200">
+                    {t('userDashboard.taskDetails.questExpired')}
+                  </div>
+                )}
+            </div>
           </div>
 
           <div className="prose max-w-none text-gray-600 bg-gray-50/50 p-6 rounded-xl border border-gray-100">

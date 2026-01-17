@@ -241,6 +241,68 @@ export async function joinTask(taskId, userId) {
 }
 
 /**
+ * User leaves/unjoins a task
+ */
+export async function unjoinTask(taskId, userId) {
+  try {
+    // Find the user's active enrollment
+    const { data: activeEnrollment, error: enrollmentError } = await supabase
+      .from('task_enrollments')
+      .select('enrollment_id, joined_at')
+      .eq('task_id', taskId)
+      .eq('user_id', userId)
+      .eq('status', 'IN_PROGRESS')
+      .single();
+
+    if (enrollmentError) {
+      if (enrollmentError.code === 'PGRST116') {
+        return {
+          success: false,
+          message: 'You are not enrolled in this quest.',
+        };
+      }
+      throw enrollmentError;
+    }
+
+    // Get all step IDs for this task
+    const { data: taskSteps, error: stepsError } = await supabase
+      .from('task_steps')
+      .select('step_id')
+      .eq('task_id', taskId);
+
+    if (stepsError) throw stepsError;
+
+    const stepIds = taskSteps.map((s) => s.step_id);
+
+    // Delete all submissions for this enrollment (only from current run)
+    if (stepIds.length > 0) {
+      const { error: deleteSubsError } = await supabase
+        .from('step_submissions')
+        .delete()
+        .eq('user_id', userId)
+        .in('step_id', stepIds)
+        .gte('submitted_at', activeEnrollment.joined_at);
+
+      if (deleteSubsError) throw deleteSubsError;
+    }
+
+    // Delete the enrollment
+    const { error: deleteEnrollmentError } = await supabase
+      .from('task_enrollments')
+      .delete()
+      .eq('enrollment_id', activeEnrollment.enrollment_id);
+
+    if (deleteEnrollmentError) throw deleteEnrollmentError;
+
+    revalidatePath('/user-dashboard');
+    return { success: true, message: 'Successfully left the quest!' };
+  } catch (error) {
+    console.error('Error unjoining task:', error);
+    return { success: false, message: 'Failed to leave task.' };
+  }
+}
+
+/**
  * User submits a step for review
  */
 export async function submitStep(stepId, userId) {
