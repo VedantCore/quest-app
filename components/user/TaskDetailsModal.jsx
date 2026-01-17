@@ -185,8 +185,15 @@ export default function TaskDetailsModal({
                       )}
                     </div>
                   </div>
-                  <span className="text-xs font-bold bg-indigo-50 text-indigo-600 px-2 py-1 rounded border border-indigo-100 whitespace-nowrap">
-                    +{step.points_reward} {t('common.pts')}
+                  <span
+                    className={`text-xs font-bold px-2 py-1 rounded border whitespace-nowrap ${
+                      step.points_reward >= 0
+                        ? 'bg-indigo-50 text-indigo-600 border-indigo-100'
+                        : 'bg-red-50 text-red-600 border-red-100'
+                    }`}
+                  >
+                    {step.points_reward >= 0 ? '+' : ''}
+                    {step.points_reward} {t('common.pts')}
                   </span>
                 </div>
               ))}

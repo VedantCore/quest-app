@@ -794,8 +794,15 @@ export default function Profile({ userId, onStatsUpdate }) {
                               </p>
                             </div>
                           </div>
-                          <span className="text-sm font-semibold text-gray-600">
-                            +{item.points_earned} {t('common.pts')}
+                          <span
+                            className={`text-sm font-semibold ${
+                              item.points_earned >= 0
+                                ? 'text-green-600'
+                                : 'text-red-600'
+                            }`}
+                          >
+                            {item.points_earned >= 0 ? '+' : ''}
+                            {item.points_earned} {t('common.pts')}
                           </span>
                         </div>
                       ))}

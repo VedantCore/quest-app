@@ -201,7 +201,16 @@ export default function ManagerTaskDetailsModal({ task, isOpen, onClose }) {
                         </div>
                       </div>
                       <span className="text-xs font-bold bg-indigo-50 text-indigo-600 px-2 py-1 rounded border border-indigo-100 whitespace-nowrap">
-                        {step.points_reward} {t('common.pts')}
+                        <span
+                          className={
+                            step.points_reward >= 0
+                              ? 'text-indigo-600'
+                              : 'text-red-600'
+                          }
+                        >
+                          {step.points_reward >= 0 ? '+' : ''}
+                          {step.points_reward} {t('common.pts')}
+                        </span>
                       </span>
                     </div>
                   ))

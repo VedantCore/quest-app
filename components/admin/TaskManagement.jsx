@@ -1016,7 +1016,6 @@ export default function TaskManagement({ companyId, companyName }) {
                         <input
                           type="number"
                           required
-                          min="0"
                           value={step.points_reward}
                           onChange={(e) =>
                             updateStep(index, 'points_reward', e.target.value)
