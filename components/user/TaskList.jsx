@@ -91,8 +91,11 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
   const fetchUserCompanies = async () => {
     try {
       const result = await getUserCompanies(userId);
+      console.log('Fetched user companies:', result);
       if (result.success) {
         setCompanies(result.data || []);
+      } else {
+        console.error('Failed to fetch companies:', result.error);
       }
     } catch (error) {
       console.error('Error fetching companies:', error);
@@ -108,6 +111,7 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
 
       // Get user's company IDs from state
       const userCompanyIds = companies.map((c) => c.company_id);
+      console.log('User company IDs for filtering tasks:', userCompanyIds);
 
       // 1. Fetch tasks with steps, manager info, AND company info
       let tasksQuery = supabase
@@ -126,9 +130,13 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
       if (userCompanyIds.length > 0) {
         // Only show tasks from user's assigned companies
         tasksQuery = tasksQuery.in('company_id', userCompanyIds);
+        console.log('Filtering tasks by company IDs:', userCompanyIds);
       } else {
         // If user has no companies, show NO tasks (or only legacy tasks without company)
         tasksQuery = tasksQuery.is('company_id', null);
+        console.log(
+          'User has no companies, showing only tasks without company_id'
+        );
       }
 
       const { data: allTasks, error: tasksError } = await tasksQuery.order(
@@ -140,6 +148,10 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
         console.error('Task query error:', tasksError);
         throw tasksError;
       }
+
+      console.log(
+        `Fetched ${allTasks?.length || 0} tasks for user's companies`
+      );
 
       // 2. Fetch user enrollments
       const { data: enrollments, error: enrollmentsError } = await supabase

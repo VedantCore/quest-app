@@ -854,6 +854,7 @@ export async function getTaskParticipants(taskId) {
  */
 export async function getUserCompanies(userId) {
   try {
+    // Query user_companies table to get only companies assigned to this specific user
     const { data, error } = await supabaseAdmin
       .from('user_companies')
       .select(
@@ -868,9 +869,19 @@ export async function getUserCompanies(userId) {
       )
       .eq('user_id', userId);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error in getUserCompanies query:', error);
+      throw error;
+    }
 
-    return { success: true, data: data.map((uc) => uc.companies) };
+    // Filter out any null companies (in case of data inconsistency)
+    const validCompanies = data
+      .filter((uc) => uc.companies !== null)
+      .map((uc) => uc.companies);
+
+    console.log(`getUserCompanies for user ${userId}:`, validCompanies);
+
+    return { success: true, data: validCompanies };
   } catch (error) {
     console.error('Error fetching user companies:', error);
     return { success: false, error: error.message };
