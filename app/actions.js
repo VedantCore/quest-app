@@ -220,6 +220,24 @@ export async function joinTask(taskId, userId) {
       };
     }
 
+    // Get all step IDs for this task to clean up old submissions
+    const { data: taskSteps, error: stepsError } = await supabase
+      .from('task_steps')
+      .select('step_id')
+      .eq('task_id', taskId);
+
+    if (stepsError) throw stepsError;
+
+    // Delete any old submissions from previous attempts to reset progress to 0%
+    if (taskSteps && taskSteps.length > 0) {
+      const stepIds = taskSteps.map((s) => s.step_id);
+      await supabase
+        .from('step_submissions')
+        .delete()
+        .eq('user_id', userId)
+        .in('step_id', stepIds);
+    }
+
     // User can join - insert new enrollment with IN_PROGRESS status
     const { data, error } = await supabase
       .from('task_enrollments')
