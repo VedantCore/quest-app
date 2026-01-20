@@ -360,3 +360,125 @@ export async function bulkAssignUsersToCompanyAction(
     return { success: false, error: error.message };
   }
 }
+
+// ==========================================
+// MANAGER OPERATIONS
+// ==========================================
+
+export async function getCompanyUsersForManagerAction(token, companyId) {
+  try {
+    const decodedToken = await adminAuth.verifyIdToken(token);
+    const uid = decodedToken.uid;
+
+    // Check if user is manager and has access to this company
+    const { data: user, error: userError } = await supabaseAdmin
+      .from('users')
+      .select('role')
+      .eq('user_id', uid)
+      .single();
+
+    if (userError || !user || user.role !== 'manager') {
+      throw new Error('Unauthorized: Manager access required');
+    }
+
+    // Verify manager is assigned to this company
+    const { data: managerCompany } = await supabaseAdmin
+      .from('user_companies')
+      .select('*')
+      .eq('user_id', uid)
+      .eq('company_id', companyId)
+      .single();
+
+    if (!managerCompany) {
+      throw new Error('Unauthorized: You do not have access to this company');
+    }
+
+    // Get company users with their details
+    const { data, error } = await supabaseAdmin
+      .from('user_companies')
+      .select(
+        `
+        user_id,
+        company_id,
+        assigned_at,
+        users!user_companies_user_id_fkey (
+          user_id,
+          name,
+          email,
+          role,
+          avatar_url,
+          total_points
+        )
+      `
+      )
+      .eq('company_id', companyId);
+
+    if (error) throw error;
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error fetching company users for manager:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function removeUserFromCompanyByManagerAction(
+  token,
+  userId,
+  companyId
+) {
+  try {
+    const decodedToken = await adminAuth.verifyIdToken(token);
+    const uid = decodedToken.uid;
+
+    // Check if user is manager
+    const { data: user, error: userError } = await supabaseAdmin
+      .from('users')
+      .select('role')
+      .eq('user_id', uid)
+      .single();
+
+    if (userError || !user || user.role !== 'manager') {
+      throw new Error('Unauthorized: Manager access required');
+    }
+
+    // Verify manager is assigned to this company
+    const { data: managerCompany } = await supabaseAdmin
+      .from('user_companies')
+      .select('*')
+      .eq('user_id', uid)
+      .eq('company_id', companyId)
+      .single();
+
+    if (!managerCompany) {
+      throw new Error('Unauthorized: You do not have access to this company');
+    }
+
+    // Check if the user being removed is a manager
+    const { data: targetUser } = await supabaseAdmin
+      .from('users')
+      .select('role')
+      .eq('user_id', userId)
+      .single();
+
+    if (targetUser && targetUser.role === 'manager') {
+      throw new Error(
+        'Cannot remove managers from company. Please contact an admin.'
+      );
+    }
+
+    // Remove user from company
+    const { error } = await supabaseAdmin
+      .from('user_companies')
+      .delete()
+      .eq('user_id', userId)
+      .eq('company_id', companyId);
+
+    if (error) throw error;
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error removing user from company:', error);
+    return { success: false, error: error.message };
+  }
+}
