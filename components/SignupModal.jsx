@@ -21,6 +21,12 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }) {
   const handleSignup = async (e) => {
     e.preventDefault();
     setError('');
+
+    // NEW: Block signup - users must use invite link
+    toast.error(t('signup.inviteRequired'));
+    return;
+
+    /* DISABLED - Users must sign up via invite link
     try {
       console.log('🔵 Starting email/password signup...');
       const userCredential = await createUserWithEmailAndPassword(
@@ -82,6 +88,7 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }) {
         toast.error(err.message);
       }
     }
+    */
   };
 
   const handleGoogleSignup = async () => {
@@ -102,17 +109,20 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }) {
         .eq('user_id', user.uid)
         .single();
 
+      // NEW: Prevent new users from signing up without invite
+      if (!existingUser) {
+        // User doesn't exist - they need an invite to sign up
+        await auth.signOut();
+        toast.error(t('signup.inviteRequired'));
+        return;
+      }
+
       const userData = {
         user_id: user.uid,
         email: user.email,
         name: user.displayName || 'User',
         avatar_url: user.photoURL || null,
       };
-
-      // Only set role if user doesn't exist (preserve existing role)
-      if (!existingUser) {
-        userData.role = 'user';
-      }
 
       console.log('🔵 Attempting Supabase sync with data:', userData);
       const { data, error: supabaseError } = await supabase

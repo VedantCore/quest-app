@@ -107,17 +107,20 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }) {
         .eq('user_id', user.uid)
         .single();
 
+      // NEW: Prevent new users from signing up without invite
+      if (!existingUser) {
+        // User doesn't exist - they need an invite to sign up
+        await auth.signOut();
+        toast.error(t('login.inviteRequired'));
+        return;
+      }
+
       const userData = {
         user_id: user.uid,
         email: user.email,
         name: user.displayName || 'User',
         avatar_url: user.photoURL || null,
       };
-
-      // Only set role if user doesn't exist (preserve existing role)
-      if (!existingUser) {
-        userData.role = 'user';
-      }
 
       console.log('🔵 Attempting Supabase sync with data:', userData);
       const { data, error: supabaseError } = await supabase
