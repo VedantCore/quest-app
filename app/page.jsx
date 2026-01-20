@@ -36,17 +36,21 @@ export default function Home() {
         .eq('user_id', user.uid)
         .single();
 
-      // Sync user to Supabase
+      // NEW: Prevent login for users not in database (must use invite link)
+      if (!existingUser) {
+        await auth.signOut();
+        toast.error(t('login.inviteRequired'));
+        setLoading(false);
+        return;
+      }
+
+      // Sync user data to Supabase (update profile info only)
       const userData = {
         user_id: user.uid,
         email: user.email,
         name: user.displayName || email.split('@')[0],
         avatar_url: user.photoURL || null,
       };
-
-      if (!existingUser) {
-        userData.role = 'user';
-      }
 
       const { error: supabaseError } = await supabase
         .from('users')
@@ -83,22 +87,27 @@ export default function Home() {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
+      // Check if user exists in Supabase
       const { data: existingUser } = await supabase
         .from('users')
         .select('role')
         .eq('user_id', user.uid)
         .single();
 
+      // NEW: Prevent login for users not in database (must use invite link)
+      if (!existingUser) {
+        await auth.signOut();
+        toast.error(t('login.inviteRequired'));
+        return;
+      }
+
+      // Sync user data to Supabase (update profile info only)
       const userData = {
         user_id: user.uid,
         email: user.email,
         name: user.displayName || 'User',
         avatar_url: user.photoURL || null,
       };
-
-      if (!existingUser) {
-        userData.role = 'user';
-      }
 
       const { error: supabaseError } = await supabase
         .from('users')

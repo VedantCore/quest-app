@@ -36,14 +36,20 @@ export const AuthProvider = ({ children }) => {
             setUserRole(data.role);
             setUserData(data);
           } else {
-            console.error('Error fetching user data:', error);
+            // User exists in Firebase but not in Supabase - sign them out
+            console.error('User not found in database, signing out:', error);
+            await auth.signOut();
             setUserRole(null);
             setUserData(null);
+            setUser(null);
           }
         } catch (err) {
           console.error('Exception fetching user data:', err);
+          // Sign out on error to be safe
+          await auth.signOut();
           setUserRole(null);
           setUserData(null);
+          setUser(null);
         }
       } else {
         setUserRole(null);
