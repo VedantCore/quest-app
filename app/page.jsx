@@ -1,126 +1,13 @@
 'use client';
 import { useState } from 'react';
-import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
-import { auth, googleProvider } from '../lib/firebase';
-import { supabase } from '../lib/supabase';
-import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
+import Navbar from '../components/Navbar';
+import LoginModal from '../components/LoginModal';
+import SignupModal from '../components/SignupModal';
+import Link from 'next/link';
 
 export default function Home() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    try {
-      console.log('🔵 Starting email/password login...');
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      const user = userCredential.user;
-      
-      // Check if user exists in Supabase
-      const { data: existingUser } = await supabase
-        .from('users')
-        .select('role')
-        .eq('user_id', user.uid)
-        .single();
-
-      // Sync user to Supabase
-      const userData = {
-        user_id: user.uid,
-        email: user.email,
-        name: user.displayName || email.split('@')[0],
-        avatar_url: user.photoURL || null,
-      };
-
-      if (!existingUser) {
-        userData.role = 'user';
-      }
-
-      const { error: supabaseError } = await supabase
-        .from('users')
-        .upsert(userData, { onConflict: 'user_id' })
-        .select();
-
-      if (supabaseError) {
-        console.error('❌ Supabase sync error:', supabaseError);
-        toast.error(`Auth successful but sync failed: ${supabaseError.message}`);
-      } else {
-        toast.success('Logged in successfully!');
-      }
-
-      // Redirect based on role
-      const role = existingUser?.role || 'user';
-      if (role === 'admin') {
-        router.push('/admin-dashboard');
-      } else if (role === 'manager') {
-        router.push('/manager-dashboard');
-      } else {
-        router.push('/user-dashboard');
-      }
-    } catch (err) {
-      toast.error(err.message);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    setError('');
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
-
-      const { data: existingUser } = await supabase
-        .from('users')
-        .select('role')
-        .eq('user_id', user.uid)
-        .single();
-
-      const userData = {
-        user_id: user.uid,
-        email: user.email,
-        name: user.displayName || 'User',
-        avatar_url: user.photoURL || null,
-      };
-
-      if (!existingUser) {
-        userData.role = 'user';
-      }
-
-      const { error: supabaseError } = await supabase
-        .from('users')
-        .upsert(userData, { onConflict: 'user_id' })
-        .select();
-
-      if (supabaseError) {
-        toast.error(`Auth successful but sync failed: ${supabaseError.message}`);
-      } else {
-        toast.success('Logged in successfully!');
-      }
-
-      const role = existingUser?.role || 'user';
-      if (role === 'admin') {
-        router.push('/admin-dashboard');
-      } else if (role === 'manager') {
-        router.push('/manager-dashboard');
-      } else {
-        router.push('/user-dashboard');
-      }
-    } catch (err) {
-      toast.error(err.message);
-    }
-  };
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showSignupModal, setShowSignupModal] = useState(false);
 
   return (
     <div className="min-h-screen w-full flex">
@@ -132,150 +19,489 @@ export default function Home() {
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-indigo-400 rounded-full blur-[100px]"></div>
         </div>
 
-        <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-12">
-            <div className="h-8 w-8 rounded bg-white"></div>
-            <span className="text-2xl font-bold">Quest</span>
-          </div>
+        <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight text-slate-900 mb-6 sm:mb-8 leading-[1.1] sm:leading-[1.1]">
+          Move fast, stay aligned,
+          <br className="hidden md:block" />
+          <span className="text-indigo-600 block md:inline">
+            {' '}
+            build better together.
+          </span>
+        </h1>
 
-          <h1 className="text-4xl lg:text-5xl font-bold mb-8 leading-tight">
-            この指とまれ
-          </h1>
+        <p className="mt-4 sm:mt-6 text-lg sm:text-xl text-slate-600 max-w-2xl sm:max-w-3xl mx-auto leading-relaxed font-medium">
+          The #1 software development tool used by agile teams. Plan, track, and
+          release world-class software with the modern project management
+          platform built for speed.
+        </p>
 
-          <div className="space-y-4 text-lg lg:text-xl text-indigo-100 font-medium leading-relaxed">
-            <p>共感した人が集まる。</p>
-            <p>共感した人だけで実行する。</p>
-            <p>共感が、そのまま成果になる。</p>
-            <p className="pt-4 text-white font-bold">
-              エントリー式プロジェクトシステム。
-            </p>
-          </div>
-        </div>
-
-        <div className="absolute bottom-8 left-12 text-xs text-indigo-300">
-          © 2025 Quest App Inc.
-        </div>
-      </div>
-
-      {/* Right Side - Login Form */}
-      <div className="w-full md:w-1/2 bg-white flex items-center justify-center p-8">
-        <div className="w-full max-w-md space-y-8">
-          <div className="text-center md:text-left">
-            <h2 className="text-3xl font-bold text-slate-900">Login</h2>
-            <p className="mt-2 text-slate-600">
-              Enter your email below to login to your account
-            </p>
-          </div>
-
-          {error && (
-            <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleLogin} className="space-y-5">
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-slate-700 mb-1"
-              >
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@example.com"
-                className="w-full px-4 py-3 bg-white border border-slate-300 text-slate-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent transition-all"
-                required
-              />
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-slate-700"
-                >
-                  Password
-                </label>
-                <button
-                  type="button"
-                  className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
-                  onClick={() => toast.success('Please contact your administrator for password reset.')}
-                >
-                  Forgot your password?
-                </button>
-              </div>
-              <div className="relative">
-                <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 bg-white border border-slate-300 text-slate-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent pr-10 transition-all"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600"
-                >
-                  {showPassword ? (
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                    </svg>
-                  ) : (
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3.5 px-4 bg-indigo-900 text-white font-semibold rounded-lg hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all shadow-md hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Logging in...' : 'Login'}
-            </button>
-          </form>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-200"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-slate-500 uppercase tracking-wider font-medium text-xs">
-                Or continue with
-              </span>
-            </div>
-          </div>
-
+        <div className="mt-8 sm:mt-12 flex justify-center">
           <button
-            onClick={handleGoogleLogin}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3.5 border border-slate-200 rounded-lg hover:bg-slate-50 bg-white text-slate-700 font-medium transition-all"
+            onClick={() => setShowSignupModal(true)}
+            className="w-full sm:w-auto px-8 py-4 text-lg font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-all shadow-lg hover:shadow-indigo-500/30 hover:-translate-y-1"
           >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-            </svg>
-            Login with Google
+            Start building your Quests
           </button>
+        </div>
+      </section>
 
-          <p className="text-center text-sm text-slate-500 pt-4">
-            By clicking login, you agree to our Terms of Service and Privacy Policy.
-            <br />
-            <span className="inline-block mt-2 px-3 py-1 bg-slate-100 rounded-full text-slate-500 font-medium text-xs">
-              Invite Only
-            </span>
-          </p>
+      {/* Features Section */}
+      <section id="features" className="px-6 py-16 sm:py-24 scroll-mt-20">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12 sm:mb-20">
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
+              Everything you need to ship
+            </h2>
+            <p className="mt-3 text-lg text-slate-600">
+              Powerful features for modern teams
+            </p>
+          </div>
+
+          <div className="grid gap-6 sm:gap-8 grid-cols-1 md:grid-cols-3">
+            {[
+              {
+                title: 'Plan',
+                desc: 'Create user stories and issues, plan sprints, and distribute tasks.',
+                icon: (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                  />
+                ),
+                color: 'text-indigo-600',
+                bg: 'bg-indigo-50',
+              },
+              {
+                title: 'Track',
+                desc: 'Prioritize and discuss your team’s work in full context with complete visibility.',
+                icon: (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                  />
+                ),
+                color: 'text-indigo-600',
+                bg: 'bg-indigo-50',
+              },
+              {
+                title: 'Release',
+                desc: 'Ship with confidence and sanity knowing the information you have is always up-to-date.',
+                icon: (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
+                ),
+                color: 'text-violet-600',
+                bg: 'bg-violet-50',
+              },
+            ].map((feature, i) => (
+              <div
+                key={i}
+                className="group p-6 sm:p-8 bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-xl hover:border-indigo-200 transition-all duration-300"
+              >
+                <div
+                  className={`w-12 h-12 sm:w-14 sm:h-14 ${feature.bg} ${feature.color} rounded-xl flex items-center justify-center mb-5 sm:mb-6 group-hover:scale-110 transition-transform`}
+                >
+                  <svg
+                    className="w-6 h-6 sm:w-7 sm:h-7"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    {feature.icon}
+                  </svg>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2 sm:mb-3">
+                  {feature.title}
+                </h3>
+                <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
+                  {feature.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section id="pricing" className="px-6 py-16 sm:py-24 scroll-mt-20">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
+              Simple, transparent pricing
+            </h2>
+            <p className="mt-3 text-lg text-slate-600">
+              Start for free, scale as you grow
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                name: 'Starter',
+                price: '$0',
+                desc: 'For individuals and small teams.',
+                features: [
+                  'Up to 10 Users',
+                  'Unlimited Quests',
+                  'Basic Analytics',
+                  'Community Support',
+                ],
+              },
+              {
+                name: 'Pro',
+                price: '$12',
+                desc: 'For growing teams that need more.',
+                features: [
+                  'Unlimited Users',
+                  'Advanced Analytics',
+                  'Private Projects',
+                  'Priority Support',
+                ],
+                popular: true,
+              },
+              {
+                name: 'Enterprise',
+                price: 'Custom',
+                desc: 'For large organizations.',
+                features: [
+                  'SSO & Advanced Security',
+                  'Dedicated Success Manager',
+                  'Custom Contracts',
+                  'SLA Support',
+                ],
+              },
+            ].map((plan, i) => (
+              <div
+                key={i}
+                className={`relative p-8 bg-white rounded-2xl border ${
+                  plan.popular
+                    ? 'border-indigo-600 shadow-xl'
+                    : 'border-slate-200 shadow-sm'
+                } hover:shadow-lg transition-shadow`}
+              >
+                {plan.popular && (
+                  <div className="absolute top-0 right-0 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl">
+                    POPULAR
+                  </div>
+                )}
+                <h3 className="text-xl font-bold text-slate-900">
+                  {plan.name}
+                </h3>
+                <div className="mt-4 mb-2 flex items-baseline gap-1">
+                  <span className="text-4xl font-extrabold text-slate-900">
+                    {plan.price}
+                  </span>
+                  {plan.price !== 'Custom' && (
+                    <span className="text-slate-500">/user/mo</span>
+                  )}
+                </div>
+                <p className="text-slate-600 text-sm mb-6">{plan.desc}</p>
+
+                <ul className="space-y-3 mb-8">
+                  {plan.features.map((feature, idx) => (
+                    <li
+                      key={idx}
+                      className="flex items-center gap-3 text-sm text-slate-700"
+                    >
+                      <svg
+                        className="w-5 h-5 text-emerald-500 shrink-0"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+
+                <button
+                  className={`w-full py-3 rounded-xl font-semibold transition-all ${
+                    plan.popular
+                      ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md'
+                      : 'bg-slate-50 text-slate-900 hover:bg-slate-100 border border-slate-200'
+                  }`}
+                >
+                  {plan.price === 'Custom' ? 'Contact Sales' : 'Get Started'}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* About Section */}
+      <section id="about" className="px-6 py-16 sm:py-24 scroll-mt-20">
+        <div className="max-w-7xl mx-auto bg-white rounded-3xl border border-slate-200 p-8 sm:p-12 shadow-sm">
+          <div className="flex flex-col md:flex-row gap-12 items-center">
+            <div className="flex-1 space-y-6">
+              <h2 className="text-3xl font-bold text-slate-900">About Quest</h2>
+              <p className="text-slate-600 leading-relaxed text-lg">
+                We believe project management shouldn't feel like a chore. Quest
+                was born from the frustration of complex, bloated tools that
+                slow teams down.
+              </p>
+              <p className="text-slate-600 leading-relaxed text-lg">
+                Our mission is to empower teams to focus on what matters most:{' '}
+                <span className="font-semibold text-indigo-600">
+                  building great software
+                </span>
+                . We combine simplicity with power to create a tool that gets
+                out of your way.
+              </p>
+              <div className="pt-4 flex gap-4">
+                <div className="text-center">
+                  <p className="text-3xl font-bold text-indigo-600">10k+</p>
+                  <p className="text-sm text-slate-500">Active Users</p>
+                </div>
+                <div className="w-px bg-slate-200 h-12"></div>
+                <div className="text-center">
+                  <p className="text-3xl font-bold text-indigo-600">5M+</p>
+                  <p className="text-sm text-slate-500">Tasks Completed</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex-1 w-full max-w-md">
+              <div className="aspect-square bg-slate-100 rounded-2xl relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-100 to-violet-100 opacity-50"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="h-32 w-32 bg-white rounded-3xl shadow-xl flex items-center justify-center transform -rotate-6">
+                    <div className="h-16 w-16 bg-indigo-600 rounded-xl"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA / Exploration Section */}
+      <section className="px-6 py-12 sm:py-24">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-white border border-slate-200 rounded-[2rem] p-8 sm:p-16 relative overflow-hidden text-center shadow-xl">
+            {/* Subtle Light Gradients */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+              <div className="absolute -top-24 -left-24 w-64 sm:w-96 h-64 sm:h-96 bg-indigo-50/50 rounded-full blur-[100px]"></div>
+              <div className="absolute bottom-0 right-0 w-64 sm:w-96 h-64 sm:h-96 bg-violet-50/50 rounded-full blur-[100px]"></div>
+            </div>
+
+            <div className="relative z-10 max-w-3xl mx-auto">
+              <h2 className="text-3xl sm:text-5xl font-bold text-slate-900 mb-6 tracking-tight leading-tight">
+                Ready to transform how <br className="hidden sm:block" /> you
+                build software?
+              </h2>
+              <p className="text-slate-600 text-lg sm:text-xl mb-10 leading-relaxed font-medium">
+                Join a community of high-performing teams who are shipping
+                faster and staying aligned with Quest.
+              </p>
+              <div className="flex flex-col sm:flex-row justify-center gap-4">
+                <button
+                  onClick={() => setShowSignupModal(true)}
+                  className="px-8 py-4 text-base font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-all shadow-lg hover:-translate-y-1"
+                >
+                  Start Questing
+                </button>
+                <Link
+                  href="#docs"
+                  className="px-8 py-4 text-base font-semibold text-indigo-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all shadow-sm hover:shadow"
+                >
+                  Explore Documentation
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer with Transparent/Light Background */}
+      <footer className="border-t border-slate-200 pt-16 pb-12 mt-12 bg-transparent">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-16">
+            <div className="col-span-2 lg:col-span-2">
+              <Link
+                href="/"
+                className="text-2xl font-bold tracking-tight text-indigo-600 flex items-center gap-2 mb-6"
+              >
+                <div className="h-8 w-8 rounded bg-indigo-600"></div>
+                Quest
+              </Link>
+              <p className="text-slate-500 text-sm leading-relaxed max-w-xs mb-6">
+                The modern standard for project management. Built for speed,
+                designed for clarity, and loved by developers.
+              </p>
+              <div className="flex space-x-4">
+                <span className="h-8 w-8 rounded-full bg-white/50 border border-slate-200 hover:bg-white hover:border-slate-300 flex items-center justify-center cursor-pointer transition-all text-slate-600">
+                  <svg
+                    className="w-4 h-4"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
+                  </svg>
+                </span>
+                <span className="h-8 w-8 rounded-full bg-white/50 border border-slate-200 hover:bg-white hover:border-slate-300 flex items-center justify-center cursor-pointer transition-all text-slate-600">
+                  <svg
+                    className="w-4 h-4"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-bold text-slate-900 mb-4">Discover</h3>
+              <ul className="space-y-3 text-sm text-slate-600">
+                <li>
+                  <Link
+                    href="#"
+                    className="hover:text-indigo-600 transition-colors"
+                  >
+                    Start a Quest
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="hover:text-indigo-600 transition-colors"
+                  >
+                    Templates
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="hover:text-indigo-600 transition-colors"
+                  >
+                    Integration Gallery
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="hover:text-indigo-600 transition-colors"
+                  >
+                    Roadmap
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-bold text-slate-900 mb-4">Resources</h3>
+              <ul className="space-y-3 text-sm text-slate-600">
+                <li>
+                  <Link
+                    href="#"
+                    className="hover:text-indigo-600 transition-colors"
+                  >
+                    Documentation
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="hover:text-indigo-600 transition-colors"
+                  >
+                    API Reference
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="hover:text-indigo-600 transition-colors"
+                  >
+                    Community Forum
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="hover:text-indigo-600 transition-colors"
+                  >
+                    Help Center
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-bold text-slate-900 mb-4">Company</h3>
+              <ul className="space-y-3 text-sm text-slate-600">
+                <li>
+                  <Link
+                    href="#"
+                    className="hover:text-indigo-600 transition-colors"
+                  >
+                    About Us
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="hover:text-indigo-600 transition-colors"
+                  >
+                    Careers
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="hover:text-indigo-600 transition-colors"
+                  >
+                    Legal
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="hover:text-indigo-600 transition-colors"
+                  >
+                    Contact
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row justify-between items-center text-xs text-slate-400 font-medium pt-8 border-t border-slate-200">
+            <p>© 2025 Quest App Inc. All rights reserved.</p>
+            <div className="flex gap-6 mt-4 sm:mt-0">
+              <Link
+                href="#"
+                className="hover:text-indigo-600 transition-colors"
+              >
+                Privacy Policy
+              </Link>
+              <Link
+                href="#"
+                className="hover:text-indigo-600 transition-colors"
+              >
+                Terms of Service
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </div>

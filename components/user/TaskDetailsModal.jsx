@@ -1,7 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { getTaskParticipants } from '@/app/actions';
-import { useAuth } from '@/context/AuthContext'; //
+import { useAuth } from '@/context/AuthContext';
+import { useLocale } from '@/context/LocaleContext';
 
 export default function TaskDetailsModal({
   task,
@@ -10,9 +11,17 @@ export default function TaskDetailsModal({
   onJoin,
   isEnrolled,
 }) {
-  const { userRole } = useAuth(); // Get user role
+  const { userRole } = useAuth();
+  const { t, locale } = useLocale();
   const [participants, setParticipants] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const localeMap = {
+    en: 'en-US',
+    id: 'id-ID',
+    ja: 'ja-JP',
+    zh: 'zh-CN',
+  };
 
   useEffect(() => {
     if (isOpen && task?.task_id) {
@@ -38,12 +47,17 @@ export default function TaskDetailsModal({
 
   const isStaff = userRole === 'admin' || userRole === 'manager'; // Check if staff
 
+  // Check if task is expired
+  const isExpired = task.deadline
+    ? new Date() > new Date(task.deadline)
+    : false;
+
   // Calculate deadline (Created + 30 days logic)
   const getDeadline = (dateStr) => {
-    if (!dateStr) return 'N/A';
+    if (!dateStr) return t('userDashboard.taskList.noDeadline');
     const date = new Date(dateStr);
     date.setDate(date.getDate() + 30);
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString(localeMap[locale] || 'en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -62,11 +76,28 @@ export default function TaskDetailsModal({
             <h3 className="text-2xl font-bold text-slate-900">{task.title}</h3>
             <div className="flex items-center gap-3 mt-2 text-sm text-gray-500">
               <span className="bg-indigo-50 text-indigo-600 px-2.5 py-0.5 rounded-full text-xs font-bold border border-indigo-100">
-                {task.task_steps?.length || 0} Steps
+                {task.task_steps?.length || 0}{' '}
+                {t('userDashboard.taskDetails.steps')}
               </span>
-              <span className="bg-indigo-50 text-indigo-600 px-2.5 py-0.5 rounded-full text-xs font-bold border border-indigo-100">
-                Deadline: {getDeadline(task.created_at)}
-              </span>
+              {task.deadline && (
+                <span
+                  className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${
+                    isExpired
+                      ? 'bg-red-50 text-red-600 border-red-200'
+                      : 'bg-indigo-50 text-indigo-600 border-indigo-100'
+                  }`}
+                >
+                  {isExpired
+                    ? `⚠️ ${t('userDashboard.taskDetails.expired')}`
+                    : `${t('userDashboard.taskDetails.deadline')}: ${new Date(
+                        task.deadline
+                      ).toLocaleDateString(localeMap[locale] || 'en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })}`}
+                </span>
+              )}
             </div>
           </div>
           <button
@@ -96,10 +127,11 @@ export default function TaskDetailsModal({
             <div className="md:col-span-2 space-y-4">
               <div>
                 <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-2">
-                  About this Quest
+                  {t('userDashboard.taskDetails.about')}
                 </h4>
                 <p className="text-gray-600 text-sm leading-relaxed bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                  {task.description || 'No description provided.'}
+                  {task.description ||
+                    t('userDashboard.taskDetails.noDescription')}
                 </p>
               </div>
             </div>
@@ -107,7 +139,7 @@ export default function TaskDetailsModal({
             <div className="space-y-4">
               <div>
                 <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-2">
-                  Quest Manager
+                  {t('userDashboard.taskDetails.manager')}
                 </h4>
                 <div className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold shadow-sm">
@@ -115,7 +147,8 @@ export default function TaskDetailsModal({
                   </div>
                   <div className="overflow-hidden">
                     <p className="text-sm font-semibold text-gray-900 truncate">
-                      {task.manager?.name || 'Unassigned'}
+                      {task.manager?.name ||
+                        t('userDashboard.taskDetails.unassigned')}
                     </p>
                     <p className="text-xs text-gray-500 truncate">
                       {task.manager?.email}
@@ -129,7 +162,7 @@ export default function TaskDetailsModal({
           {/* Steps */}
           <div>
             <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">
-              Steps & Conditions
+              {t('userDashboard.taskDetails.stepsConditions')}
             </h4>
             <div className="space-y-2">
               {task.task_steps?.map((step, idx) => (
@@ -152,8 +185,15 @@ export default function TaskDetailsModal({
                       )}
                     </div>
                   </div>
-                  <span className="text-xs font-bold bg-indigo-50 text-indigo-600 px-2 py-1 rounded border border-indigo-100 whitespace-nowrap">
-                    +{step.points_reward} pts
+                  <span
+                    className={`text-xs font-bold px-2 py-1 rounded border whitespace-nowrap ${
+                      step.points_reward >= 0
+                        ? 'bg-indigo-50 text-indigo-600 border-indigo-100'
+                        : 'bg-red-50 text-red-600 border-red-100'
+                    }`}
+                  >
+                    {step.points_reward >= 0 ? '+' : ''}
+                    {step.points_reward} {t('common.pts')}
                   </span>
                 </div>
               ))}
@@ -164,10 +204,10 @@ export default function TaskDetailsModal({
           <div>
             <div className="flex justify-between items-end mb-3">
               <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wide">
-                Adventurers Joined
+                {t('userDashboard.taskDetails.adventurersJoined')}
               </h4>
               <span className="text-xs font-medium text-gray-500">
-                {participants.length} people
+                {participants.length} {t('userDashboard.taskDetails.people')}
               </span>
             </div>
 
@@ -182,7 +222,7 @@ export default function TaskDetailsModal({
               </div>
             ) : participants.length === 0 ? (
               <div className="text-center py-6 bg-white rounded-xl border border-gray-200 border-dashed text-sm text-gray-500">
-                Be the first to join this quest!
+                {t('userDashboard.taskDetails.beFirst')}
               </div>
             ) : (
               <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
@@ -224,20 +264,24 @@ export default function TaskDetailsModal({
             onClick={onClose}
             className="px-5 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all"
           >
-            Close
+            {t('userDashboard.taskDetails.close')}
           </button>
-          {!isEnrolled &&
-            !isStaff && ( // Check if NOT staff
-              <button
-                onClick={() => {
-                  onJoin(task.task_id);
-                  onClose();
-                }}
-                className="px-6 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 shadow-sm hover:shadow-md transition-all transform hover:-translate-y-0.5"
-              >
-                Join Quest
-              </button>
-            )}
+          {!isEnrolled && !isStaff && !isExpired && (
+            <button
+              onClick={() => {
+                onJoin(task.task_id);
+                onClose();
+              }}
+              className="px-6 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 shadow-sm hover:shadow-md transition-all transform hover:-translate-y-0.5"
+            >
+              {t('userDashboard.taskDetails.joinQuest')}
+            </button>
+          )}
+          {!isEnrolled && !isStaff && isExpired && (
+            <div className="px-4 py-2.5 text-sm font-medium text-red-600 bg-red-50 rounded-xl border border-red-200">
+              {t('userDashboard.taskDetails.questExpired')}
+            </div>
+          )}
         </div>
       </div>
     </div>

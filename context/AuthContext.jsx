@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabase';
 const AuthContext = createContext({
   user: null,
   userRole: null,
+  userData: null,
   loading: true,
 });
 
@@ -15,6 +16,7 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [userRole, setUserRole] = useState(null);
+  const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,20 +24,30 @@ export const AuthProvider = ({ children }) => {
       setUser(firebaseUser);
 
       if (firebaseUser) {
-        // Fetch user role from Supabase
-        const { data, error } = await supabase
-          .from('users')
-          .select('role')
-          .eq('user_id', firebaseUser.uid)
-          .single();
+        // Fetch user role and details from Supabase
+        try {
+          const { data, error } = await supabase
+            .from('users')
+            .select('role, name, avatar_url, total_points')
+            .eq('user_id', firebaseUser.uid)
+            .single();
 
-        if (data && !error) {
-          setUserRole(data.role);
-        } else {
+          if (data && !error) {
+            setUserRole(data.role);
+            setUserData(data);
+          } else {
+            console.error('Error fetching user data:', error);
+            setUserRole(null);
+            setUserData(null);
+          }
+        } catch (err) {
+          console.error('Exception fetching user data:', err);
           setUserRole(null);
+          setUserData(null);
         }
       } else {
         setUserRole(null);
+        setUserData(null);
       }
 
       setLoading(false);
@@ -45,7 +57,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, userRole, loading }}>
+    <AuthContext.Provider value={{ user, userRole, userData, loading }}>
       {children}
     </AuthContext.Provider>
   );

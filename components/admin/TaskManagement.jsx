@@ -5,9 +5,11 @@ import { createTask, updateTask, deleteTask } from '@/app/actions';
 import { getCompaniesAction } from '@/app/company-actions';
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
+import { useLocale } from '../../context/LocaleContext';
 
-export default function TaskManagement() {
+export default function TaskManagement({ companyId, companyName }) {
   const { user } = useAuth();
+  const { t } = useLocale();
   const [tasks, setTasks] = useState([]);
   const [managers, setManagers] = useState([]);
   const [companies, setCompanies] = useState([]);
@@ -22,7 +24,7 @@ export default function TaskManagement() {
     title: '',
     description: '',
     assignedManagerId: '',
-    companyId: '',
+    companyId: companyId || '',
     deadline: '',
     level: 1,
   });
@@ -41,11 +43,11 @@ export default function TaskManagement() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [tasksResult, managersResult, companiesResult] = await Promise.all([
-        supabase
-          .from('tasks')
-          .select(
-            `
+
+      let taskQuery = supabase
+        .from('tasks')
+        .select(
+          `
           *,
           task_steps (*),
           companies (company_id, name),
@@ -59,9 +61,41 @@ export default function TaskManagement() {
             )
           )
         `
+        )
+        .order('created_at', { ascending: false });
+
+      if (companyId) {
+        taskQuery = taskQuery.eq('company_id', companyId);
+      }
+
+      // Fetch managers - filter by company if companyId is provided
+      let managersQuery;
+      if (companyId) {
+        // Fetch only managers assigned to this company
+        managersQuery = supabase
+          .from('user_companies')
+          .select(
+            `
+            user_id,
+            users!user_companies_user_id_fkey (
+              user_id,
+              name,
+              role
+            )
+          `
           )
-          .order('created_at', { ascending: false }),
-        supabase.from('users').select('user_id, name').eq('role', 'manager'),
+          .eq('company_id', companyId);
+      } else {
+        // Fetch all managers globally
+        managersQuery = supabase
+          .from('users')
+          .select('user_id, name')
+          .eq('role', 'manager');
+      }
+
+      const [tasksResult, managersResult, companiesResult] = await Promise.all([
+        taskQuery,
+        managersQuery,
         user ? getCompaniesAction(await user.getIdToken()) : { success: false },
       ]);
 
@@ -69,7 +103,17 @@ export default function TaskManagement() {
       if (managersResult.error) throw managersResult.error;
 
       setTasks(tasksResult.data || []);
-      setManagers(managersResult.data || []);
+
+      // Process managers data - handle different structures
+      let managersData = managersResult.data || [];
+      if (companyId && managersData.length > 0 && managersData[0].users) {
+        // Transform company-filtered data: extract users and filter for managers
+        managersData = managersData
+          .map((item) => item.users)
+          .filter((u) => u && u.role === 'manager');
+      }
+      setManagers(managersData);
+
       if (companiesResult.success) {
         setCompanies(companiesResult.data || []);
       }
@@ -89,7 +133,7 @@ export default function TaskManagement() {
         const result = await updateTask(editingTaskId, formData, steps);
 
         if (result.success) {
-          toast.success('Quest updated successfully!');
+          toast.success(t('taskManagement.taskUpdated'));
           closeCreateModal();
           fetchData();
           if (selectedTask && selectedTask.task_id === editingTaskId) {
@@ -98,22 +142,22 @@ export default function TaskManagement() {
             setSelectedTask(null);
           }
         } else {
-          toast.error(result.message);
+          toast.error(result.message || t('taskManagement.taskUpdateFailed'));
         }
       } else {
         const taskPayload = { ...formData, createdBy: user.uid };
         const result = await createTask(taskPayload, steps);
 
         if (result.success) {
-          toast.success('Quest created successfully!');
+          toast.success(t('taskManagement.taskCreated'));
           closeCreateModal();
           fetchData();
         } else {
-          toast.error(result.message);
+          toast.error(result.message || t('taskManagement.taskCreationFailed'));
         }
       }
     } catch (error) {
-      toast.error('Error saving quest: ' + error.message);
+      toast.error(t('common.serverError'));
     }
   };
 
@@ -144,7 +188,7 @@ export default function TaskManagement() {
       title: '',
       description: '',
       assignedManagerId: '',
-      companyId: '',
+      companyId: companyId || '',
       deadline: '',
       level: 1,
     });
@@ -180,26 +224,26 @@ export default function TaskManagement() {
 
   const handleDeleteClick = (taskId) => {
     toast(
-      (t) => (
+      (toastObj) => (
         <div className="flex flex-col gap-3 min-w-[200px]">
           <p className="font-medium text-gray-800 text-sm">
-            Are you sure you want to delete this quest?
+            {t('taskManagement.deleteConfirm')}
           </p>
           <div className="flex gap-2 justify-end">
             <button
-              onClick={() => toast.dismiss(t.id)}
+              onClick={() => toast.dismiss(toastObj.id)}
               className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
             >
-              Cancel
+              {t('common.cancel')}
             </button>
             <button
               onClick={() => {
-                toast.dismiss(t.id);
+                toast.dismiss(toastObj.id);
                 performDelete(taskId);
               }}
               className="px-3 py-1.5 text-xs font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors"
             >
-              Delete
+              {t('common.delete')}
             </button>
           </div>
         </div>
@@ -222,35 +266,61 @@ export default function TaskManagement() {
     try {
       const result = await deleteTask(taskId);
       if (result.success) {
-        toast.success('Quest deleted successfully');
+        toast.success(t('taskManagement.taskDeleted'));
         fetchData();
         if (selectedTask && selectedTask.task_id === taskId) {
           setSelectedTask(null);
         }
       } else {
-        toast.error(result.message);
+        toast.error(result.message || t('taskManagement.taskDeletionFailed'));
       }
     } catch (error) {
-      toast.error('Error deleting quest: ' + error.message);
+      toast.error(t('common.serverError'));
     }
   };
 
   const getManagerName = (id) =>
-    managers.find((m) => m.user_id === id)?.name || 'Unassigned';
+    managers.find((m) => m.user_id === id)?.name ||
+    t('taskManagement.unassigned');
 
   const getDeadline = (dateStr) => {
-    if (!dateStr) return 'N/A';
+    if (!dateStr) return t('common.noData');
     const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
+    return date.toLocaleDateString();
+  };
+
+  const isTaskExpired = (deadlineStr) => {
+    if (!deadlineStr) return false;
+    const deadline = new Date(deadlineStr);
+    const now = new Date();
+    return now > deadline;
+  };
+
+  const getTaskStatus = (task) => {
+    if (!task.is_active) {
+      return {
+        text: 'Inactive',
+        color: 'bg-red-50 text-red-700 border-red-100',
+      };
+    }
+    if (isTaskExpired(task.deadline)) {
+      return {
+        text: t('taskManagement.expired'),
+        color: 'bg-orange-50 text-orange-700 border-orange-200',
+      };
+    }
+    return {
+      text: t('taskManagement.active'),
+      color: 'bg-green-100 text-green-700 border-green-200',
+    };
   };
 
   const renderStars = (level) => {
     return (
-      <div className="flex gap-0.5" title={`Difficulty ${level || 1}`}>
+      <div
+        className="flex gap-0.5"
+        title={`${t('taskManagement.level')} ${level || 1}`}
+      >
         {[...Array(5)].map((_, i) => (
           <svg
             key={i}
@@ -276,7 +346,9 @@ export default function TaskManagement() {
 
   if (loading) {
     return (
-      <div className="text-center py-12 text-gray-500">Loading quests...</div>
+      <div className="text-center py-12 text-gray-500">
+        {t('taskManagement.loading')}
+      </div>
     );
   }
 
@@ -291,12 +363,16 @@ export default function TaskManagement() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold text-gray-900">Quests</h2>
+        <h2 className="text-xl font-bold text-gray-900">
+          {companyName
+            ? `${t('taskManagement.title')} for ${companyName}`
+            : t('taskManagement.title')}
+        </h2>
         <button
           onClick={() => setShowCreateModal(true)}
           className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl hover:bg-indigo-700 transition shadow-sm font-medium text-sm"
         >
-          + Create Quest
+          + {t('taskManagement.createQuest')}
         </button>
       </div>
 
@@ -306,28 +382,28 @@ export default function TaskManagement() {
             <thead className="bg-gray-50/50">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Quest Title
+                  {t('taskManagement.taskTitle')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Difficulty
+                  {t('taskManagement.level')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Manager
+                  {t('taskManagement.assignManager')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Deadline
+                  {t('taskManagement.deadline')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Conditions
+                  {t('taskManagement.steps')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Points
+                  {t('taskManagement.points')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Status
+                  {t('common.status')}
                 </th>
                 <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Actions
+                  {t('common.actions')}
                 </th>
               </tr>
             </thead>
@@ -338,7 +414,7 @@ export default function TaskManagement() {
                     colSpan="8"
                     className="px-6 py-12 text-center text-gray-500"
                   >
-                    No quests found. Create your first quest!
+                    {t('taskManagement.noTasks')}
                   </td>
                 </tr>
               ) : (
@@ -348,6 +424,8 @@ export default function TaskManagement() {
                       (sum, step) => sum + (step.points_reward || 0),
                       0
                     ) || 0;
+
+                  const taskStatus = getTaskStatus(task);
 
                   return (
                     <tr
@@ -375,20 +453,17 @@ export default function TaskManagement() {
                         {getDeadline(task.deadline)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {task.task_steps?.length || 0} conditions
+                        {task.task_steps?.length || 0}{' '}
+                        {t('taskManagement.steps')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
-                        {totalPoints} pts
+                        {totalPoints} {t('common.pts')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`px-2.5 py-1 text-xs font-medium rounded-full ${
-                            task.is_active
-                              ? 'bg-green-100 text-green-700 border border-green-200'
-                              : 'bg-red-50 text-red-700 border border-red-100'
-                          }`}
+                          className={`px-2.5 py-1 text-xs font-medium rounded-full border ${taskStatus.color}`}
                         >
-                          {task.is_active ? 'Active' : 'Inactive'}
+                          {taskStatus.text}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -398,7 +473,7 @@ export default function TaskManagement() {
                             handleEditClick(task);
                           }}
                           className="text-gray-400 hover:text-indigo-600 transition-colors p-2 hover:bg-gray-50 rounded-lg"
-                          title="Edit Quest"
+                          title={t('common.edit')}
                         >
                           <svg
                             className="w-5 h-5"
@@ -420,7 +495,7 @@ export default function TaskManagement() {
                             handleDeleteClick(task.task_id);
                           }}
                           className="text-gray-400 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-lg ml-1"
-                          title="Delete Quest"
+                          title={t('common.delete')}
                         >
                           <svg
                             className="w-5 h-5"
@@ -462,7 +537,7 @@ export default function TaskManagement() {
                   : 'text-gray-500 hover:bg-gray-50'
               }`}
             >
-              <span className="sr-only">Previous</span>
+              <span className="sr-only">{t('common.previous')}</span>
               <svg
                 className="h-5 w-5"
                 xmlns="http://www.w3.org/2000/svg"
@@ -501,7 +576,7 @@ export default function TaskManagement() {
                   : 'text-gray-500 hover:bg-gray-50'
               }`}
             >
-              <span className="sr-only">Next</span>
+              <span className="sr-only">{t('common.next')}</span>
               <svg
                 className="h-5 w-5"
                 xmlns="http://www.w3.org/2000/svg"
@@ -531,7 +606,7 @@ export default function TaskManagement() {
                 <div className="flex items-center gap-3 mt-2">
                   <div className="flex items-center gap-2 bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
                     <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                      Difficulty:
+                      {t('taskManagement.level')}:
                     </span>
                     {renderStars(selectedTask.level)}
                   </div>
@@ -542,10 +617,12 @@ export default function TaskManagement() {
                         : 'bg-red-100 text-red-700'
                     }`}
                   >
-                    {selectedTask.is_active ? '● Active' : '● Inactive'}
+                    {selectedTask.is_active
+                      ? `● ${t('taskManagement.active')}`
+                      : `● ${t('taskManagement.inactive')}`}
                   </span>
                   <span className="text-sm text-gray-500">
-                    Manager:{' '}
+                    {t('taskManagement.manager')}:{' '}
                     <span className="font-medium text-gray-900">
                       {getManagerName(selectedTask.assigned_manager_id)}
                     </span>
@@ -577,7 +654,7 @@ export default function TaskManagement() {
                 <div className="md:col-span-2 space-y-8">
                   <div>
                     <h4 className="text-lg font-bold text-gray-900 mb-3">
-                      Quest Details
+                      {t('taskManagement.description')}
                     </h4>
                     <p className="text-gray-600 leading-relaxed text-sm bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
                       {selectedTask.description}
@@ -586,7 +663,7 @@ export default function TaskManagement() {
 
                   <div>
                     <h4 className="text-lg font-bold text-gray-900 mb-4">
-                      Completion Conditions
+                      {t('taskManagement.completionConditions')}
                     </h4>
                     <div className="space-y-3">
                       {selectedTask.task_steps?.length > 0 ? (
@@ -612,18 +689,17 @@ export default function TaskManagement() {
                             </div>
                             <div className="flex items-center gap-2 self-start sm:self-center ml-10 sm:ml-0">
                               <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Reward
+                                {t('taskManagement.reward')}
                               </span>
                               <span className="text-sm font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-lg border border-indigo-100 min-w-[70px] text-center">
-                                {step.points_reward} pts
+                                {step.points_reward} {t('common.pts')}
                               </span>
                             </div>
                           </div>
                         ))
                       ) : (
                         <div className="text-sm text-gray-500 bg-white p-6 rounded-xl border border-gray-200 italic text-center">
-                          No specific completion conditions defined for this
-                          quest.
+                          {t('taskManagement.noStepsDefined')}
                         </div>
                       )}
                     </div>
@@ -648,7 +724,9 @@ export default function TaskManagement() {
                           />
                         </svg>
                       </div>
-                      <span className="font-bold text-gray-900">Deadline</span>
+                      <span className="font-bold text-gray-900">
+                        {t('taskManagement.deadline')}
+                      </span>
                     </div>
                     <p className="text-gray-600 text-sm font-medium pl-1">
                       {getDeadline(selectedTask.deadline)}
@@ -671,7 +749,7 @@ export default function TaskManagement() {
                         />
                       </svg>
                       <span className="font-bold text-gray-900 text-sm">
-                        Total Achievement
+                        {t('taskManagement.totalAchievement')}
                       </span>
                     </div>
                     <div className="flex items-baseline gap-1">
@@ -682,11 +760,11 @@ export default function TaskManagement() {
                         )}
                       </span>
                       <span className="text-sm font-bold text-gray-500">
-                        Points
+                        {t('common.pts')}
                       </span>
                     </div>
                     <p className="text-xs text-gray-500 mt-2 leading-relaxed">
-                      Awarded upon successful completion of all conditions.
+                      {t('taskManagement.awardedUponCompletion')}
                     </p>
                   </div>
 
@@ -694,7 +772,7 @@ export default function TaskManagement() {
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-gray-900 text-sm">
-                          Participants
+                          {t('taskManagement.participants')}
                         </span>
                         <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs font-bold">
                           {selectedTask.task_enrollments?.length || 0}
@@ -706,7 +784,7 @@ export default function TaskManagement() {
                       {!selectedTask.task_enrollments ||
                       selectedTask.task_enrollments.length === 0 ? (
                         <p className="text-xs text-gray-400 italic text-center py-4">
-                          No users enrolled yet.
+                          {t('taskManagement.noParticipants')}
                         </p>
                       ) : (
                         selectedTask.task_enrollments.map((enrollment) => (
@@ -736,7 +814,7 @@ export default function TaskManagement() {
                                 {enrollment.users?.name || 'Unknown User'}
                               </p>
                               <p className="text-[10px] text-gray-500 truncate">
-                                Joined{' '}
+                                {t('taskManagement.joined')}{' '}
                                 {new Date(
                                   enrollment.joined_at
                                 ).toLocaleDateString()}
@@ -756,13 +834,13 @@ export default function TaskManagement() {
                 onClick={() => setSelectedTask(null)}
                 className="px-5 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all shadow-sm"
               >
-                Close
+                {t('common.close')}
               </button>
               <button
                 onClick={() => handleEditClick(selectedTask)}
                 className="px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-all shadow-lg hover:shadow-xl"
               >
-                Edit Quest
+                {t('taskManagement.editQuest')}
               </button>
             </div>
           </div>
@@ -773,12 +851,14 @@ export default function TaskManagement() {
         <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-8 max-w-2xl w-full shadow-xl border border-gray-100 max-h-[90vh] overflow-y-auto">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">
-              {isEditing ? 'Edit Quest' : 'Create New Quest'}
+              {isEditing
+                ? t('taskManagement.editQuest')
+                : t('taskManagement.createQuest')}
             </h3>
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Quest Title
+                  {t('taskManagement.taskTitle')}
                 </label>
                 <input
                   type="text"
@@ -788,13 +868,13 @@ export default function TaskManagement() {
                     setFormData({ ...formData, title: e.target.value })
                   }
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-gray-400 transition-all"
-                  placeholder="E.g., Complete Project X"
+                  placeholder={t('taskManagement.taskTitle')}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Quest Details
+                  {t('taskManagement.description')}
                 </label>
                 <textarea
                   required
@@ -804,19 +884,20 @@ export default function TaskManagement() {
                   }
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-gray-400 transition-all"
                   rows="3"
-                  placeholder="Describe the quest objectives..."
+                  placeholder={t('taskManagement.description')}
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Deadline
+                    {t('taskManagement.deadline')}
                   </label>
                   <input
                     type="date"
                     required
                     value={formData.deadline}
+                    min={new Date().toISOString().split('T')[0]}
                     onChange={(e) =>
                       setFormData({ ...formData, deadline: e.target.value })
                     }
@@ -825,7 +906,7 @@ export default function TaskManagement() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Difficulty
+                    {t('taskManagement.level')}
                   </label>
                   <select
                     required
@@ -847,7 +928,7 @@ export default function TaskManagement() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Company *
+                    {t('taskManagement.company')} *
                   </label>
                   <select
                     required
@@ -860,7 +941,9 @@ export default function TaskManagement() {
                     }
                     className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-gray-400 transition-all"
                   >
-                    <option value="">Select a company</option>
+                    <option value="">
+                      {t('taskManagement.selectCompany')}
+                    </option>
                     {companies.map((company) => (
                       <option
                         key={company.company_id}
@@ -873,7 +956,7 @@ export default function TaskManagement() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Assign Manager
+                    {t('taskManagement.assignManager')}
                   </label>
                   <select
                     required
@@ -886,7 +969,9 @@ export default function TaskManagement() {
                     }
                     className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-gray-400 transition-all"
                   >
-                    <option value="">Select a manager</option>
+                    <option value="">
+                      {t('taskManagement.selectManager')}
+                    </option>
                     {managers.map((manager) => (
                       <option key={manager.user_id} value={manager.user_id}>
                         {manager.name}
@@ -899,14 +984,14 @@ export default function TaskManagement() {
               <div className="border-t border-gray-100 pt-5">
                 <div className="flex justify-between items-center mb-4">
                   <label className="text-sm font-bold text-gray-900">
-                    Completion Conditions
+                    {t('taskManagement.completionConditions')}
                   </label>
                   <button
                     type="button"
                     onClick={addStep}
                     className="text-xs bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-200 font-semibold transition-colors"
                   >
-                    + Add Condition
+                    {t('taskManagement.addCondition')}
                   </button>
                 </div>
                 <div className="space-y-3">
@@ -924,18 +1009,19 @@ export default function TaskManagement() {
                             updateStep(index, 'title', e.target.value)
                           }
                           className="flex-1 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:border-gray-400 outline-none"
-                          placeholder={`Condition ${index + 1}`}
+                          placeholder={`${t(
+                            'taskManagement.conditionPlaceholder'
+                          )} ${index + 1}`}
                         />
                         <input
                           type="number"
                           required
-                          min="0"
                           value={step.points_reward}
                           onChange={(e) =>
                             updateStep(index, 'points_reward', e.target.value)
                           }
                           className="w-24 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:border-gray-400 outline-none"
-                          placeholder="Pts"
+                          placeholder={t('common.pts')}
                         />
                         {steps.length > 1 && (
                           <button
@@ -954,7 +1040,7 @@ export default function TaskManagement() {
                           updateStep(index, 'description', e.target.value)
                         }
                         className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:border-gray-400 outline-none"
-                        placeholder="Description (optional)"
+                        placeholder={t('taskManagement.descriptionOptional')}
                       />
                     </div>
                   ))}
@@ -966,14 +1052,16 @@ export default function TaskManagement() {
                   type="submit"
                   className="flex-1 bg-indigo-600 text-white py-3 rounded-xl hover:bg-indigo-700 transition font-semibold shadow-sm"
                 >
-                  {isEditing ? 'Update Quest' : 'Create Quest'}
+                  {isEditing
+                    ? t('taskManagement.updateQuest')
+                    : t('taskManagement.createQuest')}
                 </button>
                 <button
                   type="button"
                   onClick={closeCreateModal}
                   className="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl hover:bg-gray-50 transition font-semibold"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
               </div>
             </form>

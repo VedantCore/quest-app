@@ -61,10 +61,11 @@ export async function getInvitesAction(token) {
       throw new Error('Unauthorized');
     }
 
-    // 3. Fetch Invites
+    // 3. Fetch Active Invites Only
     const { data, error } = await supabaseAdmin
       .from('invites')
       .select('*')
+      .eq('is_used', false)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -139,11 +140,19 @@ export async function completeSignupWithInviteAction(token, code, userData) {
     // Ensure role is 'user'
     const safeUserData = { ...userData, role: 'user' };
 
-    const { error: userError } = await supabaseAdmin
-      .from('users')
-      .upsert(safeUserData, { onConflict: 'user_id' });
+    console.log('Creating user profile with data:', safeUserData);
 
-    if (userError) throw userError;
+    const { data: insertedUser, error: userError } = await supabaseAdmin
+      .from('users')
+      .upsert(safeUserData, { onConflict: 'user_id' })
+      .select();
+
+    if (userError) {
+      console.error('Error creating user profile:', userError);
+      throw userError;
+    }
+
+    console.log('User profile created successfully:', insertedUser);
 
     // 2. Mark invite used
     const { error: inviteError, count } = await supabaseAdmin

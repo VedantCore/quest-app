@@ -95,24 +95,23 @@ export async function updateTask(taskId, taskData, steps) {
       }
 
       // Upsert steps (update existing, insert new)
+      // NEW: Upsert logic to handle duplicates gracefully
       for (const step of steps) {
+        const stepData = {
+          task_id: taskId,
+          title: step.title,
+          description: step.description,
+          points_reward: parseInt(step.points_reward),
+        };
+        // If we have an ID, force it (standard update)
         if (step.step_id) {
-          await supabase
-            .from('task_steps')
-            .update({
-              title: step.title,
-              description: step.description,
-              points_reward: parseInt(step.points_reward),
-            })
-            .eq('step_id', step.step_id);
-        } else {
-          await supabase.from('task_steps').insert({
-            task_id: taskId,
-            title: step.title,
-            description: step.description,
-            points_reward: parseInt(step.points_reward),
-          });
+          stepData.step_id = step.step_id;
         }
+        // This handles both Insert and Update based on the unique constraint
+        const { error } = await supabase
+          .from('task_steps')
+          .upsert(stepData, { onConflict: 'task_id, title' });
+        if (error) throw error;
       }
     }
 
@@ -164,23 +163,74 @@ export async function deleteTask(taskId) {
  */
 export async function joinTask(taskId, userId) {
   try {
+    // First, check if the task exists and get its deadline
+    const { data: task, error: taskError } = await supabase
+      .from('tasks')
+      .select('task_id, deadline, is_active')
+      .eq('task_id', taskId)
+      .single();
+
+    if (taskError) throw taskError;
+
+    if (!task) {
+      return {
+        success: false,
+        message: 'Task not found.',
+      };
+    }
+
+    // Check if task is inactive
+    if (!task.is_active) {
+      return {
+        success: false,
+        message: 'This task is no longer active.',
+      };
+    }
+
+    // Check if deadline has passed
+    if (task.deadline) {
+      const deadline = new Date(task.deadline);
+      const now = new Date();
+
+      if (now > deadline) {
+        return {
+          success: false,
+          message: 'This task has expired. The deadline has passed.',
+        };
+      }
+    }
+
+    // Check if user already has an IN_PROGRESS enrollment for this task
+    const { data: activeEnrollment, error: enrollmentError } = await supabase
+      .from('task_enrollments')
+      .select('enrollment_id')
+      .eq('task_id', taskId)
+      .eq('user_id', userId)
+      .eq('status', 'IN_PROGRESS')
+      .single();
+
+    if (enrollmentError && enrollmentError.code !== 'PGRST116') {
+      throw enrollmentError;
+    }
+
+    if (activeEnrollment) {
+      return {
+        success: false,
+        message: 'You are already working on this quest.',
+      };
+    }
+
+    // User can join - insert new enrollment with IN_PROGRESS status
     const { data, error } = await supabase
       .from('task_enrollments')
       .insert({
         task_id: taskId,
         user_id: userId,
+        status: 'IN_PROGRESS',
       })
       .select();
 
-    if (error) {
-      if (error.code === '23505') {
-        return {
-          success: false,
-          message: 'You have already joined this task.',
-        };
-      }
-      throw error;
-    }
+    if (error) throw error;
 
     revalidatePath('/user-dashboard');
     return { success: true, message: 'Successfully joined task!' };
@@ -191,17 +241,125 @@ export async function joinTask(taskId, userId) {
 }
 
 /**
+ * User leaves/unjoins a task
+ */
+export async function unjoinTask(taskId, userId) {
+  try {
+    // Find the user's active enrollment
+    const { data: activeEnrollment, error: enrollmentError } = await supabase
+      .from('task_enrollments')
+      .select('enrollment_id, joined_at')
+      .eq('task_id', taskId)
+      .eq('user_id', userId)
+      .eq('status', 'IN_PROGRESS')
+      .single();
+
+    if (enrollmentError) {
+      if (enrollmentError.code === 'PGRST116') {
+        return {
+          success: false,
+          message: 'You are not enrolled in this quest.',
+        };
+      }
+      throw enrollmentError;
+    }
+
+    // Get all step IDs for this task
+    const { data: taskSteps, error: stepsError } = await supabase
+      .from('task_steps')
+      .select('step_id')
+      .eq('task_id', taskId);
+
+    if (stepsError) throw stepsError;
+
+    const stepIds = taskSteps.map((s) => s.step_id);
+
+    // Delete all submissions for this enrollment (only from current run)
+    if (stepIds.length > 0) {
+      const { error: deleteSubsError } = await supabase
+        .from('step_submissions')
+        .delete()
+        .eq('user_id', userId)
+        .in('step_id', stepIds)
+        .gte('submitted_at', activeEnrollment.joined_at);
+
+      if (deleteSubsError) throw deleteSubsError;
+    }
+
+    // Delete the enrollment
+    const { error: deleteEnrollmentError } = await supabase
+      .from('task_enrollments')
+      .delete()
+      .eq('enrollment_id', activeEnrollment.enrollment_id);
+
+    if (deleteEnrollmentError) throw deleteEnrollmentError;
+
+    revalidatePath('/user-dashboard');
+    return { success: true, message: 'Successfully left the quest!' };
+  } catch (error) {
+    console.error('Error unjoining task:', error);
+    return { success: false, message: 'Failed to leave task.' };
+  }
+}
+
+/**
  * User submits a step for review
  */
 export async function submitStep(stepId, userId) {
   try {
-    // Check if submission exists
-    const { data: existingSubmission } = await supabase
-      .from('step_submissions')
-      .select('submission_id, status')
+    // First, get the task_id, step title, and task details
+    const { data: step, error: stepError } = await supabase
+      .from('task_steps')
+      .select('task_id, title')
       .eq('step_id', stepId)
+      .single();
+
+    if (stepError) throw stepError;
+
+    // Get task details including assigned manager
+    const { data: task, error: taskError } = await supabase
+      .from('tasks')
+      .select('title, assigned_manager_id')
+      .eq('task_id', step.task_id)
+      .single();
+
+    if (taskError) throw taskError;
+
+    // Get user name for notification
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('name, email')
       .eq('user_id', userId)
       .single();
+
+    if (userError) throw userError;
+
+    // Find the user's current active enrollment for this task
+    const { data: activeEnrollment, error: enrollmentError } = await supabase
+      .from('task_enrollments')
+      .select('enrollment_id, joined_at')
+      .eq('task_id', step.task_id)
+      .eq('user_id', userId)
+      .eq('status', 'IN_PROGRESS')
+      .single();
+
+    if (enrollmentError || !activeEnrollment) {
+      return {
+        success: false,
+        message: 'You must be enrolled in this quest to submit steps.',
+      };
+    }
+
+    // Check if submission exists for this step after the current enrollment date
+    const { data: existingSubmission } = await supabase
+      .from('step_submissions')
+      .select('submission_id, status, submitted_at')
+      .eq('step_id', stepId)
+      .eq('user_id', userId)
+      .gte('submitted_at', activeEnrollment.joined_at)
+      .single();
+
+    let submissionId = null;
 
     if (existingSubmission) {
       // If already approved, don't allow resubmission
@@ -230,15 +388,43 @@ export async function submitStep(stepId, userId) {
         .eq('submission_id', existingSubmission.submission_id);
 
       if (error) throw error;
+      submissionId = existingSubmission.submission_id;
     } else {
       // Create new submission
-      const { error } = await supabase.from('step_submissions').insert({
-        step_id: stepId,
-        user_id: userId,
-        status: 'PENDING',
-      });
+      const { data: newSubmission, error } = await supabase
+        .from('step_submissions')
+        .insert({
+          step_id: stepId,
+          user_id: userId,
+          status: 'PENDING',
+        })
+        .select()
+        .single();
 
       if (error) throw error;
+      submissionId = newSubmission.submission_id;
+    }
+
+    // Create notification for the assigned manager
+    if (task.assigned_manager_id && submissionId) {
+      const { createNotification } = await import('./notification-actions');
+      await createNotification({
+        managerId: task.assigned_manager_id,
+        taskId: step.task_id,
+        userId: userId,
+        stepId: stepId,
+        submissionId: submissionId,
+        type: 'STEP_SUBMITTED',
+        title: 'Step Submitted for Review',
+        message: `${user.name || user.email} submitted "${
+          step.title
+        }" for review in "${task.title}"`,
+        metadata: {
+          userName: user.name || user.email,
+          stepTitle: step.title,
+          taskTitle: task.title,
+        },
+      });
     }
 
     revalidatePath('/user-dashboard');
@@ -258,6 +444,51 @@ export async function approveSubmission(
   feedback = ''
 ) {
   try {
+    // Get submission details to find user and step
+    const { data: submission, error: submissionError } = await supabase
+      .from('step_submissions')
+      .select('step_id, user_id, submitted_at')
+      .eq('submission_id', submissionId)
+      .single();
+
+    if (submissionError) throw submissionError;
+
+    // Get the task_id and step info
+    const { data: step, error: stepError } = await supabase
+      .from('task_steps')
+      .select('task_id, points_reward')
+      .eq('step_id', submission.step_id)
+      .single();
+
+    if (stepError) throw stepError;
+
+    // Find the user's current active enrollment
+    const { data: activeEnrollment, error: enrollmentError } = await supabase
+      .from('task_enrollments')
+      .select('enrollment_id, joined_at')
+      .eq('task_id', step.task_id)
+      .eq('user_id', submission.user_id)
+      .eq('status', 'IN_PROGRESS')
+      .single();
+
+    if (enrollmentError || !activeEnrollment) {
+      return {
+        success: false,
+        message: 'User must have an active enrollment to approve submissions.',
+      };
+    }
+
+    // Verify this submission belongs to the current run
+    if (
+      new Date(submission.submitted_at) < new Date(activeEnrollment.joined_at)
+    ) {
+      return {
+        success: false,
+        message: 'This submission is from a previous quest run.',
+      };
+    }
+
+    // Approve the submission
     const { error } = await supabase
       .from('step_submissions')
       .update({
@@ -269,6 +500,45 @@ export async function approveSubmission(
       .eq('submission_id', submissionId);
 
     if (error) throw error;
+
+    // Get total number of steps for this task
+    const { count: totalSteps, error: stepsCountError } = await supabase
+      .from('task_steps')
+      .select('*', { count: 'exact', head: true })
+      .eq('task_id', step.task_id);
+
+    if (stepsCountError) throw stepsCountError;
+
+    // Get all step IDs for this task
+    const { data: taskSteps, error: taskStepsError } = await supabase
+      .from('task_steps')
+      .select('step_id')
+      .eq('task_id', step.task_id);
+
+    if (taskStepsError) throw taskStepsError;
+
+    const stepIds = taskSteps.map((s) => s.step_id);
+
+    // Count approved submissions for this user after their enrollment date
+    const { count: approvedSteps, error: approvedCountError } = await supabase
+      .from('step_submissions')
+      .select('submission_id', { count: 'exact', head: true })
+      .eq('user_id', submission.user_id)
+      .eq('status', 'APPROVED')
+      .gte('submitted_at', activeEnrollment.joined_at)
+      .in('step_id', stepIds);
+
+    if (approvedCountError) throw approvedCountError;
+
+    // If all steps are completed, mark enrollment as COMPLETED
+    if (approvedSteps >= totalSteps) {
+      const { error: updateEnrollmentError } = await supabase
+        .from('task_enrollments')
+        .update({ status: 'COMPLETED' })
+        .eq('enrollment_id', activeEnrollment.enrollment_id);
+
+      if (updateEnrollmentError) throw updateEnrollmentError;
+    }
 
     revalidatePath('/manager-dashboard');
     return {
@@ -342,7 +612,7 @@ export async function getPendingSubmissions(managerId) {
 
       const { data: users, error: usersError } = await supabase
         .from('users')
-        .select('user_id, email, name')
+        .select('user_id, email, name, total_points, role')
         .in('user_id', userIds);
 
       if (usersError) throw usersError;
@@ -623,5 +893,208 @@ export async function getUserTasksByCompany(userId, companyId = null) {
   } catch (error) {
     console.error('Error fetching user tasks by company:', error);
     return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Update user's name
+ */
+export async function updateUserName(userId, newName) {
+  try {
+    const { error } = await supabase
+      .from('users')
+      .update({ name: newName })
+      .eq('user_id', userId);
+
+    if (error) throw error;
+
+    revalidatePath('/user-dashboard');
+    return { success: true, message: 'Name updated successfully' };
+  } catch (error) {
+    console.error('Error updating name:', error);
+    return { success: false, message: 'Failed to update name' };
+  }
+}
+
+/**
+ * Admin updates user's total points
+ */
+export async function updateUserPoints(userId, newPoints, adminId) {
+  try {
+    // Verify admin role
+    const { data: admin, error: adminError } = await supabase
+      .from('users')
+      .select('role')
+      .eq('user_id', adminId)
+      .single();
+
+    if (adminError) throw adminError;
+
+    if (!admin || admin.role !== 'admin') {
+      return {
+        success: false,
+        message: 'Unauthorized: Only admins can update user points',
+      };
+    }
+
+    // Validate points
+    const points = parseInt(newPoints);
+    if (isNaN(points) || points < 0) {
+      return {
+        success: false,
+        message: 'Invalid points value. Points must be a non-negative number.',
+      };
+    }
+
+    // Update user points
+    const { error } = await supabase
+      .from('users')
+      .update({ total_points: points })
+      .eq('user_id', userId);
+
+    if (error) throw error;
+
+    revalidatePath('/admin-dashboard');
+    return { success: true, message: 'User points updated successfully' };
+  } catch (error) {
+    console.error('Error updating user points:', error);
+    return {
+      success: false,
+      message: 'Failed to update user points: ' + error.message,
+    };
+  }
+}
+
+/**
+ * Manager updates user's points (reset, increase, or decrease)
+ * Only for users in the same company as the manager
+ */
+export async function managerUpdateUserPoints(
+  userId,
+  companyId,
+  managerId,
+  action,
+  amount = 0
+) {
+  try {
+    // Verify manager role
+    const { data: manager, error: managerError } = await supabase
+      .from('users')
+      .select('role')
+      .eq('user_id', managerId)
+      .single();
+
+    if (managerError) throw managerError;
+
+    if (!manager || manager.role !== 'manager') {
+      return {
+        success: false,
+        message: 'Unauthorized: Only managers can update user points',
+      };
+    }
+
+    // Verify manager belongs to the company
+    const { data: managerCompany, error: managerCompanyError } = await supabase
+      .from('user_companies')
+      .select('company_id')
+      .eq('user_id', managerId)
+      .eq('company_id', companyId)
+      .single();
+
+    if (managerCompanyError || !managerCompany) {
+      return {
+        success: false,
+        message: 'Unauthorized: Manager must belong to this company',
+      };
+    }
+
+    // Verify user belongs to the same company
+    const { data: userCompany, error: userCompanyError } = await supabase
+      .from('user_companies')
+      .select('company_id')
+      .eq('user_id', userId)
+      .eq('company_id', companyId)
+      .single();
+
+    if (userCompanyError || !userCompany) {
+      return {
+        success: false,
+        message: 'User must belong to this company',
+      };
+    }
+
+    // Get current user points
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('total_points')
+      .eq('user_id', userId)
+      .single();
+
+    if (userError) throw userError;
+
+    let newPoints = user.total_points || 0;
+
+    // Calculate new points based on action
+    switch (action) {
+      case 'reset':
+        newPoints = 0;
+        break;
+      case 'increase':
+        const increaseAmount = parseInt(amount);
+        if (isNaN(increaseAmount) || increaseAmount <= 0) {
+          return {
+            success: false,
+            message: 'Invalid amount. Must be a positive number.',
+          };
+        }
+        newPoints += increaseAmount;
+        break;
+      case 'decrease':
+        const decreaseAmount = parseInt(amount);
+        if (isNaN(decreaseAmount) || decreaseAmount <= 0) {
+          return {
+            success: false,
+            message: 'Invalid amount. Must be a positive number.',
+          };
+        }
+        newPoints = Math.max(0, newPoints - decreaseAmount);
+        break;
+      case 'set':
+        const setAmount = parseInt(amount);
+        if (isNaN(setAmount) || setAmount < 0) {
+          return {
+            success: false,
+            message: 'Invalid points value. Must be a non-negative number.',
+          };
+        }
+        newPoints = setAmount;
+        break;
+      default:
+        return {
+          success: false,
+          message: 'Invalid action. Use reset, increase, decrease, or set.',
+        };
+    }
+
+    // Update user points
+    const { error } = await supabase
+      .from('users')
+      .update({ total_points: newPoints })
+      .eq('user_id', userId);
+
+    if (error) throw error;
+
+    revalidatePath('/manager-dashboard');
+    return {
+      success: true,
+      message: 'User points updated successfully',
+      newPoints,
+    };
+  } catch (error) {
+    console.error('Error updating user points:', error);
+    return {
+      success: false,
+      message: 'Failed to update user points: ' + error.message,
+    };
   }
 }

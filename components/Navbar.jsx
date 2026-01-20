@@ -3,12 +3,17 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '../context/AuthContext';
+import { useLocale } from '../context/LocaleContext';
 import { signOut } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { useRouter } from 'next/navigation';
+import LanguageSwitcher from './LanguageSwitcher';
+import { RankBadge } from '../lib/rankUtils';
+import NotificationDropdown from './NotificationDropdown';
 
 export default function Navbar({ onOpenLogin, onOpenSignup }) {
-  const { user, userRole, loading } = useAuth();
+  const { user, userRole, userData, loading } = useAuth();
+  const { t } = useLocale();
   const router = useRouter();
 
   // State for dropdowns
@@ -86,11 +91,18 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
 
           {/* Brand Logo */}
           <Link
-            href="/"
-            className="text-xl font-bold tracking-tight text-indigo-600 flex items-center gap-2 group active:scale-95 transition-transform duration-200"
+            href={
+              user
+                ? userRole === 'admin'
+                  ? '/admin-dashboard'
+                  : userRole === 'manager'
+                  ? '/manager-dashboard'
+                  : '/user-dashboard'
+                : '/'
+            }
+            className="text-xl font-bold tracking-tight text-indigo-600 group active:scale-95 transition-transform duration-200"
           >
-            <div className="h-7 w-7 rounded-lg bg-indigo-600 shadow-sm group-hover:shadow transition-all"></div>
-            Quest
+            {t('nav.quest')}
           </Link>
 
           {/* Desktop Navigation */}
@@ -98,20 +110,20 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
             {!user ? (
               <>
                 <Link href="/#features" className={navLinkStyle}>
-                  Features
+                  {t('nav.features')}
                 </Link>
                 <Link href="/#pricing" className={navLinkStyle}>
-                  Pricing
+                  {t('nav.pricing')}
                 </Link>
                 <Link href="/#about" className={navLinkStyle}>
-                  About
+                  {t('nav.about')}
                 </Link>
               </>
             ) : (
               <>
                 {userRole === 'user' || !userRole ? (
                   <Link href="/tasks" className={navLinkStyle}>
-                    All Quest
+                    {t('nav.allQuest')}
                   </Link>
                 ) : (
                   <Link
@@ -122,7 +134,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                     }
                     className={navLinkStyle}
                   >
-                    Dashboard
+                    {t('nav.dashboard')}
                   </Link>
                 )}
               </>
@@ -133,6 +145,10 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
         <div className="flex items-center gap-3 sm:gap-4">
           {!loading && (
             <>
+              <LanguageSwitcher />
+              {user && userRole === 'manager' && (
+                <NotificationDropdown managerId={user.uid} />
+              )}
               {user ? (
                 <div className="relative" ref={profileDropdownRef}>
                   <button
@@ -149,9 +165,9 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                       />
                     ) : (
                       <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-medium shadow-md border-2 border-white ring-1 ring-gray-100">
-                        {user.displayName
-                          ? user.displayName.charAt(0).toUpperCase()
-                          : user.email?.charAt(0).toUpperCase()}
+                        {(userData?.name || user.displayName || user.email)
+                          ?.charAt(0)
+                          .toUpperCase()}
                       </div>
                     )}
                   </button>
@@ -162,15 +178,23 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                       {/* User Info Header */}
                       <div className="px-5 py-4 border-b border-gray-100 bg-gray-50/50">
                         <p className="text-sm font-bold text-indigo-600 truncate">
-                          {user.displayName || 'User'}
+                          {userData?.name ||
+                            user.displayName ||
+                            t('userDashboard.explorer')}
                         </p>
                         <p className="text-xs text-gray-500 truncate font-medium mb-3">
                           {user.email}
                         </p>
                         {/* Role Badge */}
-                        <span className="inline-flex items-center rounded-full bg-white px-2.5 py-0.5 text-xs font-bold text-indigo-600 border border-gray-200 shadow-sm capitalize">
-                          {userRole || 'User'}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex items-center rounded-full bg-white px-2.5 py-0.5 text-xs font-bold text-indigo-600 border border-gray-200 shadow-sm capitalize">
+                            {t('common.' + (userRole || 'user'))}
+                          </span>
+                          <RankBadge
+                            points={userData?.total_points}
+                            role={userRole}
+                          />
+                        </div>
                       </div>
 
                       {/* Links */}
@@ -195,7 +219,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                               />
                             </svg>
                           </span>
-                          My Account
+                          {t('nav.myAccount')}
                         </Link>
                         {(userRole === 'user' || !userRole) && (
                           <Link
@@ -218,7 +242,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                                 />
                               </svg>
                             </span>
-                            My Quests
+                            {t('nav.myQuests')}
                           </Link>
                         )}{' '}
                         {userRole === 'admin' && (
@@ -242,7 +266,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                                 />
                               </svg>
                             </span>
-                            Admin Dashboard
+                            {t('nav.adminDashboard')}
                           </Link>
                         )}
                         {userRole === 'manager' && (
@@ -266,7 +290,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                                 />
                               </svg>
                             </span>
-                            Manager Dashboard
+                            {t('nav.managerDashboard')}
                           </Link>
                         )}
                       </div>
@@ -293,7 +317,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                               d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
                             />
                           </svg>
-                          Sign Out
+                          {t('nav.logout')}
                         </button>
                       </div>
                     </div>
@@ -305,7 +329,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                     onClick={onOpenLogin}
                     className={secondaryButtonStyle}
                   >
-                    Log in
+                    {t('login.title')}
                   </button>
                   {/* Public signup disabled - Invite only
                   <button onClick={onOpenSignup} className={primaryButtonStyle}>
@@ -329,19 +353,19 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                   href="/#features"
                   className="block px-4 py-3 text-base font-medium text-gray-600 hover:text-indigo-600 hover:bg-white rounded-xl transition-colors"
                 >
-                  Features
+                  {t('nav.features')}
                 </Link>
                 <Link
                   href="/#pricing"
                   className="block px-4 py-3 text-base font-medium text-gray-600 hover:text-indigo-600 hover:bg-white rounded-xl transition-colors"
                 >
-                  Pricing
+                  {t('nav.pricing')}
                 </Link>
                 <Link
                   href="/#about"
                   className="block px-4 py-3 text-base font-medium text-gray-600 hover:text-indigo-600 hover:bg-white rounded-xl transition-colors"
                 >
-                  About
+                  {t('nav.about')}
                 </Link>
               </>
             ) : (
@@ -351,7 +375,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                     href="/tasks"
                     className="block px-4 py-3 text-base font-medium text-gray-600 hover:text-indigo-600 hover:bg-white rounded-xl transition-colors"
                   >
-                    My Quest
+                    {t('nav.allQuest')}
                   </Link>
                 ) : (
                   <Link
@@ -362,7 +386,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                     }
                     className="block px-4 py-3 text-base font-medium text-gray-600 hover:text-indigo-600 hover:bg-white rounded-xl transition-colors"
                   >
-                    Dashboard
+                    {t('nav.dashboard')}
                   </Link>
                 )}
               </>
@@ -373,7 +397,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                   onClick={onOpenLogin}
                   className="w-full text-center px-4 py-3 text-base font-medium text-gray-700 bg-white border border-gray-200 rounded-xl active:scale-95"
                 >
-                  Log in
+                  {t('login.title')}
                 </button>
                 {/* Public signup disabled - Invite only
                 <button

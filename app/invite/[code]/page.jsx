@@ -11,11 +11,14 @@ import {
 } from '@/app/invite-actions';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import { useLocale } from '@/context/LocaleContext';
 
 export default function InvitePage({ params }) {
   const { code } = use(params);
   const [isValid, setIsValid] = useState(null); // null = loading, true, false
   const [loading, setLoading] = useState(true);
+
+  const { t } = useLocale();
 
   // Form state
   const [name, setName] = useState('');
@@ -74,14 +77,12 @@ export default function InvitePage({ params }) {
               password
             );
             user = signInCredential.user;
-            toast('Email already registered, signing you in...', {
+            toast(t('invite.emailRegistered'), {
               icon: 'ℹ️',
             });
           } catch (signInError) {
             if (signInError.code === 'auth/wrong-password') {
-              toast.error(
-                'This email is already registered with a different password. Please contact support or use the correct password.'
-              );
+              toast.error(t('invite.wrongPassword'));
               throw signInError;
             } else {
               throw signInError;
@@ -109,11 +110,11 @@ export default function InvitePage({ params }) {
 
       if (!result.success) {
         console.error('Error completing signup:', result.error);
-        toast.error(`Account created but setup failed: ${result.error}`);
+        toast.error(t('invite.setupFailed', { error: result.error }));
         // User is created in Firebase but not in Supabase or invite not marked.
         // This is a partial failure state.
       } else {
-        toast.success('Account created successfully!');
+        toast.success(t('invite.success'));
         router.push('/');
       }
     } catch (err) {
@@ -121,7 +122,7 @@ export default function InvitePage({ params }) {
       if (err.code && err.code.startsWith('auth/')) {
         toast.error(err.message);
       } else {
-        toast.error('An error occurred during signup. Please try again.');
+        toast.error(t('invite.errorGeneric'));
       }
     } finally {
       setIsSubmitting(false);
@@ -156,16 +157,15 @@ export default function InvitePage({ params }) {
             </svg>
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Invalid Invite
+            {t('invite.invalidTitle')}
           </h2>
-          <p className="text-gray-500 mb-6">
-            This invite link is invalid, expired, or has already been used.
-          </p>
+          <p className="text-gray-400">{t('invite.joining')}</p>
+          <p className="text-gray-500 mb-6">{t('invite.invalidText')}</p>
           <button
             onClick={() => router.push('/')}
             className="w-full px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors"
           >
-            Go Home
+            {t('invite.goHome')}
           </button>
         </div>
       </div>
@@ -176,16 +176,14 @@ export default function InvitePage({ params }) {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
         <div className="px-8 py-6 bg-indigo-600 text-center">
-          <h2 className="text-2xl font-bold text-white">You're Invited!</h2>
-          <p className="text-indigo-100 mt-2">
-            Create your account to join Quest
-          </p>
+          <h2 className="text-2xl font-bold text-white">{t('invite.title')}</h2>
+          <p className="text-indigo-100 mt-2">{t('invite.subtitle')}</p>
         </div>
 
         <form onSubmit={handleSignup} className="p-8 space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Full Name
+              {t('invite.fullName')}
             </label>
             <input
               type="text"
@@ -193,13 +191,13 @@ export default function InvitePage({ params }) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-              placeholder="John Doe"
+              placeholder={t('invite.placeholderName')}
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email Address
+              {t('invite.emailAddress')}
             </label>
             <input
               type="email"
@@ -207,13 +205,13 @@ export default function InvitePage({ params }) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-              placeholder="john@example.com"
+              placeholder={t('invite.placeholderEmail')}
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password
+              {t('invite.password')}
             </label>
             <input
               type="password"
@@ -231,7 +229,9 @@ export default function InvitePage({ params }) {
             disabled={isSubmitting}
             className="w-full py-3 px-4 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl active:scale-95"
           >
-            {isSubmitting ? 'Creating Account...' : 'Create Account'}
+            {isSubmitting
+              ? t('invite.creatingAccount')
+              : t('invite.createAccount')}
           </button>
         </form>
       </div>

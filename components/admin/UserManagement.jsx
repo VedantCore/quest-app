@@ -2,10 +2,15 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { deleteUser } from '@/app/actions';
+import { deleteUser, updateUserPoints } from '@/app/actions';
 import { toast } from 'react-hot-toast';
+import { useLocale } from '../../context/LocaleContext';
+import { RankBadge } from '@/lib/rankUtils';
+import { useAuth } from '@/context/AuthContext';
 
 export default function UserManagement() {
+  const { t } = useLocale();
+  const { user: currentUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -13,6 +18,11 @@ export default function UserManagement() {
   const [sortConfig, setSortConfig] = useState({
     key: 'created_at',
     direction: 'desc',
+  });
+  const [editPointsModal, setEditPointsModal] = useState({
+    isOpen: false,
+    user: null,
+    newPoints: '',
   });
 
   // Pagination
@@ -31,7 +41,43 @@ export default function UserManagement() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setUsers(data || []);
+
+      // Fetch companies for each user
+      const usersWithCompanies = await Promise.all(
+        (data || []).map(async (user) => {
+          const { data: userCompanies, error: companiesError } = await supabase
+            .from('user_companies')
+            .select(
+              `
+              company_id,
+              companies (
+                company_id,
+                name
+              )
+            `
+            )
+            .eq('user_id', user.user_id);
+
+          if (companiesError) {
+            console.error(
+              'Error fetching companies for user:',
+              user.user_id,
+              companiesError
+            );
+          }
+
+          // Extract companies from the nested structure
+          const companies =
+            userCompanies?.map((uc) => uc.companies).filter(Boolean) || [];
+
+          return {
+            ...user,
+            companies,
+          };
+        })
+      );
+
+      setUsers(usersWithCompanies);
     } catch (error) {
       console.error('Error fetching users:', error);
     } finally {
@@ -50,30 +96,57 @@ export default function UserManagement() {
       fetchUsers();
     } catch (error) {
       console.error('Error updating role:', error);
-      alert('Error updating role: ' + error.message);
+      alert(t('userManagement.roleChangeFailed'));
     }
   };
 
   const handleDeleteUser = async (user) => {
-    if (
-      !confirm(
-        `Are you sure you want to delete user ${user.name}? This action cannot be undone.`
-      )
-    ) {
+    if (!confirm(t('userManagement.deleteConfirm', { name: user.name }))) {
       return;
     }
 
     try {
       const result = await deleteUser(user.user_id);
       if (result.success) {
-        toast.success('User deleted successfully');
+        toast.success(t('userManagement.deleteSuccess'));
         fetchUsers();
       } else {
-        toast.error('Failed to delete user: ' + result.error);
+        toast.error(t('userManagement.deleteFailed'));
       }
     } catch (error) {
       console.error('Error deleting user:', error);
-      toast.error('An error occurred while deleting the user');
+      toast.error(t('common.serverError'));
+    }
+  };
+
+  const handleEditPoints = (user) => {
+    setEditPointsModal({
+      isOpen: true,
+      user: user,
+      newPoints: user.total_points || 0,
+    });
+  };
+
+  const handleSavePoints = async () => {
+    if (!editPointsModal.user || !currentUser) return;
+
+    try {
+      const result = await updateUserPoints(
+        editPointsModal.user.user_id,
+        editPointsModal.newPoints,
+        currentUser.uid
+      );
+
+      if (result.success) {
+        toast.success(t('userManagement.pointsUpdateSuccess'));
+        setEditPointsModal({ isOpen: false, user: null, newPoints: '' });
+        fetchUsers();
+      } else {
+        toast.error(result.message || t('userManagement.pointsUpdateFailed'));
+      }
+    } catch (error) {
+      console.error('Error updating points:', error);
+      toast.error(t('common.serverError'));
     }
   };
 
@@ -164,7 +237,9 @@ export default function UserManagement() {
 
   if (loading)
     return (
-      <div className="text-center py-12 text-gray-500">Loading users...</div>
+      <div className="text-center py-12 text-gray-500">
+        {t('userManagement.loading')}
+      </div>
     );
 
   return (
@@ -172,7 +247,7 @@ export default function UserManagement() {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {[
           {
-            label: 'Total Users',
+            label: t('userManagement.totalUsers'),
             value: users.length,
             icon: (
               <svg
@@ -191,7 +266,7 @@ export default function UserManagement() {
             ),
           },
           {
-            label: 'Admins',
+            label: t('userManagement.admins'),
             value: users.filter((u) => u.role === 'admin').length,
             icon: (
               <svg
@@ -210,7 +285,7 @@ export default function UserManagement() {
             ),
           },
           {
-            label: 'Managers',
+            label: t('userManagement.managers'),
             value: users.filter((u) => u.role === 'manager').length,
             icon: (
               <svg
@@ -229,7 +304,7 @@ export default function UserManagement() {
             ),
           },
           {
-            label: 'Users',
+            label: t('userManagement.users'),
             value: users.filter((u) => u.role === 'user').length,
             icon: (
               <svg
@@ -266,7 +341,7 @@ export default function UserManagement() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input
             type="text"
-            placeholder="Search by name or email..."
+            placeholder={t('userManagement.search')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-gray-400"
@@ -276,10 +351,10 @@ export default function UserManagement() {
             onChange={(e) => setFilterRole(e.target.value)}
             className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-gray-400"
           >
-            <option value="all">All Roles</option>
-            <option value="admin">Admin</option>
-            <option value="manager">Manager</option>
-            <option value="user">User</option>
+            <option value="all">{t('common.all')}</option>
+            <option value="admin">{t('common.admin')}</option>
+            <option value="manager">{t('common.manager')}</option>
+            <option value="user">{t('common.user')}</option>
           </select>
         </div>
       </div>
@@ -290,22 +365,25 @@ export default function UserManagement() {
             <thead className="bg-gray-50/50">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  {renderSortableHeader('User', 'name')}
+                  {renderSortableHeader(t('common.name'), 'name')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  {renderSortableHeader('Email', 'email')}
+                  {renderSortableHeader(t('common.email'), 'email')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  {renderSortableHeader('Role', 'role')}
+                  {renderSortableHeader(t('common.role'), 'role')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  {renderSortableHeader('Points', 'total_points')}
+                  {t('common.companies')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  {renderSortableHeader('Joined', 'created_at')}
+                  {renderSortableHeader(t('common.points'), 'total_points')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Actions
+                  {renderSortableHeader(t('common.joined'), 'created_at')}
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  {t('common.actions')}
                 </th>
               </tr>
             </thead>
@@ -313,10 +391,10 @@ export default function UserManagement() {
               {sortedUsers.length === 0 ? (
                 <tr>
                   <td
-                    colSpan="6"
+                    colSpan="7"
                     className="px-6 py-12 text-center text-gray-500"
                   >
-                    No users found.
+                    {t('userManagement.noUsers')}
                   </td>
                 </tr>
               ) : (
@@ -341,8 +419,14 @@ export default function UserManagement() {
                             {user.name?.charAt(0).toUpperCase() || 'U'}
                           </div>
                         )}
-                        <div className="text-sm font-medium text-gray-900 group-hover:text-indigo-600 transition-colors">
-                          {user.name || 'No name'}
+                        <div className="flex items-center gap-2">
+                          <div className="text-sm font-medium text-gray-900 group-hover:text-indigo-600 transition-colors">
+                            {user.name || t('common.noName')}
+                          </div>
+                          <RankBadge
+                            points={user.total_points}
+                            role={user.role || 'user'}
+                          />
                         </div>
                       </Link>
                     </td>
@@ -364,44 +448,97 @@ export default function UserManagement() {
                         }`}
                       >
                         <option value="user" className="text-black bg-white">
-                          User
+                          {t('common.user')}
                         </option>
                         <option value="manager" className="text-black bg-white">
-                          Manager
+                          {t('common.manager')}
                         </option>
                         <option value="admin" className="text-black bg-white">
-                          Admin
+                          {t('common.admin')}
                         </option>
                       </select>
                     </td>
+                    <td className="px-6 py-4">
+                      {user.companies && user.companies.length > 0 ? (
+                        <div className="flex flex-wrap gap-1.5 max-w-xs">
+                          {user.companies.map((company) => (
+                            <Link
+                              key={company.company_id}
+                              href={`/admin-dashboard/company/${company.company_id}`}
+                              className="inline-flex items-center px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full hover:bg-blue-100 transition-colors border border-blue-200"
+                            >
+                              <svg
+                                className="w-3 h-3 mr-1"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                                />
+                              </svg>
+                              {company.name}
+                            </Link>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-sm text-gray-400 italic">
+                          {t('common.noCompanies')}
+                        </span>
+                      )}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
-                      {user.total_points || 0} pts
+                      {user.total_points || 0} {t('common.pts')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {user.created_at
                         ? new Date(user.created_at).toLocaleDateString()
-                        : 'N/A'}
+                        : t('common.noData')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <button
-                        onClick={() => handleDeleteUser(user)}
-                        className="text-gray-400 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-lg"
-                        title="Delete User"
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleEditPoints(user)}
+                          className="text-gray-400 hover:text-indigo-500 transition-colors p-2 hover:bg-indigo-50 rounded-lg"
+                          title={t('userManagement.editPoints')}
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                          />
-                        </svg>
-                      </button>
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => handleDeleteUser(user)}
+                          className="text-gray-400 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-lg"
+                          title={t('userManagement.deleteUser')}
+                        >
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                          </svg>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -427,7 +564,7 @@ export default function UserManagement() {
                   : 'text-gray-500 hover:bg-gray-50'
               }`}
             >
-              <span className="sr-only">Previous</span>
+              <span className="sr-only">{t('common.previous')}</span>
               <svg
                 className="h-5 w-5"
                 xmlns="http://www.w3.org/2000/svg"
@@ -466,7 +603,7 @@ export default function UserManagement() {
                   : 'text-gray-500 hover:bg-gray-50'
               }`}
             >
-              <span className="sr-only">Next</span>
+              <span className="sr-only">{t('common.next')}</span>
               <svg
                 className="h-5 w-5"
                 xmlns="http://www.w3.org/2000/svg"
@@ -482,6 +619,118 @@ export default function UserManagement() {
               </svg>
             </button>
           </nav>
+        </div>
+      )}
+
+      {/* Edit Points Modal */}
+      {editPointsModal.isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-900">
+                {t('userManagement.editPoints')}
+              </h3>
+              <button
+                onClick={() =>
+                  setEditPointsModal({
+                    isOpen: false,
+                    user: null,
+                    newPoints: '',
+                  })
+                }
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {editPointsModal.user && (
+              <div className="space-y-4">
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    {editPointsModal.user.avatar_url ? (
+                      <img
+                        src={editPointsModal.user.avatar_url}
+                        alt={editPointsModal.user.name}
+                        className="h-10 w-10 rounded-full object-cover border border-gray-200"
+                      />
+                    ) : (
+                      <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-sm font-medium">
+                        {editPointsModal.user.name?.charAt(0).toUpperCase() ||
+                          'U'}
+                      </div>
+                    )}
+                    <div>
+                      <div className="font-semibold text-gray-900">
+                        {editPointsModal.user.name || t('common.noName')}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {editPointsModal.user.email}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    {t('userManagement.currentPoints')}:{' '}
+                    <span className="font-semibold text-indigo-600">
+                      {editPointsModal.user.total_points || 0} {t('common.pts')}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {t('userManagement.newPoints')}
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={editPointsModal.newPoints}
+                    onChange={(e) =>
+                      setEditPointsModal({
+                        ...editPointsModal,
+                        newPoints: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    placeholder={t('userManagement.enterPoints')}
+                  />
+                </div>
+
+                <div className="flex gap-3 mt-6">
+                  <button
+                    onClick={() =>
+                      setEditPointsModal({
+                        isOpen: false,
+                        user: null,
+                        newPoints: '',
+                      })
+                    }
+                    className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                  >
+                    {t('common.cancel')}
+                  </button>
+                  <button
+                    onClick={handleSavePoints}
+                    className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                  >
+                    {t('common.save')}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

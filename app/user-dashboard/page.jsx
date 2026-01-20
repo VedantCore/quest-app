@@ -2,31 +2,33 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
+import { useLocale } from '../../context/LocaleContext';
 import Navbar from '../../components/Navbar';
 import TaskList from '../../components/user/TaskList';
 import Profile from '../../components/user/Profile';
 
 function DashboardContent() {
   const { user, userRole, loading } = useAuth();
+  const { t } = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const [activeTab, setActiveTab] = useState('tasks');
   const [stats, setStats] = useState(null);
 
-  const isStaff = userRole === 'admin' || userRole === 'manager';
+  const isAdmin = userRole === 'admin';
 
   // Handle Tabs & Role Restrictions
   useEffect(() => {
-    if (isStaff) {
-      // If Admin/Manager, FORCE 'profile' tab
+    if (isAdmin) {
+      // If Admin, FORCE 'profile' tab
       setActiveTab('profile');
     } else {
-      // If standard User, allow switching via URL or default
+      // If standard User or Manager, allow switching via URL or default
       const tabParam = searchParams.get('tab');
       if (tabParam) setActiveTab(tabParam);
     }
-  }, [searchParams, isStaff]);
+  }, [searchParams, isAdmin]);
 
   useEffect(() => {
     if (!loading && !user) router.push('/');
@@ -48,23 +50,25 @@ function DashboardContent() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
-            {isStaff
-              ? 'My Account'
-              : `Welcome, ${user.displayName || 'Explorer'}`}
+            {isAdmin
+              ? t('userDashboard.title')
+              : `${t('userDashboard.welcome')}, ${
+                  user.displayName || t('userDashboard.explorer')
+                }`}
           </h1>
           <p className="text-gray-600">
-            {isStaff
-              ? 'Manage your account settings and profile.'
-              : 'Track your progress and find new quests.'}
+            {isAdmin
+              ? t('userDashboard.subtitle')
+              : t('userDashboard.trackProgress')}
           </p>
         </div>
 
-        {/* Stats Row (HIDDEN for Staff) */}
-        {!isStaff && activeTab === 'tasks' && stats && (
+        {/* Stats Row (HIDDEN for Admin) */}
+        {!isAdmin && activeTab === 'tasks' && stats && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
               <p className="text-xs text-gray-500 font-bold uppercase">
-                Active Quests
+                {t('userDashboard.activeQuests')}
               </p>
               <p className="text-2xl font-bold text-indigo-600">
                 {stats.activeTasks}
@@ -72,7 +76,7 @@ function DashboardContent() {
             </div>
             <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
               <p className="text-xs text-gray-500 font-bold uppercase">
-                Completed
+                {t('userDashboard.completed')}
               </p>
               <p className="text-2xl font-bold text-gray-900">
                 {stats.completedTasks}
@@ -80,7 +84,7 @@ function DashboardContent() {
             </div>
             <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
               <p className="text-xs text-gray-500 font-bold uppercase">
-                Total Points
+                {t('userDashboard.totalPoints')}
               </p>
               <p className="text-2xl font-bold text-purple-600">
                 {stats.totalPoints}
@@ -88,7 +92,7 @@ function DashboardContent() {
             </div>
             <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
               <p className="text-xs text-gray-500 font-bold uppercase">
-                Progress
+                {t('userDashboard.progress')}
               </p>
               <p className="text-2xl font-bold text-orange-500">
                 {stats.overallProgress}%
@@ -97,8 +101,8 @@ function DashboardContent() {
           </div>
         )}
 
-        {/* Tab Switcher (HIDDEN for Staff) */}
-        {!isStaff && (
+        {/* Tab Switcher (HIDDEN for Admin only) */}
+        {!isAdmin && (
           <div className="bg-white p-1 rounded-xl inline-flex border border-gray-200 shadow-sm mb-6">
             <button
               onClick={() => {
@@ -111,7 +115,7 @@ function DashboardContent() {
                   : 'text-gray-500 hover:text-gray-900'
               }`}
             >
-              Quests Board
+              {t('userDashboard.tabs.tasks')}
             </button>
             <button
               onClick={() => {
@@ -124,13 +128,13 @@ function DashboardContent() {
                   : 'text-gray-500 hover:text-gray-900'
               }`}
             >
-              Profile
+              {t('userDashboard.tabs.profile')}
             </button>
           </div>
         )}
 
         {/* Main Content Area */}
-        {activeTab === 'tasks' && !isStaff ? (
+        {activeTab === 'tasks' && !isAdmin ? (
           <TaskList userId={user.uid} onStatsUpdate={setStats} />
         ) : (
           <Profile userId={user.uid} onStatsUpdate={setStats} />
@@ -141,8 +145,9 @@ function DashboardContent() {
 }
 
 export default function UserDashboard() {
+  const { t } = useLocale();
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div>{t('common.loading')}</div>}>
       <DashboardContent />
     </Suspense>
   );
