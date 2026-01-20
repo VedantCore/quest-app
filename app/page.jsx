@@ -67,7 +67,7 @@ export default function Home() {
       } else if (role === 'manager') {
         router.push('/manager-dashboard');
       } else {
-        router.push('/user-dashboard');
+        router.push('/tasks');
       }
     } catch (err) {
       toast.error(err.message);
@@ -119,7 +119,7 @@ export default function Home() {
       } else if (role === 'manager') {
         router.push('/manager-dashboard');
       } else {
-        router.push('/user-dashboard');
+        router.push('/tasks');
       }
     } catch (err) {
       toast.error(err.message);

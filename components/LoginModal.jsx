@@ -81,8 +81,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }) {
       } else if (role === 'manager') {
         router.push('/manager-dashboard');
       } else {
-        // CHANGED: Redirect to User Dashboard instead of /tasks
-        router.push('/user-dashboard');
+        router.push('/tasks');
       }
     } catch (err) {
       toast.error(err.message);
@@ -150,8 +149,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }) {
       } else if (role === 'manager') {
         router.push('/manager-dashboard');
       } else {
-        // CHANGED: Redirect to User Dashboard instead of /tasks
-        router.push('/user-dashboard');
+        router.push('/tasks');
       }
     } catch (err) {
       toast.error(err.message);
