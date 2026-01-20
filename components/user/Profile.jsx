@@ -487,29 +487,32 @@ export default function Profile({ userId, onStatsUpdate }) {
                     {formatDate(userInfo.created_at)}
                   </p>
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                    {t('user.profile.assignedCompanies')}
-                  </label>
-                  <div className="border-b border-gray-100 pb-3">
-                    {userCompanies.length === 0 ? (
-                      <p className="text-gray-400 font-medium italic text-sm">
-                        {t('user.profile.noCompanies')}
-                      </p>
-                    ) : (
-                      <div className="flex flex-wrap gap-2">
-                        {userCompanies.map((company) => (
-                          <span
-                            key={company.company_id}
-                            className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-sm hover:shadow-md transition-shadow"
-                          >
-                            {company.name}
-                          </span>
-                        ))}
-                      </div>
-                    )}
+                {/* Only show Assigned Companies for users and managers, not for admins */}
+                {userInfo.role !== 'admin' && (
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                      {t('user.profile.assignedCompanies')}
+                    </label>
+                    <div className="border-b border-gray-100 pb-3">
+                      {userCompanies.length === 0 ? (
+                        <p className="text-gray-400 font-medium italic text-sm">
+                          {t('user.profile.noCompanies')}
+                        </p>
+                      ) : (
+                        <div className="flex flex-wrap gap-2">
+                          {userCompanies.map((company) => (
+                            <span
+                              key={company.company_id}
+                              className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-sm hover:shadow-md transition-shadow"
+                            >
+                              {company.name}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
                 {isOwnProfile && (
                   <>
                     <div>
