@@ -94,8 +94,16 @@ export default function Profile({ userId, onStatsUpdate }) {
     }
 
     try {
+      // Update in Supabase
       const result = await updateUserName(userId, newName);
       if (result.success) {
+        // Update Firebase Auth displayName to keep it in sync
+        if (auth.currentUser && authUser?.uid === userId) {
+          await updateProfile(auth.currentUser, {
+            displayName: newName,
+          });
+        }
+
         setUserInfo((prev) => ({ ...prev, name: newName }));
         setIsEditingName(false);
         toast.success(t('user.profile.nameUpdated'));
