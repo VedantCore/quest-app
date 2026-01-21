@@ -77,13 +77,13 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
     }
   }, [userId, mode, companiesLoaded]);
 
-  // Initialize all companies as expanded when data loads
+  // Initialize all companies as collapsed when data loads
   useEffect(() => {
     if (companies.length > 0) {
       const initial = {};
-      companies.forEach((c) => (initial[c.company_id] = true));
+      companies.forEach((c) => (initial[c.company_id] = false));
       // Also handle 'other' if needed, though we filter by user companies usually
-      initial['other'] = true;
+      initial['other'] = false;
       setExpandedCompanies(initial);
     }
   }, [companies]);
@@ -477,7 +477,7 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
         // For now, if no tasks match filters, we hide the company section to avoid visual clutter.
         if (!companyTasks || companyTasks.length === 0) return null;
 
-        const isExpanded = expandedCompanies[company.company_id] ?? true;
+        const isExpanded = expandedCompanies[company.company_id] ?? false;
 
         return (
           <div
