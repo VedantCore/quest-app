@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { useLocale } from '@/context/LocaleContext';
 import { RankBadge } from '@/lib/rankUtils';
@@ -179,27 +180,30 @@ export default function CompanyLeaderboard({ companyId }) {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center gap-3">
+                  <Link
+                    href={`/user/${user.user_id}`}
+                    className="flex items-center gap-3 group cursor-pointer"
+                  >
                     {user.avatar_url ? (
                       <img
                         src={user.avatar_url}
                         alt={user.name}
-                        className="h-10 w-10 rounded-full object-cover border border-gray-200 shadow-sm"
+                        className="h-10 w-10 rounded-full object-cover border border-gray-200 shadow-sm group-hover:border-indigo-300 transition-colors"
                       />
                     ) : (
-                      <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-sm font-bold border border-indigo-200">
+                      <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-sm font-bold border border-indigo-200 group-hover:bg-indigo-200 transition-colors">
                         {user.name?.charAt(0).toUpperCase() || 'U'}
                       </div>
                     )}
                     <div className="flex flex-col">
-                      <span className="text-sm font-bold text-gray-900">
+                      <span className="text-sm font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">
                         {user.name || t('manager.company.unknownUser')}
                       </span>
                       <span className="text-xs text-gray-500">
                         {user.email}
                       </span>
                     </div>
-                  </div>
+                  </Link>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <RankBadge points={user.total_points} role="user" />

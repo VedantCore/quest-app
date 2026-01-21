@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useLocale } from '@/context/LocaleContext';
 import toast from 'react-hot-toast';
@@ -143,13 +144,16 @@ export default function CompanyUserManagement({ companyId, companyName }) {
                     key={cu.user_id}
                     className="flex items-center justify-between p-4 border border-indigo-200 bg-indigo-50 rounded-lg"
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-indigo-200 flex items-center justify-center">
+                    <Link
+                      href={`/user/${cu.user_id}`}
+                      className="flex items-center gap-4 group cursor-pointer flex-1"
+                    >
+                      <div className="w-12 h-12 rounded-full bg-indigo-200 flex items-center justify-center flex-shrink-0">
                         {cu.users.avatar_url ? (
                           <img
                             src={cu.users.avatar_url}
                             alt={cu.users.name}
-                            className="w-12 h-12 rounded-full object-cover"
+                            className="w-12 h-12 rounded-full object-cover group-hover:ring-2 group-hover:ring-indigo-400 transition-all"
                           />
                         ) : (
                           <span className="text-lg font-bold text-indigo-700">
@@ -158,7 +162,7 @@ export default function CompanyUserManagement({ companyId, companyName }) {
                         )}
                       </div>
                       <div>
-                        <p className="font-semibold text-gray-900">
+                        <p className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
                           {cu.users.name}
                         </p>
                         <p className="text-sm text-gray-600">
@@ -173,7 +177,7 @@ export default function CompanyUserManagement({ companyId, companyName }) {
                           </span>
                         </div>
                       </div>
-                    </div>
+                    </Link>
                     <div className="text-sm text-gray-500 italic">
                       {t('manager.company.cannotRemove') ||
                         'Contact admin to remove'}
@@ -196,13 +200,16 @@ export default function CompanyUserManagement({ companyId, companyName }) {
                     key={cu.user_id}
                     className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
+                    <Link
+                      href={`/user/${cu.user_id}`}
+                      className="flex items-center gap-4 group cursor-pointer flex-1"
+                    >
+                      <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
                         {cu.users.avatar_url ? (
                           <img
                             src={cu.users.avatar_url}
                             alt={cu.users.name}
-                            className="w-12 h-12 rounded-full object-cover"
+                            className="w-12 h-12 rounded-full object-cover group-hover:ring-2 group-hover:ring-indigo-400 transition-all"
                           />
                         ) : (
                           <span className="text-lg font-bold text-gray-600">
@@ -211,7 +218,7 @@ export default function CompanyUserManagement({ companyId, companyName }) {
                         )}
                       </div>
                       <div>
-                        <p className="font-semibold text-gray-900">
+                        <p className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
                           {cu.users.name}
                         </p>
                         <p className="text-sm text-gray-600">
@@ -226,7 +233,7 @@ export default function CompanyUserManagement({ companyId, companyName }) {
                           </span>
                         </div>
                       </div>
-                    </div>
+                    </Link>
                     <button
                       onClick={() =>
                         handleRemoveUser(cu.user_id, cu.users.name)

@@ -332,20 +332,23 @@ export default function UserList({ companyId }) {
                     className="hover:bg-gray-50/50 transition-colors"
                   >
                     <td className="px-6 py-4 whitespace-nowrap min-w-[200px]">
-                      <div className="flex items-center gap-3">
+                      <Link
+                        href={`/user/${user.user_id}`}
+                        className="flex items-center gap-3 group cursor-pointer"
+                      >
                         {user.avatar_url ? (
                           <img
                             src={user.avatar_url}
                             alt={user.name}
-                            className="h-9 w-9 rounded-full object-cover border border-gray-200"
+                            className="h-9 w-9 rounded-full object-cover border border-gray-200 group-hover:border-indigo-300 transition-colors"
                           />
                         ) : (
-                          <div className="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-sm font-medium">
+                          <div className="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-sm font-medium group-hover:bg-indigo-200 transition-colors">
                             {user.name?.charAt(0).toUpperCase() || 'U'}
                           </div>
                         )}
                         <div className="flex items-center gap-2">
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-medium text-gray-900 group-hover:text-indigo-600 transition-colors">
                             {user.name || t('taskManagement.unassigned')}
                           </div>
                           <RankBadge
@@ -353,7 +356,7 @@ export default function UserList({ companyId }) {
                             role={user.role || 'user'}
                           />
                         </div>
-                      </div>
+                      </Link>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                       {user.email}
