@@ -248,21 +248,6 @@ export default function NotificationDropdown({ managerId }) {
               ))
             )}
           </div>
-
-          {/* Footer */}
-          {notifications.length > 0 && (
-            <div className="px-4 py-2 border-t border-gray-200">
-              <button
-                onClick={() => {
-                  router.push('/manager-dashboard');
-                  setIsOpen(false);
-                }}
-                className="text-sm text-indigo-600 hover:text-indigo-800 font-medium w-full text-center"
-              >
-                {t('notifications.viewAll')}
-              </button>
-            </div>
-          )}
         </div>
       )}
     </div>
