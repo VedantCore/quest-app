@@ -147,7 +147,7 @@ export default function NotificationDropdown({ managerId }) {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-        aria-label="Notifications"
+        aria-label={t('notifications.title')}
       >
         <svg
           className="w-6 h-6"
