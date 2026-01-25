@@ -65,7 +65,7 @@ function DashboardContent() {
 
         {/* Stats Row (HIDDEN for Admin) */}
         {!isAdmin && activeTab === 'tasks' && stats && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 gap-4 mb-8">
             <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
               <p className="text-xs text-gray-500 font-bold uppercase">
                 {t('userDashboard.activeQuests')}
@@ -80,22 +80,6 @@ function DashboardContent() {
               </p>
               <p className="text-2xl font-bold text-gray-900">
                 {stats.completedTasks}
-              </p>
-            </div>
-            <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-              <p className="text-xs text-gray-500 font-bold uppercase">
-                {t('userDashboard.totalPoints')}
-              </p>
-              <p className="text-2xl font-bold text-purple-600">
-                {stats.totalPoints}
-              </p>
-            </div>
-            <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-              <p className="text-xs text-gray-500 font-bold uppercase">
-                {t('userDashboard.progress')}
-              </p>
-              <p className="text-2xl font-bold text-orange-500">
-                {stats.overallProgress}%
               </p>
             </div>
           </div>

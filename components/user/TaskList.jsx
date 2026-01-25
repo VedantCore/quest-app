@@ -122,7 +122,7 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
           task_steps (*),
           manager:users!tasks_assigned_manager_id_fkey (name, email, avatar_url),
           companies (company_id, name)
-        `
+        `,
         )
         .eq('is_active', true);
 
@@ -135,13 +135,13 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
         // If user has no companies, show NO tasks (or only legacy tasks without company)
         tasksQuery = tasksQuery.is('company_id', null);
         console.log(
-          'User has no companies, showing only tasks without company_id'
+          'User has no companies, showing only tasks without company_id',
         );
       }
 
       const { data: allTasks, error: tasksError } = await tasksQuery.order(
         'created_at',
-        { ascending: false }
+        { ascending: false },
       );
 
       if (tasksError) {
@@ -150,7 +150,7 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
       }
 
       console.log(
-        `Fetched ${allTasks?.length || 0} tasks for user's companies`
+        `Fetched ${allTasks?.length || 0} tasks for user's companies`,
       );
 
       // 2. Fetch user enrollments
@@ -171,13 +171,29 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
 
       if (submissionsError) throw submissionsError;
 
+      // 4. Fetch actual earned points from user_point_history
+      const { data: pointHistory, error: pointHistoryError } = await supabase
+        .from('user_point_history')
+        .select('step_id, points_earned')
+        .eq('user_id', userId);
+
+      if (pointHistoryError) throw pointHistoryError;
+
+      // Create a map of step_id to actual earned points
+      const earnedPointsMap = {};
+      pointHistory?.forEach((record) => {
+        if (record.step_id) {
+          earnedPointsMap[record.step_id] = record.points_earned;
+        }
+      });
+
       // Process tasks
       let processedTasks = allTasks.map((task) => {
         const isEnrolled = enrolledTaskIds.has(task.task_id);
 
         const stepsWithStatus = task.task_steps.map((step) => {
           const submission = submissions?.find(
-            (s) => s.step_id === step.step_id
+            (s) => s.step_id === step.step_id,
           );
           return {
             ...step,
@@ -189,7 +205,7 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
         // Calculate progress
         const totalSteps = stepsWithStatus.length;
         const completedSteps = stepsWithStatus.filter(
-          (s) => s.status === 'APPROVED'
+          (s) => s.status === 'APPROVED',
         ).length;
         const progress =
           totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
@@ -197,11 +213,18 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
         // Calculate points
         const totalPoints = stepsWithStatus.reduce(
           (sum, s) => sum + (s.points_reward || 0),
-          0
+          0,
         );
-        const earnedPoints = stepsWithStatus
-          .filter((s) => s.status === 'APPROVED')
-          .reduce((sum, s) => sum + (s.points_reward || 0), 0);
+        // Use actual earned points from point history instead of just points_reward
+        const earnedPoints = stepsWithStatus.reduce((sum, step) => {
+          if (
+            step.status === 'APPROVED' &&
+            earnedPointsMap[step.step_id] !== undefined
+          ) {
+            return sum + earnedPointsMap[step.step_id];
+          }
+          return sum;
+        }, 0);
 
         // Check if task is expired
         const isExpired = task.deadline
@@ -220,8 +243,8 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
             progress === 100
               ? 'completed'
               : progress > 0
-              ? 'in-progress'
-              : 'not-started',
+                ? 'in-progress'
+                : 'not-started',
         };
       });
 
@@ -241,23 +264,23 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
       if (onStatsUpdate) {
         const enrolledTasks = processedTasks.filter((t) => t.isEnrolled);
         const activeTasks = enrolledTasks.filter(
-          (t) => t.progress < 100
+          (t) => t.progress < 100,
         ).length;
         const completedTasks = enrolledTasks.filter(
-          (t) => t.progress === 100
+          (t) => t.progress === 100,
         ).length;
         const totalEarnedPoints = enrolledTasks.reduce(
           (sum, t) => sum + t.earnedPoints,
-          0
+          0,
         );
         const totalEnrolledSteps = enrolledTasks.reduce(
           (sum, t) => sum + t.steps.length,
-          0
+          0,
         );
         const totalCompletedSteps = enrolledTasks.reduce(
           (sum, t) =>
             sum + t.steps.filter((s) => s.status === 'APPROVED').length,
-          0
+          0,
         );
         const overallProgress =
           totalEnrolledSteps > 0
@@ -345,11 +368,11 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
   if (mode === 'available') {
     if (filter === 'latest') {
       filteredTasks.sort(
-        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+        (a, b) => new Date(b.created_at) - new Date(a.created_at),
       );
     } else if (filter === 'oldest') {
       filteredTasks.sort(
-        (a, b) => new Date(a.created_at) - new Date(b.created_at)
+        (a, b) => new Date(a.created_at) - new Date(b.created_at),
       );
     }
   }
@@ -623,7 +646,7 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
                                 >
                                   {task.deadline
                                     ? `${t(
-                                        'userDashboard.taskList.due'
+                                        'userDashboard.taskList.due',
                                       )}: ${getDeadline(task.deadline)}`
                                     : t('userDashboard.taskList.noDeadline')}
                                 </span>
@@ -633,7 +656,7 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
                               <div
                                 className="hidden sm:flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg"
                                 title={`${t(
-                                  'userDashboard.taskList.manager'
+                                  'userDashboard.taskList.manager',
                                 )}: ${task.manager.name}`}
                               >
                                 <svg
