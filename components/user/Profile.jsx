@@ -64,7 +64,7 @@ export default function Profile({ userId, onStatsUpdate }) {
       const { data: historyData, error: historyError } = await supabase
         .from('user_point_history')
         .select(
-          `history_id, points_earned, earned_at, step:task_steps (title, task:tasks (title, task_id))`
+          `history_id, points_earned, earned_at, step:task_steps (title, task:tasks (title, task_id))`,
         )
         .eq('user_id', userId)
         .order('earned_at', { ascending: false });
@@ -189,7 +189,7 @@ export default function Profile({ userId, onStatsUpdate }) {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
-      }
+      },
     );
   };
 
@@ -544,7 +544,7 @@ export default function Profile({ userId, onStatsUpdate }) {
         </div>
       </div>
 
-      {userInfo.role === 'user' && (
+      {(userInfo.role === 'user' || userInfo.role === 'manager') && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
             {
@@ -635,7 +635,7 @@ export default function Profile({ userId, onStatsUpdate }) {
         </div>
       )}
 
-      {userInfo.role === 'user' && (
+      {(userInfo.role === 'user' || userInfo.role === 'manager') && (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="px-6 py-5 border-b border-gray-100">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
@@ -656,10 +656,10 @@ export default function Profile({ userId, onStatsUpdate }) {
                     {filter === 'all'
                       ? t('user.profile.allTime')
                       : filter === 'thisWeek'
-                      ? t('user.profile.thisWeek')
-                      : filter === 'thisMonth'
-                      ? t('user.profile.thisMonth')
-                      : t('user.profile.customRange')}
+                        ? t('user.profile.thisWeek')
+                        : filter === 'thisMonth'
+                          ? t('user.profile.thisMonth')
+                          : t('user.profile.customRange')}
                   </button>
                 ))}
               </div>
