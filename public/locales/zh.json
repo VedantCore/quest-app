@@ -70,6 +70,18 @@
     }
   },
   "common": {
+    "alt": {
+      "profile": "个人资料"
+    },
+    "placeholders": {
+      "amount": "金额",
+      "email": "name@example.com",
+      "password": "••••••••",
+      "searchUsers": "搜索用户..."
+    },
+    "title": {
+      "removeFromCompany": "从公司删除"
+    },
     "100": "100",
     "200": "200",
     "300": "300",

@@ -53,7 +53,7 @@ export default function UserList({ companyId }) {
               created_at,
               total_points
             )
-          `
+          `,
           )
           .eq('company_id', companyId);
 
@@ -102,7 +102,7 @@ export default function UserList({ companyId }) {
             task_steps (points_reward),
             manager:users!assigned_manager_id (name)
           )
-        `
+        `,
         )
         .eq('user_id', user.user_id)
         .order('joined_at', { ascending: false });
@@ -118,7 +118,7 @@ export default function UserList({ companyId }) {
           task_steps (
             task_id
           )
-        `
+        `,
         )
         .eq('user_id', user.user_id);
 
@@ -141,7 +141,7 @@ export default function UserList({ companyId }) {
         const totalPoints =
           enrollment.tasks.task_steps?.reduce(
             (sum, step) => sum + (step.points_reward || 0),
-            0
+            0,
           ) || 0;
 
         return {
@@ -175,7 +175,7 @@ export default function UserList({ companyId }) {
       const result = await removeUserFromCompanyAction(
         token,
         userId,
-        companyId
+        companyId,
       );
 
       if (result.success) {
@@ -381,7 +381,7 @@ export default function UserList({ companyId }) {
                           <button
                             onClick={() => handleRemoveUser(user.user_id)}
                             className="text-red-600 hover:text-red-800 font-medium transition-colors"
-                            title="Remove from company"
+                            title={t('common.title.removeFromCompany')}
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"

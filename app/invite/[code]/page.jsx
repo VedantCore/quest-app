@@ -64,7 +64,7 @@ export default function InvitePage({ params }) {
         const userCredential = await createUserWithEmailAndPassword(
           auth,
           email,
-          password
+          password,
         );
         user = userCredential.user;
       } catch (authError) {
@@ -75,7 +75,7 @@ export default function InvitePage({ params }) {
             const signInCredential = await signInWithEmailAndPassword(
               auth,
               email,
-              password
+              password,
             );
             user = signInCredential.user;
             toast(t('invite.emailRegistered'), {
@@ -106,7 +106,7 @@ export default function InvitePage({ params }) {
       const result = await completeSignupWithInviteAction(
         token,
         code,
-        userData
+        userData,
       );
 
       if (!result.success) {
@@ -155,7 +155,7 @@ export default function InvitePage({ params }) {
       const signupResult = await completeSignupWithInviteAction(
         token,
         code,
-        userData
+        userData,
       );
 
       if (!signupResult.success) {
@@ -266,7 +266,7 @@ export default function InvitePage({ params }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-              placeholder="••••••••"
+              placeholder={t('common.placeholders.password')}
             />
           </div>
 

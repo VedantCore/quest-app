@@ -304,7 +304,7 @@ export default function Profile({ userId, onStatsUpdate }) {
                 {userInfo.avatar_url ? (
                   <img
                     src={userInfo.avatar_url}
-                    alt="Profile"
+                    alt={t('common.alt.profile')}
                     className={`w-24 h-24 rounded-full border-4 border-white shadow-md object-cover transition-opacity ${
                       uploading ? 'opacity-50' : 'group-hover:opacity-75'
                     }`}

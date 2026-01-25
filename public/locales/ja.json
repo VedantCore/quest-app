@@ -70,6 +70,18 @@
     }
   },
   "common": {
+    "alt": {
+      "profile": "プロフィール"
+    },
+    "placeholders": {
+      "amount": "金額",
+      "email": "name@example.com",
+      "password": "••••••••",
+      "searchUsers": "ユーザーを検索..."
+    },
+    "title": {
+      "removeFromCompany": "会社から削除"
+    },
     "100": "100",
     "200": "200",
     "300": "300",

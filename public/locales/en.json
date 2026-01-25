@@ -70,6 +70,18 @@
     }
   },
   "common": {
+    "alt": {
+      "profile": "Profile"
+    },
+    "placeholders": {
+      "amount": "Amount",
+      "email": "name@example.com",
+      "password": "••••••••",
+      "searchUsers": "Search users..."
+    },
+    "title": {
+      "removeFromCompany": "Remove from company"
+    },
     "100": "100",
     "200": "200",
     "300": "300",

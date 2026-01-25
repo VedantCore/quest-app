@@ -96,8 +96,8 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                 ? userRole === 'admin'
                   ? '/admin-dashboard'
                   : userRole === 'manager'
-                  ? '/manager-dashboard'
-                  : '/user-dashboard'
+                    ? '/manager-dashboard'
+                    : '/user-dashboard'
                 : '/'
             }
             className="text-xl font-bold tracking-tight text-indigo-600 group active:scale-95 transition-transform duration-200"
@@ -160,7 +160,7 @@ export default function Navbar({ onOpenLogin, onOpenSignup }) {
                     {user.photoURL ? (
                       <img
                         src={user.photoURL}
-                        alt="Profile"
+                        alt={t('common.alt.profile')}
                         className="h-9 w-9 sm:h-10 sm:w-10 rounded-full border-2 border-white shadow-md object-cover ring-1 ring-gray-100"
                       />
                     ) : (

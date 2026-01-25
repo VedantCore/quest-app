@@ -25,7 +25,7 @@ export default function Home() {
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
-        password
+        password,
       );
       const user = userCredential.user;
 
@@ -116,7 +116,7 @@ export default function Home() {
 
       if (supabaseError) {
         toast.error(
-          `Auth successful but sync failed: ${supabaseError.message}`
+          `Auth successful but sync failed: ${supabaseError.message}`,
         );
       } else {
         toast.success('Logged in successfully!');
@@ -197,7 +197,7 @@ export default function Home() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@example.com"
+                placeholder={t('common.placeholders.email')}
                 className="w-full px-4 py-3 bg-white border border-slate-300 text-slate-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent transition-all"
                 required
               />

@@ -70,6 +70,18 @@
     }
   },
   "common": {
+    "alt": {
+      "profile": "Profil"
+    },
+    "placeholders": {
+      "amount": "Jumlah",
+      "email": "nama@contoh.com",
+      "password": "••••••••",
+      "searchUsers": "Cari pengguna..."
+    },
+    "title": {
+      "removeFromCompany": "Hapus dari perusahaan"
+    },
     "100": "100",
     "200": "200",
     "300": "300",

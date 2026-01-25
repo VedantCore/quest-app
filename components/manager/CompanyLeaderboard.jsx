@@ -41,7 +41,7 @@ export default function CompanyLeaderboard({ companyId }) {
             avatar_url,
             total_points
           )
-        `
+        `,
         )
         .eq('company_id', companyId);
 
@@ -76,7 +76,7 @@ export default function CompanyLeaderboard({ companyId }) {
         companyId,
         user.uid,
         pointsAction,
-        pointsAmount ? parseInt(pointsAmount) : 0
+        pointsAmount ? parseInt(pointsAmount) : 0,
       );
 
       if (result.success) {
@@ -173,7 +173,7 @@ export default function CompanyLeaderboard({ companyId }) {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div
                     className={`nav-number flex items-center justify-center w-8 h-8 rounded-full border text-sm font-bold ${getMedalColor(
-                      index
+                      index,
                     )}`}
                   >
                     {index + 1}
@@ -241,7 +241,7 @@ export default function CompanyLeaderboard({ companyId }) {
                           min="0"
                           value={pointsAmount}
                           onChange={(e) => setPointsAmount(e.target.value)}
-                          placeholder="Amount"
+                          placeholder={t('common.placeholders.amount')}
                           className="w-20 text-xs border border-gray-300 rounded px-2 py-1"
                           disabled={updating}
                         />

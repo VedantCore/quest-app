@@ -45,7 +45,7 @@ export default function CompanyDetailPage({ params }) {
         const result = await getCompaniesAction(token);
         if (result.success) {
           const foundCompany = result.data.find(
-            (c) => c.company_id === companyId
+            (c) => c.company_id === companyId,
           );
           setCompany(foundCompany);
         }
@@ -103,12 +103,12 @@ export default function CompanyDetailPage({ params }) {
       const result = await bulkAssignUsersToCompanyAction(
         token,
         selectedUsers,
-        companyId
+        companyId,
       );
 
       if (result.success) {
         toast.success(
-          `Assigned ${selectedUsers.length} user(s) to ${company.name}`
+          `Assigned ${selectedUsers.length} user(s) to ${company.name}`,
         );
         setShowAssignModal(false);
         setSelectedUsers([]);
@@ -127,7 +127,7 @@ export default function CompanyDetailPage({ params }) {
     setSelectedUsers((prev) =>
       prev.includes(userId)
         ? prev.filter((id) => id !== userId)
-        : [...prev, userId]
+        : [...prev, userId],
     );
   };
 
@@ -346,7 +346,7 @@ export default function CompanyDetailPage({ params }) {
                 <div className="mb-4">
                   <input
                     type="text"
-                    placeholder="Search users..."
+                    placeholder={t('common.placeholders.searchUsers')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -361,11 +361,11 @@ export default function CompanyDetailPage({ params }) {
                           .includes(searchTerm.toLowerCase()) ||
                         u.email
                           ?.toLowerCase()
-                          .includes(searchTerm.toLowerCase())
+                          .includes(searchTerm.toLowerCase()),
                     )
                     .map((u) => {
                       const alreadyAssigned = companyUsers.some(
-                        (cu) => cu.users?.user_id === u.user_id
+                        (cu) => cu.users?.user_id === u.user_id,
                       );
                       return (
                         <label

@@ -53,7 +53,7 @@ export default function ManagerList({ companyId }) {
               created_at,
               total_points
             )
-          `
+          `,
           )
           .eq('company_id', companyId);
 
@@ -123,7 +123,7 @@ export default function ManagerList({ companyId }) {
       const result = await removeUserFromCompanyAction(
         token,
         managerId,
-        companyId
+        companyId,
       );
 
       if (result.success) {
@@ -150,7 +150,7 @@ export default function ManagerList({ companyId }) {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredManagers.slice(
     indexOfFirstItem,
-    indexOfLastItem
+    indexOfLastItem,
   );
   const totalPages = Math.ceil(filteredManagers.length / itemsPerPage);
 
@@ -248,7 +248,7 @@ export default function ManagerList({ companyId }) {
                           <button
                             onClick={() => handleRemoveManager(manager.user_id)}
                             className="text-red-600 hover:text-red-800 font-medium transition-colors"
-                            title="Remove from company"
+                            title={t('common.title.removeFromCompany')}
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
