@@ -90,7 +90,7 @@ export default function TaskDetailsModal({
                   {isExpired
                     ? `⚠️ ${t('userDashboard.taskDetails.expired')}`
                     : `${t('userDashboard.taskDetails.deadline')}: ${new Date(
-                        task.deadline
+                        task.deadline,
                       ).toLocaleDateString(localeMap[locale] || 'en-US', {
                         month: 'short',
                         day: 'numeric',
@@ -192,8 +192,8 @@ export default function TaskDetailsModal({
                         : 'bg-red-50 text-red-600 border-red-100'
                     }`}
                   >
-                    {step.points_reward >= 0 ? '+' : ''}
-                    {step.points_reward} {t('common.pts')}
+                    {step.points_reward >= 0 ? '+' : '-'}
+                    {Math.abs(step.points_reward)} {t('common.pts')}
                   </span>
                 </div>
               ))}

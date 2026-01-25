@@ -208,8 +208,8 @@ export default function ManagerTaskDetailsModal({ task, isOpen, onClose }) {
                               : 'text-red-600'
                           }
                         >
-                          {step.points_reward >= 0 ? '+' : ''}
-                          {step.points_reward} {t('common.pts')}
+                          {step.points_reward >= 0 ? '+' : '-'}
+                          {Math.abs(step.points_reward)} {t('common.pts')}
                         </span>
                       </span>
                     </div>

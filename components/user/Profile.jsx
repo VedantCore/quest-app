@@ -762,8 +762,15 @@ export default function Profile({ userId, onStatsUpdate }) {
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                      <div className="font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full text-sm border border-indigo-100">
-                        +{group.totalPoints} {t('common.pts')}
+                      <div
+                        className={`font-bold px-3 py-1 rounded-full text-sm border ${
+                          group.totalPoints >= 0
+                            ? 'text-indigo-600 bg-indigo-50 border-indigo-100'
+                            : 'text-red-600 bg-red-50 border-red-100'
+                        }`}
+                      >
+                        {group.totalPoints >= 0 ? '+' : '-'}
+                        {Math.abs(group.totalPoints)} {t('common.pts')}
                       </div>
                       <svg
                         className={`w-5 h-5 text-gray-400 transition-transform ${
@@ -812,8 +819,8 @@ export default function Profile({ userId, onStatsUpdate }) {
                                 : 'text-red-600'
                             }`}
                           >
-                            {item.points_earned >= 0 ? '+' : ''}
-                            {item.points_earned} {t('common.pts')}
+                            {item.points_earned >= 0 ? '+' : '-'}
+                            {Math.abs(item.points_earned)} {t('common.pts')}
                           </span>
                         </div>
                       ))}

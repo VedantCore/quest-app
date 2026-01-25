@@ -48,7 +48,7 @@ export default function TaskDetailsPage() {
           *,
           task_steps (*),
           manager:users!tasks_assigned_manager_id_fkey (name, email, avatar_url)
-        `
+        `,
         )
         .eq('task_id', taskId)
         .single();
@@ -77,7 +77,7 @@ export default function TaskDetailsPage() {
           .gte('submitted_at', enrollment.joined_at)
           .in(
             'step_id',
-            taskData.task_steps.map((s) => s.step_id)
+            taskData.task_steps.map((s) => s.step_id),
           );
 
         if (subsError) throw subsError;
@@ -98,7 +98,7 @@ export default function TaskDetailsPage() {
       // Calculate progress
       const totalSteps = stepsWithStatus.length;
       const completedSteps = stepsWithStatus.filter(
-        (s) => s.status === 'APPROVED'
+        (s) => s.status === 'APPROVED',
       ).length;
       const progress =
         totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
@@ -253,15 +253,15 @@ export default function TaskDetailsPage() {
                     task.isExpired
                       ? 'bg-red-50 text-red-700 border-red-200'
                       : task.is_active
-                      ? 'bg-green-50 text-green-700 border-green-200'
-                      : 'bg-gray-100 text-gray-700 border-gray-200'
+                        ? 'bg-green-50 text-green-700 border-green-200'
+                        : 'bg-gray-100 text-gray-700 border-gray-200'
                   }`}
                 >
                   {task.isExpired
                     ? t('userDashboard.taskList.expired')
                     : task.is_active
-                    ? t('taskPage.active')
-                    : t('taskPage.inactive')}
+                      ? t('taskPage.active')
+                      : t('taskPage.inactive')}
                 </span>
                 {task.isEnrolled && (
                   <span className="px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
@@ -285,7 +285,7 @@ export default function TaskDetailsPage() {
                   >
                     {task.deadline
                       ? new Date(task.deadline).toLocaleDateString(
-                          localeMap[locale] || 'en-US'
+                          localeMap[locale] || 'en-US',
                         )
                       : t('userDashboard.taskList.noDeadline')}
                   </span>
@@ -400,8 +400,15 @@ export default function TaskDetailsPage() {
                           {step.title}
                         </h3>
                         <div className="flex items-center gap-2">
-                          <span className="px-3 py-1 bg-yellow-50 text-yellow-700 text-xs font-bold rounded-full border border-yellow-200 whitespace-nowrap">
-                            +{step.points_reward} {t('common.pts')}
+                          <span
+                            className={`px-3 py-1 text-xs font-bold rounded-full border whitespace-nowrap ${
+                              step.points_reward >= 0
+                                ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                                : 'bg-red-50 text-red-700 border-red-200'
+                            }`}
+                          >
+                            {step.points_reward >= 0 ? '+' : '-'}
+                            {Math.abs(step.points_reward)} {t('common.pts')}
                           </span>
 
                           {/* Status Badges */}
