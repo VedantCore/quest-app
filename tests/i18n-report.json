@@ -1,0 +1,26 @@
+{
+  "missingKeys": {},
+  "unusedKeys": [],
+  "undefinedKeys": [],
+  "wrongLanguage": [],
+  "parameterMismatches": [],
+  "emptyValues": [],
+  "duplicateKeys": [],
+  "totalKeys": {
+    "en": 467,
+    "id": 467,
+    "ja": 467,
+    "zh": 467
+  },
+  "summary": {
+    "totalKeysAcrossLocales": 467,
+    "keysUsedInCode": 467,
+    "missingKeysCount": 0,
+    "unusedKeysCount": 0,
+    "undefinedKeysCount": 0,
+    "wrongLanguageCount": 0,
+    "parameterMismatchCount": 0,
+    "emptyValuesCount": 0,
+    "duplicateKeysCount": 0
+  }
+}

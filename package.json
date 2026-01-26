@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:points": "node tests/points-system.test.js"
+    "test:points": "node tests/points-system.test.js",
+    "test:i18n": "node tests/i18n-validator.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.86.2",
