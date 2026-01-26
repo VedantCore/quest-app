@@ -14,8 +14,10 @@ import {
   bulkAssignUsersToCompanyAction,
 } from '@/app/company-actions';
 import toast from 'react-hot-toast';
+import { useLocale } from '@/context/LocaleContext';
 
 export default function CompanyDetailPage({ params }) {
+  const { t } = useLocale();
   const { user, userRole, loading } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('tasks');
@@ -319,11 +321,11 @@ export default function CompanyDetailPage({ params }) {
 
       {/* Assign Users Modal */}
       {showAssignModal && (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div className="flex justify-between items-center p-6 border-b">
               <h3 className="text-xl font-bold">
-                Assign Users to {company.name}
+                {t('admin.company.assignTo', { companyName: company.name })}
               </h3>
               <button
                 onClick={() => {
@@ -331,28 +333,43 @@ export default function CompanyDetailPage({ params }) {
                   setSelectedUsers([]);
                   setSearchTerm('');
                 }}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-400 hover:text-gray-600"
               >
-                ✕
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
               </button>
             </div>
 
             {loadingUsers ? (
-              <div className="flex justify-center py-8">
+              <div className="flex-grow flex justify-center items-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
               </div>
             ) : (
-              <form onSubmit={handleBulkAssign}>
-                <div className="mb-4">
+              <form
+                onSubmit={handleBulkAssign}
+                className="flex-grow flex flex-col overflow-hidden"
+              >
+                <div className="p-6">
                   <input
                     type="text"
                     placeholder={t('common.placeholders.searchUsers')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
-                <div className="space-y-2 mb-4 max-h-96 overflow-y-auto">
+                <div className="flex-grow overflow-y-auto px-6 space-y-2">
                   {allUsers
                     .filter(
                       (u) =>
@@ -370,8 +387,14 @@ export default function CompanyDetailPage({ params }) {
                       return (
                         <label
                           key={u.user_id}
-                          className={`flex items-center p-3 border rounded-md cursor-pointer hover:bg-gray-50 ${
-                            alreadyAssigned ? 'opacity-50' : ''
+                          className={`flex items-center p-3 border rounded-lg cursor-pointer transition-colors ${
+                            alreadyAssigned
+                              ? 'bg-gray-100 opacity-60 cursor-not-allowed'
+                              : 'hover:bg-indigo-50'
+                          } ${
+                            selectedUsers.includes(u.user_id)
+                              ? 'bg-indigo-50 border-indigo-300'
+                              : 'border-gray-200'
                           }`}
                         >
                           <input
@@ -379,26 +402,32 @@ export default function CompanyDetailPage({ params }) {
                             checked={selectedUsers.includes(u.user_id)}
                             onChange={() => toggleUserSelection(u.user_id)}
                             disabled={alreadyAssigned}
-                            className="mr-3"
+                            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-4"
                           />
                           <div>
-                            <p className="font-medium">{u.name}</p>
-                            <p className="text-sm text-gray-600">{u.email}</p>
-                            <span className="text-xs px-2 py-1 bg-gray-100 rounded">
-                              {u.role}
-                            </span>
-                            {alreadyAssigned && (
-                              <span className="ml-2 text-xs text-green-600">
-                                Already assigned
-                              </span>
+                            <p className="font-medium text-gray-800">
+                              {u.name || u.email}
+                            </p>
+                            {u.name && (
+                              <p className="text-sm text-gray-500">{u.email}</p>
                             )}
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-xs px-2 py-0.5 bg-gray-200 text-gray-700 font-medium rounded-full">
+                                {u.role}
+                              </span>
+                              {alreadyAssigned && (
+                                <span className="text-xs font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
+                                  {t('admin.company.alreadyAssigned')}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </label>
                       );
                     })}
                 </div>
 
-                <div className="flex gap-2 justify-end">
+                <div className="flex gap-4 justify-end p-6 border-t bg-gray-50">
                   <button
                     type="button"
                     onClick={() => {
@@ -406,16 +435,18 @@ export default function CompanyDetailPage({ params }) {
                       setSelectedUsers([]);
                       setSearchTerm('');
                     }}
-                    className="px-4 py-2 border rounded-md hover:bg-gray-50"
+                    className="px-5 py-2.5 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50 font-semibold text-sm"
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                    className="px-5 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-indigo-300 disabled:cursor-not-allowed font-semibold text-sm"
                     disabled={selectedUsers.length === 0}
                   >
-                    Assign {selectedUsers.length} User(s)
+                    {t('admin.company.assignUsers', {
+                      count: selectedUsers.length,
+                    })}
                   </button>
                 </div>
               </form>

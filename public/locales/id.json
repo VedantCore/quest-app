@@ -1732,6 +1732,14 @@
     "updateQuest": "Perbarui Quest",
     "view": "Lihat"
   },
+  "admin": {
+    "company": {
+      "assignTo": "Tetapkan Pengguna ke {{companyName}}",
+      "assignUsers": "Tetapkan {{count}} Pengguna",
+      "assignUsers_plural": "Tetapkan {{count}} Pengguna",
+      "alreadyAssigned": "Sudah ditetapkan"
+    }
+  },
   "taskPage": {
     "active": "Aktif",
     "backToTasks": "Kembali ke Tugas",

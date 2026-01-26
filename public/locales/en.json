@@ -1732,6 +1732,14 @@
     "updateQuest": "Update Quest",
     "view": "View"
   },
+  "admin": {
+    "company": {
+      "assignTo": "Assign Users to {{companyName}}",
+      "assignUsers": "Assign {{count}} User",
+      "assignUsers_plural": "Assign {{count}} Users",
+      "alreadyAssigned": "Already assigned"
+    }
+  },
   "taskPage": {
     "active": "Active",
     "backToTasks": "Back to Tasks",

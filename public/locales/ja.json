@@ -3,8 +3,10 @@
     "company": {
       "alreadyAssigned": "割り当て済み",
       "assign": "割り当て",
-      "assignUsers": "ユーザーを割り当て",
-      "assignUsersTo": "ユーザーを {company} に割り当てる",
+      "assignTo": "ユーザーを{{companyName}}に割り当てる",
+      "assignUsers": "{{count}}人のユーザーを割り当てる",
+      "assignUsers_plural": "{{count}}人のユーザーを割り当てる",
+      "alreadyAssigned": "割り当て済み",
       "create": "会社作成",
       "createFirst": "ユーザーを割り当てる前に、まず会社を作成してください。",
       "createTitle": "新しい会社を作成",

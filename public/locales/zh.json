@@ -1732,6 +1732,14 @@
     "updateQuest": "更新任务",
     "view": "查看"
   },
+  "admin": {
+    "company": {
+      "assignTo": "分配用户到 {{companyName}}",
+      "assignUsers": "分配 {{count}} 个用户",
+      "assignUsers_plural": "分配 {{count}} 个用户",
+      "alreadyAssigned": "已分配"
+    }
+  },
   "taskPage": {
     "active": "进行中",
     "backToTasks": "返回任务列表",
