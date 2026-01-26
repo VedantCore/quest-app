@@ -641,17 +641,21 @@ export async function approveSubmission(
     // Award points to the user
     const pointsToAward = step.points_reward || 0;
 
-    // Check if points were already awarded for this step to prevent duplicates
+    // Check if points were already awarded for this step IN THE CURRENT SESSION
+    // This prevents duplicate awards while still allowing points on rejoin
     const { data: existingPointHistory, error: pointHistoryCheckError } =
       await supabase
         .from('user_point_history')
         .select('history_id')
         .eq('user_id', submission.user_id)
         .eq('step_id', submission.step_id)
-        .single();
+        .gte('earned_at', activeEnrollment.joined_at);
 
-    // Only award points if not already awarded for this step
-    if (!existingPointHistory && pointHistoryCheckError?.code === 'PGRST116') {
+    // Only award points if not already awarded for this step in this session
+    const alreadyAwarded =
+      existingPointHistory && existingPointHistory.length > 0;
+
+    if (!alreadyAwarded) {
       // Insert into user_point_history
       const { error: pointHistoryError } = await supabase
         .from('user_point_history')
