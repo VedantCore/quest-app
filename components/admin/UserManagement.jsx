@@ -54,7 +54,7 @@ export default function UserManagement() {
                 company_id,
                 name
               )
-            `
+            `,
             )
             .eq('user_id', user.user_id);
 
@@ -62,7 +62,7 @@ export default function UserManagement() {
             console.error(
               'Error fetching companies for user:',
               user.user_id,
-              companiesError
+              companiesError,
             );
           }
 
@@ -74,7 +74,7 @@ export default function UserManagement() {
             ...user,
             companies,
           };
-        })
+        }),
       );
 
       setUsers(usersWithCompanies);
@@ -134,7 +134,7 @@ export default function UserManagement() {
       const result = await updateUserPoints(
         editPointsModal.user.user_id,
         editPointsModal.newPoints,
-        currentUser.uid
+        currentUser.uid,
       );
 
       if (result.success) {
@@ -343,7 +343,10 @@ export default function UserManagement() {
             type="text"
             placeholder={t('userManagement.search')}
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
             className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-gray-400"
           />
           <select
@@ -443,8 +446,8 @@ export default function UserManagement() {
                           user.role === 'admin'
                             ? 'bg-purple-100 text-purple-700 border-purple-200'
                             : user.role === 'manager'
-                            ? 'bg-indigo-100 text-indigo-700 border-indigo-200'
-                            : 'bg-gray-100 text-gray-700 border-gray-200'
+                              ? 'bg-indigo-100 text-indigo-700 border-indigo-200'
+                              : 'bg-gray-100 text-gray-700 border-gray-200'
                         }`}
                       >
                         <option value="user" className="text-black bg-white">
