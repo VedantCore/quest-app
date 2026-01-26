@@ -60,7 +60,7 @@ export default function TaskManagement({ companyId, companyName }) {
               avatar_url
             )
           )
-        `
+        `,
         )
         .order('created_at', { ascending: false });
 
@@ -82,7 +82,7 @@ export default function TaskManagement({ companyId, companyName }) {
               name,
               role
             )
-          `
+          `,
           )
           .eq('company_id', companyId);
       } else {
@@ -170,13 +170,19 @@ export default function TaskManagement({ companyId, companyName }) {
     setSteps(
       newSteps.length > 0
         ? newSteps
-        : [{ title: '', description: '', points_reward: 0 }]
+        : [{ title: '', description: '', points_reward: 0 }],
     );
   };
 
   const updateStep = (index, field, value) => {
     const newSteps = [...steps];
-    newSteps[index][field] = value;
+    // Convert points_reward to number to prevent NaN issues
+    if (field === 'points_reward') {
+      const numValue = parseInt(value);
+      newSteps[index][field] = isNaN(numValue) ? 0 : numValue;
+    } else {
+      newSteps[index][field] = value;
+    }
     setSteps(newSteps);
   };
 
@@ -213,7 +219,7 @@ export default function TaskManagement({ companyId, companyName }) {
             description: s.description,
             points_reward: s.points_reward,
           }))
-        : [{ title: '', description: '', points_reward: 0 }]
+        : [{ title: '', description: '', points_reward: 0 }],
     );
 
     setIsEditing(true);
@@ -258,7 +264,7 @@ export default function TaskManagement({ companyId, companyName }) {
           borderRadius: '12px',
           padding: '16px',
         },
-      }
+      },
     );
   };
 
@@ -422,7 +428,7 @@ export default function TaskManagement({ companyId, companyName }) {
                   const totalPoints =
                     task.task_steps?.reduce(
                       (sum, step) => sum + (step.points_reward || 0),
-                      0
+                      0,
                     ) || 0;
 
                   const taskStatus = getTaskStatus(task);
@@ -756,7 +762,7 @@ export default function TaskManagement({ companyId, companyName }) {
                       <span className="text-3xl font-black text-indigo-600">
                         {selectedTask.task_steps?.reduce(
                           (s, st) => s + (st.points_reward || 0),
-                          0
+                          0,
                         )}
                       </span>
                       <span className="text-sm font-bold text-gray-500">
@@ -816,7 +822,7 @@ export default function TaskManagement({ companyId, companyName }) {
                               <p className="text-[10px] text-gray-500 truncate">
                                 {t('taskManagement.joined')}{' '}
                                 {new Date(
-                                  enrollment.joined_at
+                                  enrollment.joined_at,
                                 ).toLocaleDateString()}
                               </p>
                             </div>
@@ -1010,7 +1016,7 @@ export default function TaskManagement({ companyId, companyName }) {
                           }
                           className="flex-1 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:border-gray-400 outline-none"
                           placeholder={`${t(
-                            'taskManagement.conditionPlaceholder'
+                            'taskManagement.conditionPlaceholder',
                           )} ${index + 1}`}
                         />
                         <input

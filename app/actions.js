@@ -28,12 +28,15 @@ export async function createTask(taskData, steps) {
     if (taskError) throw taskError;
 
     if (steps && steps.length > 0) {
-      const stepsToInsert = steps.map((step) => ({
-        task_id: task.task_id,
-        title: step.title,
-        description: step.description,
-        points_reward: parseInt(step.points_reward),
-      }));
+      const stepsToInsert = steps.map((step) => {
+        const pointsValue = parseInt(step.points_reward);
+        return {
+          task_id: task.task_id,
+          title: step.title,
+          description: step.description,
+          points_reward: isNaN(pointsValue) ? 0 : pointsValue,
+        };
+      });
 
       const { error: stepsError } = await supabase
         .from('task_steps')
@@ -97,11 +100,12 @@ export async function updateTask(taskId, taskData, steps) {
       // Upsert steps (update existing, insert new)
       // NEW: Upsert logic to handle duplicates gracefully
       for (const step of steps) {
+        const pointsValue = parseInt(step.points_reward);
         const stepData = {
           task_id: taskId,
           title: step.title,
           description: step.description,
-          points_reward: parseInt(step.points_reward),
+          points_reward: isNaN(pointsValue) ? 0 : pointsValue,
         };
         // If we have an ID, force it (standard update)
         if (step.step_id) {
@@ -228,9 +232,55 @@ export async function joinTask(taskId, userId) {
 
     if (stepsError) throw stepsError;
 
-    // Delete any old submissions from previous attempts to reset progress to 0%
+    // Delete any old submissions and point history from previous attempts to reset progress to 0%
     if (taskSteps && taskSteps.length > 0) {
       const stepIds = taskSteps.map((s) => s.step_id);
+
+      // Get points to deduct from previous attempts
+      const { data: oldPointHistory, error: pointHistoryError } = await supabase
+        .from('user_point_history')
+        .select('history_id, points_earned')
+        .eq('user_id', userId)
+        .in('step_id', stepIds);
+
+      if (pointHistoryError) throw pointHistoryError;
+
+      // Deduct old points and clean up history
+      if (oldPointHistory && oldPointHistory.length > 0) {
+        const totalOldPoints = oldPointHistory.reduce(
+          (sum, record) => sum + (record.points_earned || 0),
+          0,
+        );
+
+        // Delete old point history records
+        const historyIds = oldPointHistory.map((p) => p.history_id);
+        await supabase
+          .from('user_point_history')
+          .delete()
+          .in('history_id', historyIds);
+
+        // Deduct old points from user's total
+        if (totalOldPoints > 0) {
+          const { data: currentUser, error: userFetchError } = await supabase
+            .from('users')
+            .select('total_points')
+            .eq('user_id', userId)
+            .single();
+
+          if (!userFetchError && currentUser) {
+            const newTotalPoints = Math.max(
+              0,
+              (currentUser.total_points || 0) - totalOldPoints,
+            );
+            await supabase
+              .from('users')
+              .update({ total_points: newTotalPoints })
+              .eq('user_id', userId);
+          }
+        }
+      }
+
+      // Delete old submissions
       await supabase
         .from('step_submissions')
         .delete()
@@ -292,8 +342,59 @@ export async function unjoinTask(taskId, userId) {
 
     const stepIds = taskSteps.map((s) => s.step_id);
 
-    // Delete all submissions for this enrollment (only from current run)
+    // Calculate points to deduct from user_point_history for steps in this task
     if (stepIds.length > 0) {
+      // Get points earned for this task's steps
+      const { data: pointsEarned, error: pointsError } = await supabase
+        .from('user_point_history')
+        .select('history_id, points_earned')
+        .eq('user_id', userId)
+        .in('step_id', stepIds);
+
+      if (pointsError) throw pointsError;
+
+      // Calculate total points to deduct
+      const totalPointsToDeduct =
+        pointsEarned?.reduce(
+          (sum, record) => sum + (record.points_earned || 0),
+          0,
+        ) || 0;
+
+      // Delete point history records for this task
+      if (pointsEarned && pointsEarned.length > 0) {
+        const historyIds = pointsEarned.map((p) => p.history_id);
+        const { error: deletePointsError } = await supabase
+          .from('user_point_history')
+          .delete()
+          .in('history_id', historyIds);
+
+        if (deletePointsError) throw deletePointsError;
+
+        // Deduct points from user's total
+        if (totalPointsToDeduct > 0) {
+          const { data: currentUser, error: userFetchError } = await supabase
+            .from('users')
+            .select('total_points')
+            .eq('user_id', userId)
+            .single();
+
+          if (userFetchError) throw userFetchError;
+
+          const newTotalPoints = Math.max(
+            0,
+            (currentUser.total_points || 0) - totalPointsToDeduct,
+          );
+
+          const { error: userUpdateError } = await supabase
+            .from('users')
+            .update({ total_points: newTotalPoints })
+            .eq('user_id', userId);
+
+          if (userUpdateError) throw userUpdateError;
+        }
+      }
+
+      // Delete all submissions for this enrollment (only from current run)
       const { error: deleteSubsError } = await supabase
         .from('step_submissions')
         .delete()
