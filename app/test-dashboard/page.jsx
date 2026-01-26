@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import testScenarios from '../../../tests/ui-test-scenarios';
+import testScenarios from '../../tests/ui-test-scenarios';
 
 // Initialize Supabase client
 const supabase = createClient(
