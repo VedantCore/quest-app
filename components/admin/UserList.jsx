@@ -7,6 +7,7 @@ import { useLocale } from '@/context/LocaleContext';
 import { RankBadge } from '@/lib/rankUtils';
 import { removeUserFromCompanyAction } from '@/app/company-actions';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
 
 export default function UserList({ companyId }) {
   const { t } = useLocale();
