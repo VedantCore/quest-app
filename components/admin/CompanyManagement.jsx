@@ -62,7 +62,7 @@ export default function CompanyManagement({ allUsers }) {
 
       // Filter users who don't have any company
       const usersWithoutCompanies = allUsers.filter(
-        (u) => !assignedUserIds.has(u.user_id)
+        (u) => !assignedUserIds.has(u.user_id),
       );
 
       setUnassignedUsers(usersWithoutCompanies);
@@ -138,7 +138,7 @@ export default function CompanyManagement({ allUsers }) {
       const result = await removeUserFromCompanyAction(
         token,
         userId,
-        selectedCompany.company_id
+        selectedCompany.company_id,
       );
 
       if (result.success) {
@@ -165,7 +165,7 @@ export default function CompanyManagement({ allUsers }) {
       const result = await bulkAssignUsersToCompanyAction(
         token,
         selectedUsers,
-        selectedCompany.company_id
+        selectedCompany.company_id,
       );
 
       if (result.success) {
@@ -187,7 +187,7 @@ export default function CompanyManagement({ allUsers }) {
     setSelectedUsers((prev) =>
       prev.includes(userId)
         ? prev.filter((id) => id !== userId)
-        : [...prev, userId]
+        : [...prev, userId],
     );
   };
 
@@ -239,7 +239,7 @@ export default function CompanyManagement({ allUsers }) {
                   onClick={(e) => {
                     e.stopPropagation();
                     router.push(
-                      `/admin-dashboard/company/${company.company_id}`
+                      `/admin-dashboard/company/${company.company_id}`,
                     );
                   }}
                   className="w-full text-sm font-medium bg-white border border-indigo-200 text-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-50 transition-colors shadow-sm"
@@ -399,14 +399,14 @@ export default function CompanyManagement({ allUsers }) {
                           const result = await assignUserToCompanyAction(
                             token,
                             user.user_id,
-                            company.company_id
+                            company.company_id,
                           );
                           if (result.success) {
                             toast.success(t('admin.company.successCreate'));
                             fetchUnassignedUsers();
                           } else {
                             toast.error(
-                              result.error || t('admin.company.errorCreate')
+                              result.error || t('admin.company.errorCreate'),
                             );
                           }
                         }}
@@ -454,7 +454,7 @@ export default function CompanyManagement({ allUsers }) {
               <div className="space-y-2 mb-4 max-h-96 overflow-y-auto">
                 {allUsers.map((user) => {
                   const alreadyAssigned = companyUsers.some(
-                    (cu) => cu.user_id === user.user_id
+                    (cu) => cu.user_id === user.user_id,
                   );
                   return (
                     <label
