@@ -305,7 +305,7 @@ export default function TaskManagement({ companyId, companyName }) {
   const getTaskStatus = (task) => {
     if (!task.is_active) {
       return {
-        text: 'Inactive',
+        text: t('taskManagement.inactive'),
         color: 'bg-red-50 text-red-700 border-red-100',
       };
     }

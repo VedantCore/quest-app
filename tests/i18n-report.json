@@ -1,22 +1,24 @@
 {
   "missingKeys": {},
-  "unusedKeys": [],
+  "unusedKeys": [
+    "admin.company.successDelete"
+  ],
   "undefinedKeys": [],
   "wrongLanguage": [],
   "parameterMismatches": [],
   "emptyValues": [],
   "duplicateKeys": [],
   "totalKeys": {
-    "en": 467,
-    "id": 467,
-    "ja": 467,
-    "zh": 467
+    "en": 469,
+    "id": 469,
+    "ja": 469,
+    "zh": 469
   },
   "summary": {
-    "totalKeysAcrossLocales": 467,
-    "keysUsedInCode": 467,
+    "totalKeysAcrossLocales": 469,
+    "keysUsedInCode": 468,
     "missingKeysCount": 0,
-    "unusedKeysCount": 0,
+    "unusedKeysCount": 1,
     "undefinedKeysCount": 0,
     "wrongLanguageCount": 0,
     "parameterMismatchCount": 0,

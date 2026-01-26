@@ -119,7 +119,7 @@ export default function Home() {
           `Auth successful but sync failed: ${supabaseError.message}`,
         );
       } else {
-        toast.success('Logged in successfully!');
+        toast.success(t('login.successMessage'));
       }
 
       const role = existingUser?.role || 'user';

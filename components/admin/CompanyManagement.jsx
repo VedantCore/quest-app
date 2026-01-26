@@ -142,7 +142,7 @@ export default function CompanyManagement({ allUsers }) {
       );
 
       if (result.success) {
-        toast.success(t('admin.company.successDelete'));
+        toast.success(t('admin.company.userRemoved'));
         setCompanyUsers(companyUsers.filter((cu) => cu.user_id !== userId));
       } else {
         toast.error(result.error || t('admin.company.errorDelete'));
@@ -169,7 +169,7 @@ export default function CompanyManagement({ allUsers }) {
       );
 
       if (result.success) {
-        toast.success(t('admin.company.successCreate'));
+        toast.success(t('admin.company.successAssign'));
         setShowAssignModal(false);
         setSelectedUsers([]);
         // Refresh company users
