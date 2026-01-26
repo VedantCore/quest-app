@@ -135,15 +135,77 @@ export async function updateTask(taskId, taskData, steps) {
  */
 export async function deleteTask(taskId) {
   try {
-    // Delete task (cascade should handle related steps/enrollments if configured,
-    // otherwise we might need to delete them manually first.
-    // Assuming cascade delete is set up or we delete related records first)
+    // Get all step IDs for this task
+    const { data: taskSteps, error: stepsQueryError } = await supabase
+      .from('task_steps')
+      .select('step_id')
+      .eq('task_id', taskId);
 
-    // 1. Delete related records if no cascade (safer approach)
+    if (stepsQueryError) throw stepsQueryError;
+
+    const stepIds = taskSteps?.map((s) => s.step_id) || [];
+
+    if (stepIds.length > 0) {
+      // Get all users who have earned points for steps in this task
+      const { data: pointHistoryRecords, error: pointHistoryError } =
+        await supabase
+          .from('user_point_history')
+          .select('history_id, user_id, points_earned')
+          .in('step_id', stepIds);
+
+      if (pointHistoryError) throw pointHistoryError;
+
+      // Calculate points per user to deduct
+      const userPointsMap = {};
+      pointHistoryRecords?.forEach((record) => {
+        if (!userPointsMap[record.user_id]) {
+          userPointsMap[record.user_id] = 0;
+        }
+        userPointsMap[record.user_id] += record.points_earned || 0;
+      });
+
+      // Deduct points from each user
+      for (const [userId, pointsToDeduct] of Object.entries(userPointsMap)) {
+        if (pointsToDeduct > 0) {
+          const { data: currentUser, error: userFetchError } = await supabase
+            .from('users')
+            .select('total_points')
+            .eq('user_id', userId)
+            .single();
+
+          if (!userFetchError && currentUser) {
+            const newTotalPoints = Math.max(
+              0,
+              (currentUser.total_points || 0) - pointsToDeduct,
+            );
+            await supabase
+              .from('users')
+              .update({ total_points: newTotalPoints })
+              .eq('user_id', userId);
+          }
+        }
+      }
+
+      // Delete point history records for this task's steps
+      if (pointHistoryRecords && pointHistoryRecords.length > 0) {
+        const historyIds = pointHistoryRecords.map((p) => p.history_id);
+        await supabase
+          .from('user_point_history')
+          .delete()
+          .in('history_id', historyIds);
+      }
+
+      // Delete step submissions for these steps
+      await supabase.from('step_submissions').delete().in('step_id', stepIds);
+    }
+
+    // Delete task steps
     await supabase.from('task_steps').delete().eq('task_id', taskId);
+
+    // Delete task enrollments
     await supabase.from('task_enrollments').delete().eq('task_id', taskId);
 
-    // 2. Delete the task
+    // Delete the task
     const { error } = await supabase
       .from('tasks')
       .delete()

@@ -2,11 +2,13 @@
   "name": "quest-app",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:points": "node tests/points-system.test.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.86.2",
@@ -21,6 +23,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "dotenv": "^16.6.1",
     "eslint": "^9",
     "eslint-config-next": "16.0.7",
     "tailwindcss": "^4"
