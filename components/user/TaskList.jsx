@@ -215,13 +215,16 @@ export default function TaskList({ userId, onStatsUpdate, mode = 'enrolled' }) {
           (sum, s) => sum + (s.points_reward || 0),
           0,
         );
-        // Use actual earned points from point history instead of just points_reward
+        // Use actual earned points from point history, with fallback to points_reward for approved steps
         const earnedPoints = stepsWithStatus.reduce((sum, step) => {
-          if (
-            step.status === 'APPROVED' &&
-            earnedPointsMap[step.step_id] !== undefined
-          ) {
-            return sum + earnedPointsMap[step.step_id];
+          if (step.status === 'APPROVED') {
+            // Use point history if available, otherwise fall back to step's points_reward
+            if (earnedPointsMap[step.step_id] !== undefined) {
+              return sum + earnedPointsMap[step.step_id];
+            } else {
+              // Fallback for legacy approved steps without point history
+              return sum + (step.points_reward || 0);
+            }
           }
           return sum;
         }, 0);

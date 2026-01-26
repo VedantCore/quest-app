@@ -457,7 +457,7 @@ export async function submitStep(stepId, userId) {
 export async function approveSubmission(
   submissionId,
   managerId,
-  feedback = ''
+  feedback = '',
 ) {
   try {
     // Get submission details to find user and step
@@ -516,6 +516,51 @@ export async function approveSubmission(
       .eq('submission_id', submissionId);
 
     if (error) throw error;
+
+    // Award points to the user
+    const pointsToAward = step.points_reward || 0;
+
+    // Check if points were already awarded for this step to prevent duplicates
+    const { data: existingPointHistory, error: pointHistoryCheckError } =
+      await supabase
+        .from('user_point_history')
+        .select('history_id')
+        .eq('user_id', submission.user_id)
+        .eq('step_id', submission.step_id)
+        .single();
+
+    // Only award points if not already awarded for this step
+    if (!existingPointHistory && pointHistoryCheckError?.code === 'PGRST116') {
+      // Insert into user_point_history
+      const { error: pointHistoryError } = await supabase
+        .from('user_point_history')
+        .insert({
+          user_id: submission.user_id,
+          step_id: submission.step_id,
+          points_earned: pointsToAward,
+          earned_at: new Date().toISOString(),
+        });
+
+      if (pointHistoryError) throw pointHistoryError;
+
+      // Update user's total_points
+      const { data: currentUser, error: userFetchError } = await supabase
+        .from('users')
+        .select('total_points')
+        .eq('user_id', submission.user_id)
+        .single();
+
+      if (userFetchError) throw userFetchError;
+
+      const newTotalPoints = (currentUser.total_points || 0) + pointsToAward;
+
+      const { error: userUpdateError } = await supabase
+        .from('users')
+        .update({ total_points: newTotalPoints })
+        .eq('user_id', submission.user_id);
+
+      if (userUpdateError) throw userUpdateError;
+    }
 
     // Get total number of steps for this task
     const { count: totalSteps, error: stepsCountError } = await supabase
@@ -616,7 +661,7 @@ export async function getPendingSubmissions(managerId) {
             assigned_manager_id
           )
         )
-      `
+      `,
       )
       .eq('status', 'PENDING')
       .order('submitted_at', { ascending: true });
@@ -663,7 +708,7 @@ export async function getManagerTasks(managerId, companyId = null) {
         *,
         task_steps (*),
         companies (company_id, name)
-      `
+      `,
       )
       .eq('assigned_manager_id', managerId);
 
@@ -695,7 +740,7 @@ export async function getAllTasks(companyId = null) {
         task_steps (*),
         manager:users!tasks_assigned_manager_id_fkey (name, email, avatar_url),
         companies (company_id, name)
-      `
+      `,
     );
 
     if (companyId) {
@@ -728,7 +773,7 @@ export async function getTaskDetails(taskId) {
         task_steps (*),
         manager:users!tasks_assigned_manager_id_fkey (name, email, avatar_url),
         companies (company_id, name)
-      `
+      `,
       )
       .eq('task_id', taskId)
       .single();
@@ -751,7 +796,7 @@ export async function getTaskDetails(taskId) {
     // Sort steps by creation or some order if needed
     if (data.task_steps) {
       data.task_steps.sort(
-        (a, b) => new Date(a.created_at) - new Date(b.created_at)
+        (a, b) => new Date(a.created_at) - new Date(b.created_at),
       );
     }
 
@@ -830,7 +875,7 @@ export async function getTaskParticipants(taskId) {
     const participants = users.map((user) => {
       const enrollment = enrollments.find((e) => e.user_id === user.user_id);
       const userSubmissions = submissions.filter(
-        (s) => s.user_id === user.user_id
+        (s) => s.user_id === user.user_id,
       );
 
       return {
@@ -863,7 +908,7 @@ export async function getUserCompanies(userId) {
           name,
           description
         )
-      `
+      `,
       )
       .eq('user_id', userId);
 
@@ -901,7 +946,7 @@ export async function getUserTasksByCompany(userId, companyId = null) {
           task_steps (*),
           companies (company_id, name)
         )
-      `
+      `,
       )
       .eq('user_id', userId);
 
@@ -1001,7 +1046,7 @@ export async function managerUpdateUserPoints(
   companyId,
   managerId,
   action,
-  amount = 0
+  amount = 0,
 ) {
   try {
     // Verify manager role
