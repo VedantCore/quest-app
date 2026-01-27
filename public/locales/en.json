@@ -249,13 +249,17 @@
       "noParticipants": "No participants yet",
       "noSteps": "No steps defined",
       "noUsers": "No users enrolled",
+      "pendingReview": "Pending Review",
       "pointsToAward": "Points to Award",
       "processing": "Processing...",
       "progressReview": "Progress Review",
       "questSteps": "Quest Steps",
       "reject": "Reject",
-      "status": {
-        "${status}": "{status}"
+      "statuses": {
+        "APPROVED": "Approved",
+        "REJECTED": "Rejected",
+        "PENDING": "Pending",
+        "NOT_STARTED": "Not Started"
       },
       "step": "Step",
       "steps": "Steps",
@@ -303,7 +307,8 @@
     "minutesAgo": "{count} minutes ago",
     "noNotifications": "No notifications",
     "stepSubmittedMessage": "Step \"{stepTitle}\" for task \"{taskTitle}\" has been submitted for review.",
-    "stepSubmittedTitle": "Step Submitted",
+    "stepSubmittedBy": "Submitted by",
+    "stepSubmittedTitle": "New Submission",
     "title": "Notifications"
   },
   "signup": {

@@ -249,13 +249,17 @@
       "noParticipants": "まだ参加者がいません",
       "noSteps": "ステップが定義されていません",
       "noUsers": "登録ユーザーがいません",
+      "pendingReview": "レビュー待ち",
       "pointsToAward": "付与するポイント",
       "processing": "処理中...",
       "progressReview": "進捗レビュー",
       "questSteps": "クエストステップ",
       "reject": "却下",
-      "status": {
-        "${status}": "{status}"
+      "statuses": {
+        "APPROVED": "承認済み",
+        "REJECTED": "却下済み",
+        "PENDING": "確認待ち",
+        "NOT_STARTED": "未着手"
       },
       "step": "ステップ",
       "steps": "ステップ",
@@ -303,7 +307,8 @@
     "minutesAgo": "{count}分前",
     "noNotifications": "通知はありません",
     "stepSubmittedMessage": "タスク「{taskTitle}」のステップ「{stepTitle}」が提出され、確認待ちです",
-    "stepSubmittedTitle": "ステップが送信されました",
+    "stepSubmittedBy": "提出者",
+    "stepSubmittedTitle": "新しい提出",
     "title": "通知"
   },
   "signup": {

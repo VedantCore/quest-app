@@ -2,26 +2,33 @@
   "missingKeys": {},
   "unusedKeys": [
     "admin.company.successDelete",
+    "manager.task.statuses.APPROVED",
+    "manager.task.statuses.REJECTED",
+    "manager.task.statuses.PENDING",
+    "manager.task.statuses.NOT_STARTED",
     "notifications.stepSubmittedMessage",
+    "notifications.stepSubmittedBy",
     "notifications.stepSubmittedTitle"
   ],
-  "undefinedKeys": [],
+  "undefinedKeys": [
+    "manager.task.statuses.${status}"
+  ],
   "wrongLanguage": [],
   "parameterMismatches": [],
   "emptyValues": [],
   "duplicateKeys": [],
   "totalKeys": {
-    "en": 482,
-    "id": 482,
-    "ja": 482,
-    "zh": 482
+    "en": 487,
+    "id": 487,
+    "ja": 487,
+    "zh": 487
   },
   "summary": {
-    "totalKeysAcrossLocales": 482,
-    "keysUsedInCode": 479,
+    "totalKeysAcrossLocales": 487,
+    "keysUsedInCode": 480,
     "missingKeysCount": 0,
-    "unusedKeysCount": 3,
-    "undefinedKeysCount": 0,
+    "unusedKeysCount": 8,
+    "undefinedKeysCount": 1,
     "wrongLanguageCount": 0,
     "parameterMismatchCount": 0,
     "emptyValuesCount": 0,

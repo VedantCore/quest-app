@@ -225,11 +225,18 @@ export default function NotificationDropdown({ managerId }) {
                     {getNotificationIcon(notification.type)}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
-                        <p className="font-medium text-sm text-gray-900 line-clamp-1">
-                          {notification.title.startsWith('notifications.')
-                            ? t(notification.title)
-                            : notification.title}
-                        </p>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-medium text-sm text-gray-900 line-clamp-1">
+                            {notification.title.startsWith('notifications.')
+                              ? t(notification.title)
+                              : notification.title}
+                          </p>
+                          {notification.metadata?.userName && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                              {notification.metadata.userName}
+                            </span>
+                          )}
+                        </div>
                         {!notification.is_read && (
                           <span className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0 mt-1"></span>
                         )}

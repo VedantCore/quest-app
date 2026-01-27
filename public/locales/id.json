@@ -249,13 +249,17 @@
       "noParticipants": "Belum ada peserta",
       "noSteps": "Tidak ada langkah yang ditentukan",
       "noUsers": "Tidak ada pengguna terdaftar",
+      "pendingReview": "Menunggu Peninjauan",
       "pointsToAward": "Poin untuk Diberikan",
       "processing": "Memproses...",
       "progressReview": "Tinjauan Kemajuan",
       "questSteps": "Langkah Misi",
       "reject": "Tolak",
-      "status": {
-        "${status}": "{status}"
+      "statuses": {
+        "APPROVED": "Disetujui",
+        "REJECTED": "Ditolak",
+        "PENDING": "Tertunda",
+        "NOT_STARTED": "Belum Dimulai"
       },
       "step": "Langkah",
       "steps": "Langkah",
@@ -303,7 +307,8 @@
     "minutesAgo": "{count} menit yang lalu",
     "noNotifications": "Tidak ada notifikasi",
     "stepSubmittedMessage": "Langkah \"{stepTitle}\" untuk tugas \"{taskTitle}\" telah dikirim dan menunggu peninjauan.",
-    "stepSubmittedTitle": "Langkah Dikirimkan",
+    "stepSubmittedBy": "Dikirim oleh",
+    "stepSubmittedTitle": "Pengajuan Baru",
     "title": "Notifikasi"
   },
   "signup": {

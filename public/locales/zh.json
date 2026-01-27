@@ -249,13 +249,17 @@
       "noParticipants": "暂无参与者",
       "noSteps": "未定义步骤",
       "noUsers": "没有注册用户",
+      "pendingReview": "待审核",
       "pointsToAward": "要奖励的积分",
       "processing": "处理中...",
       "progressReview": "进度审核",
       "questSteps": "任务步骤",
       "reject": "拒绝",
-      "status": {
-        "${status}": "{status}"
+      "statuses": {
+        "APPROVED": "已批准",
+        "REJECTED": "已拒绝",
+        "PENDING": "待审核",
+        "NOT_STARTED": "未开始"
       },
       "step": "步骤",
       "steps": "步骤",
@@ -303,7 +307,8 @@
     "minutesAgo": "{count} 分钟前",
     "noNotifications": "没有通知",
     "stepSubmittedMessage": "任务“{taskTitle}”的步骤“{stepTitle}”已提交，等待审核。",
-    "stepSubmittedTitle": "步骤已提交",
+    "stepSubmittedBy": "提交者",
+    "stepSubmittedTitle": "新提交",
     "title": "通知"
   },
   "signup": {

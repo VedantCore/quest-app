@@ -112,7 +112,7 @@ export default function TaskParticipantsPage() {
   useEffect(() => {
     if (selectedUser && participants.length > 0) {
       const updatedUser = participants.find(
-        (p) => p.user_id === selectedUser.user_id
+        (p) => p.user_id === selectedUser.user_id,
       );
       if (updatedUser) setSelectedUser(updatedUser);
     }
@@ -195,8 +195,8 @@ export default function TaskParticipantsPage() {
                     <span className="font-medium text-gray-900">
                       {new Date(
                         new Date(task.created_at).setDate(
-                          new Date(task.created_at).getDate() + 30
-                        )
+                          new Date(task.created_at).getDate() + 30,
+                        ),
                       ).toLocaleDateString(localeMap[locale] || 'en-US', {
                         month: 'short',
                         day: 'numeric',
@@ -340,59 +340,94 @@ export default function TaskParticipantsPage() {
             </div>
           ) : (
             <ul className="divide-y divide-gray-100">
-              {participants.map((participant) => (
-                <li
-                  key={participant.user_id}
-                  onClick={() => handleUserClick(participant)}
-                  className="px-6 py-4 hover:bg-gray-50 cursor-pointer transition-colors flex items-center gap-4 group"
-                >
-                  <div className="flex-shrink-0">
-                    {participant.avatar_url ? (
-                      <img
-                        className="h-10 w-10 rounded-full border border-gray-200 object-cover"
-                        src={participant.avatar_url}
-                        alt=""
-                      />
-                    ) : (
-                      <div className="h-10 w-10 rounded-full bg-[#171717] flex items-center justify-center text-white font-bold text-sm">
-                        {(participant.name || participant.email || '?')
-                          .charAt(0)
-                          .toUpperCase()}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-[#171717] truncate">
-                      {participant.name || participant.email}
-                    </p>
-                    <p className="text-xs text-gray-500 truncate">
-                      {participant.email}
-                    </p>
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {t('manager.task.joined')}:{' '}
-                    {new Date(participant.joined_at).toLocaleDateString(
-                      localeMap[locale] || 'en-US'
-                    )}
-                  </div>
-                  <div className="px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700">
-                    {participant.total_points} {t('common.pts')}
-                  </div>
-                  <svg
-                    className="w-5 h-5 text-gray-300 group-hover:text-gray-500 transition-colors"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+              {participants.map((participant) => {
+                const pendingCount =
+                  participant.submissions?.filter((s) => s.status === 'PENDING')
+                    .length || 0;
+
+                return (
+                  <li
+                    key={participant.user_id}
+                    onClick={() => handleUserClick(participant)}
+                    className={`px-6 py-4 hover:bg-gray-50 cursor-pointer transition-colors flex items-center gap-4 group ${
+                      pendingCount > 0
+                        ? 'bg-amber-50/50 border-l-4 border-l-amber-400'
+                        : ''
+                    }`}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </li>
-              ))}
+                    <div className="flex-shrink-0 relative">
+                      {participant.avatar_url ? (
+                        <img
+                          className="h-10 w-10 rounded-full border border-gray-200 object-cover"
+                          src={participant.avatar_url}
+                          alt=""
+                        />
+                      ) : (
+                        <div className="h-10 w-10 rounded-full bg-[#171717] flex items-center justify-center text-white font-bold text-sm">
+                          {(participant.name || participant.email || '?')
+                            .charAt(0)
+                            .toUpperCase()}
+                        </div>
+                      )}
+                      {pendingCount > 0 && (
+                        <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-[10px] font-bold text-white ring-2 ring-white">
+                          {pendingCount}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold text-[#171717] truncate">
+                          {participant.name || participant.email}
+                        </p>
+                        {pendingCount > 0 && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">
+                            <svg
+                              className="w-3 h-3"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
+                            </svg>
+                            {t('manager.task.pendingReview')}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-500 truncate">
+                        {participant.email}
+                      </p>
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {t('manager.task.joined')}:{' '}
+                      {new Date(participant.joined_at).toLocaleDateString(
+                        localeMap[locale] || 'en-US',
+                      )}
+                    </div>
+                    <div className="px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700">
+                      {participant.total_points} {t('common.pts')}
+                    </div>
+                    <svg
+                      className="w-5 h-5 text-gray-300 group-hover:text-gray-500 transition-colors"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>
@@ -439,7 +474,7 @@ export default function TaskParticipantsPage() {
                       ?.filter((s) => s.step_id === step.step_id)
                       .sort(
                         (a, b) =>
-                          new Date(b.submitted_at) - new Date(a.submitted_at)
+                          new Date(b.submitted_at) - new Date(a.submitted_at),
                       )[0];
                     const status = submission
                       ? submission.status
@@ -472,20 +507,20 @@ export default function TaskParticipantsPage() {
                                   status === 'APPROVED'
                                     ? 'bg-green-50 text-green-700 border-green-100'
                                     : status === 'REJECTED'
-                                    ? 'bg-red-50 text-red-700 border-red-100'
-                                    : status === 'PENDING'
-                                    ? 'bg-yellow-50 text-yellow-800 border-yellow-100'
-                                    : 'bg-gray-100 text-gray-600 border-gray-200'
+                                      ? 'bg-red-50 text-red-700 border-red-100'
+                                      : status === 'PENDING'
+                                        ? 'bg-yellow-50 text-yellow-800 border-yellow-100'
+                                        : 'bg-gray-100 text-gray-600 border-gray-200'
                                 }`}
                               >
-                                {t(`manager.task.status.${status}`)}
+                                {t(`manager.task.statuses.${status}`)}
                               </span>
                               {submission && (
                                 <span className="text-xs text-gray-400">
                                   {new Date(
-                                    submission.submitted_at
+                                    submission.submitted_at,
                                   ).toLocaleDateString(
-                                    localeMap[locale] || 'en-US'
+                                    localeMap[locale] || 'en-US',
                                   )}
                                 </span>
                               )}
@@ -497,7 +532,7 @@ export default function TaskParticipantsPage() {
                                   onClick={() =>
                                     handleAction(
                                       submission.submission_id,
-                                      'reject'
+                                      'reject',
                                     )
                                   }
                                   disabled={
@@ -512,7 +547,7 @@ export default function TaskParticipantsPage() {
                                   onClick={() =>
                                     handleAction(
                                       submission.submission_id,
-                                      'approve'
+                                      'approve',
                                     )
                                   }
                                   disabled={
@@ -530,13 +565,13 @@ export default function TaskParticipantsPage() {
                           {status === 'PENDING' && submission && (
                             <textarea
                               placeholder={t(
-                                'manager.task.feedbackPlaceholder'
+                                'manager.task.feedbackPlaceholder',
                               )}
                               value={feedbacks[submission.submission_id] || ''}
                               onChange={(e) =>
                                 handleFeedbackChange(
                                   submission.submission_id,
-                                  e.target.value
+                                  e.target.value,
                                 )
                               }
                               className="w-full text-sm p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none"
