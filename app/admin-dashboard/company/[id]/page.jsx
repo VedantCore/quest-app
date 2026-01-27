@@ -87,7 +87,7 @@ export default function CompanyDetailPage({ params }) {
       }
     } catch (error) {
       console.error('Error fetching users:', error);
-      toast.error('Failed to load users');
+      toast.error(t('admin.company.errorLoadUsers'));
     } finally {
       setLoadingUsers(false);
     }
@@ -96,7 +96,7 @@ export default function CompanyDetailPage({ params }) {
   const handleBulkAssign = async (e) => {
     e.preventDefault();
     if (selectedUsers.length === 0) {
-      toast.error('Please select at least one user');
+      toast.error(t('admin.company.selectAtLeastOneUser'));
       return;
     }
 
@@ -110,7 +110,10 @@ export default function CompanyDetailPage({ params }) {
 
       if (result.success) {
         toast.success(
-          `Assigned ${selectedUsers.length} user(s) to ${company.name}`,
+          t('admin.company.bulkAssignSuccess', {
+            count: selectedUsers.length,
+            companyName: company.name,
+          }),
         );
         setShowAssignModal(false);
         setSelectedUsers([]);
@@ -121,7 +124,7 @@ export default function CompanyDetailPage({ params }) {
       }
     } catch (error) {
       console.error('Error assigning users:', error);
-      toast.error('Failed to assign users');
+      toast.error(t('admin.company.errorAssignUsers'));
     }
   };
 

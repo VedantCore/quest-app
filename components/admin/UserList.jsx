@@ -168,8 +168,7 @@ export default function UserList({ companyId }) {
   };
 
   const handleRemoveUser = async (userId) => {
-    if (!confirm('Are you sure you want to remove this user from the company?'))
-      return;
+    if (!confirm(t('admin.company.confirmRemoveUser'))) return;
 
     try {
       const token = await currentUser.getIdToken();
@@ -180,14 +179,14 @@ export default function UserList({ companyId }) {
       );
 
       if (result.success) {
-        toast.success('User removed successfully');
+        toast.success(t('admin.company.userRemoved'));
         setUsers(users.filter((u) => u.user_id !== userId));
       } else {
         toast.error(result.error);
       }
     } catch (error) {
       console.error('Error removing user:', error);
-      toast.error('Failed to remove user');
+      toast.error(t('admin.company.errorDelete'));
     }
   };
 
@@ -429,7 +428,7 @@ export default function UserList({ companyId }) {
                   : 'text-gray-500 hover:bg-gray-50'
               }`}
             >
-              <span className="sr-only">Previous</span>
+              <span className="sr-only">{t('common.previous')}</span>
               <svg
                 className="h-5 w-5"
                 xmlns="http://www.w3.org/2000/svg"
@@ -468,7 +467,7 @@ export default function UserList({ companyId }) {
                   : 'text-gray-500 hover:bg-gray-50'
               }`}
             >
-              <span className="sr-only">Next</span>
+              <span className="sr-only">{t('common.next')}</span>
               <svg
                 className="h-5 w-5"
                 xmlns="http://www.w3.org/2000/svg"

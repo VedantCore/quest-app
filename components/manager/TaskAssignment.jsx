@@ -33,7 +33,9 @@ export default function TaskAssignment() {
     if (result.success) {
       setSubmissions(result.data || []);
     } else {
-      toast.error('Failed to load submissions: ' + result.error);
+      toast.error(
+        `${t('manager.assignment.errorLoadSubmissions')}: ` + result.error,
+      );
     }
     setLoading(false);
   };
@@ -59,7 +61,7 @@ export default function TaskAssignment() {
 
     if (result.success) {
       setSubmissions((prev) =>
-        prev.filter((s) => s.submission_id !== submissionId)
+        prev.filter((s) => s.submission_id !== submissionId),
       );
       toast.success(result.message);
     } else {
@@ -79,7 +81,7 @@ export default function TaskAssignment() {
 
     if (result.success) {
       setSubmissions((prev) =>
-        prev.filter((s) => s.submission_id !== submissionId)
+        prev.filter((s) => s.submission_id !== submissionId),
       );
       toast.success(result.message);
     } else {
@@ -166,7 +168,7 @@ export default function TaskAssignment() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {new Date(submission.submitted_at).toLocaleDateString(
-                      localeMap[locale] || 'en-US'
+                      localeMap[locale] || 'en-US',
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

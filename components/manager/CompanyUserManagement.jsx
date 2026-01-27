@@ -30,11 +30,11 @@ export default function CompanyUserManagement({ companyId, companyName }) {
       if (result.success) {
         setCompanyUsers(result.data || []);
       } else {
-        toast.error(result.error || 'Failed to load company users');
+        toast.error(result.error || t('manager.company.errorLoadUsers'));
       }
     } catch (error) {
       console.error('Error fetching company users:', error);
-      toast.error('Failed to load company users');
+      toast.error(t('manager.company.errorLoadUsers'));
     } finally {
       setLoading(false);
     }
@@ -43,7 +43,10 @@ export default function CompanyUserManagement({ companyId, companyName }) {
   const handleRemoveUser = async (userId, userName) => {
     if (
       !confirm(
-        `Are you sure you want to remove ${userName} from ${companyName}?`
+        t('manager.company.confirmRemoveFromCompany', {
+          name: userName,
+          company: companyName,
+        }),
       )
     ) {
       return;
@@ -54,18 +57,18 @@ export default function CompanyUserManagement({ companyId, companyName }) {
       const result = await removeUserFromCompanyByManagerAction(
         token,
         userId,
-        companyId
+        companyId,
       );
 
       if (result.success) {
-        toast.success('User removed successfully');
+        toast.success(t('manager.company.successRemoveUser'));
         setCompanyUsers(companyUsers.filter((cu) => cu.user_id !== userId));
       } else {
-        toast.error(result.error || 'Failed to remove user');
+        toast.error(result.error || t('manager.company.errorRemoveUser'));
       }
     } catch (error) {
       console.error('Error removing user:', error);
-      toast.error('Failed to remove user');
+      toast.error(t('manager.company.errorRemoveUser'));
     }
   };
 
@@ -84,13 +87,13 @@ export default function CompanyUserManagement({ companyId, companyName }) {
       acc[role].push(cu);
       return acc;
     },
-    { manager: [], user: [] }
+    { manager: [], user: [] },
   );
 
   // Sort by points within each role
   Object.keys(usersByRole).forEach((role) => {
     usersByRole[role].sort(
-      (a, b) => (b.users.total_points || 0) - (a.users.total_points || 0)
+      (a, b) => (b.users.total_points || 0) - (a.users.total_points || 0),
     );
   });
 
